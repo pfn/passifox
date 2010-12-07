@@ -42,9 +42,19 @@ LoginManagerStorage.prototype = {
     // ignored, no implementation
     initWithFile: function _initWithFile(inFile, outFile) { },
 
-    // XXX TODO implement me!
     addLogin: function _addLogin(login) {
-        this.stub(arguments);
+        let r = {
+                url: login.hostname,
+                submiturl: login.formSubmitURL,
+                username: login.username,
+                password: login.password
+        };
+
+        login.QueryInterface(Ci.nsILoginMetaInfo);
+        if (login.guid)
+            r.uuid = login.guid;
+
+        this._kpf.set_login(r);
         this._sendNotification("addLogin", login);
     },
     // not implemented--removals should be managed in KeePass
@@ -201,6 +211,35 @@ KeePassFox.prototype = {
                 delete this._cache[i];
         }
     },
+    set_login: function(login) {
+        if (!this._test_associate())
+            return;
+        let request = {
+            RequestType: "set-login",
+        };
+
+        let [id, key] = this._set_verifier(request);
+        let iv = request.Nonce;
+        request.Login     = this._crypto.encrypt(login.username,  key, iv);
+        request.Password  = this._crypto.encrypt(login.password,  key, iv);
+        request.Url       = this._crypto.encrypt(login.url,       key, iv);
+
+        if (login.submiturl)
+            request.SubmitUrl = this._crypto.encrypt(login.submiturl, key, iv);
+        if (login.uuid)
+            request.Uuid = this._crypto.encrypt(login.uuid, key, iv);
+
+        let [s, response] = this._send(request);
+        if (this._success(s)) {
+            let r = JSON.parse(response);
+            if (this._verify_response(r, key, id)) {
+                this.log("saved login for: " + login.url);
+            } else {
+                this._showNotification(
+                        "set_login for " + login.url + " rejected");
+            }
+        }
+    },
     get_logins: function(url, submiturl) {
         let cached = this._find_cache_item(url, submiturl);
         if (cached)
@@ -213,12 +252,12 @@ KeePassFox.prototype = {
             RequestType: "get-logins",
         };
         let [id, key] = this._set_verifier(request);
-        request.Url = this._crypto.encrypt(url, key, request.Nonce);
-        request.SubmitUrl = this._crypto.encrypt(submiturl, key, request.Nonce);
+        let iv = request.Nonce;
+        request.Url = this._crypto.encrypt(url, key, iv);
+        if (submiturl)
+            request.SubmitUrl = this._crypto.encrypt(submiturl, key, iv);
         let [s, response] = this._send(request);
         let entries = [];
-this.log("response: " + response);
-this.log("s: " + s);
         if (this._success(s)) {
             let r = JSON.parse(response);
             if (this._verify_response(r, key, id)) {
@@ -229,10 +268,9 @@ this.log("s: " + s);
                 entries = r.Entries;
                 this._cache_item(url, submiturl, entries);
             } else {
+                this._cache_item(url, submiturl, []);
                 this.log("get_logins for " + url + " rejected");
             }
-        } else {
-            this.log("Request not success: " + s);
         }
         return entries;
     },
@@ -247,8 +285,6 @@ this.log("s: " + s);
         request.Url = this._crypto.encrypt(url, key, request.Nonce);
         let [s, response] = this._send(request);
         let entries = [];
-this.log("s: " + s);
-this.log("r: " + response);
         if (this._success(s)) {
             let r = JSON.parse(response);
             if (this._verify_response(r, key, id))
