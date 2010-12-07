@@ -1,0 +1,37 @@
+KeePassFox extension for Firefox
+
+Implements a transparent replacement for the built-in Firefox password storage
+
+This extension is for use with KeePassHttp
+
+Prereqs:
+    1) KeePass
+       http://keepass.info/
+    2) KeePassHttp
+       https://github.com/pfn/keepasshttp/raw/master/KeePassHttp.plgx
+
+Install:
+    1) Copy KeePassHttp.plgx to C:\Path\To\KeePass.exe\Dir
+
+Configuration:
+    There is no explicit configuration necessary. KeePassFox and KeePassHttp
+    will communicate with each other on http://localhost:19455/
+
+    When a login form is discovered for the first time, KeePassFox will
+    initialize itself and request an "Association" with KeePass (KeePassHttp).
+
+    Once that is completed, Firefox can freely retrieve passwords from
+    KeePass. KeePass must be running and unlocked in order for passwords
+    to be available.
+
+    Entries in KeePass can be stored as http://host.name/ or just host.name
+    without any extra fluff. KeePassHttp will do the work to figure out what
+    you want. There are some permissions things where KeePassHttp will
+    notify you when passwords are requested and the hostnames do not exactly
+    match. When those prompts occur, you can accept, deny and remember your
+    choice.
+
+TODO:
+    1) Implement firefox-detected login/password modifications to propagate
+       to KeePass
+    2) Implement a context-menu click on password fields to force a form-fill

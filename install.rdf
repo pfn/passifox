@@ -2,7 +2,7 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>keepassfox@hanhuy.com</em:id>
-    <em:version>0.0.1</em:version>
+    <em:version>1.0.0</em:version>
     <em:type>2</em:type>
     <!-- firefox -->
     <em:targetApplication>
@@ -12,6 +12,7 @@
     <em:name>KeePassFox</em:name>
     <em:description>KeePass Login Manager Storage and Integration using the KeePassHttp plugin</em:description>
     <em:creator>Perry Nguyen</em:creator>
-    <em:homepageURL>http://www.hanhuy.com/keepass</em:homepageURL>
+    <em:homepageURL>https://github.com/pfn/keepassfox</em:homepageURL>
+    <em:updateURL>https://github.com/pfn/keepassfox/raw/master/update.rdf</em:updateURL>
   </Description>
 </RDF>
