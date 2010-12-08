@@ -5,7 +5,7 @@ const Cc = Components.classes;
 const AES_KEY_URL = "chrome://keepassfox";
 const KEEPASS_HTTP_URL = "http://localhost:19455/";
 
-const KEEPASSFOX_CACHE_TIME = 5 * 1000; // milliseconds
+const KEEPASSFOX_CACHE_TIME = 30 * 1000; // milliseconds
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
@@ -25,9 +25,13 @@ LoginManagerStorage.prototype = {
                                              Ci.nsILoginManagerStorage]),
     uiBusy: false, // XXX seems to be needed in <=ff4.0b7
     log: function(m) {
+        if (!this._kpf._debug)
+            return;
         Services.console.logStringMessage("LoginManagerStorage: " + m);
     },
     stub: function(arguments) {
+        if (!this._kpf._debug)
+            return;
         let args = [];
         for (let i = 0; i < arguments.length; i++) {
             let arg = arguments[i];
@@ -42,7 +46,8 @@ LoginManagerStorage.prototype = {
     // ignored, no implementation
     initWithFile: function _initWithFile(inFile, outFile) { },
 
-    addLogin: function _addLogin(login) {
+    addLogin: function addLogin(login) {
+        this.stub(arguments);
         let r = {
                 url: login.hostname,
                 submiturl: login.formSubmitURL,
@@ -62,7 +67,7 @@ LoginManagerStorage.prototype = {
         //this._sendNotification("removeLogin", login);
     },
     // XXX TODO implement me!
-    modifyLogin: function _modifyLogin(oldlogin, newlogindata) {
+    modifyLogin: function modifyLogin(oldlogin, newlogindata) {
         this.stub(arguments);
 
         let newlogin = oldlogin.clone();
@@ -72,7 +77,8 @@ LoginManagerStorage.prototype = {
 
         //this._sendNotifiation("modifyLogin", [oldlogin, newlogin]);
     },
-    getAllLogins: function _getAllLogins(outCount) {
+    getAllLogins: function getAllLogins(outCount) {
+        this.stub(arguments);
         let entries = this._kpf.get_all_logins();
         outCount.value = entries.length;
         let logins = [];
@@ -90,10 +96,11 @@ LoginManagerStorage.prototype = {
         }
         return logins;
     },
-    getAllEncryptedLogins: function _getAllEncryptedLogins(outCount) {
+    getAllEncryptedLogins: function getAllEncryptedLogins(outCount) {
         return this.getAllLogins(outCount);
     },
-    searchLogins: function _searchLogins(count, matchData) {
+    searchLogins: function searchLogins(count, matchData) {
+        this.stub(arguments);
         // this appears to be used by weave/sync, don't need it
         outCount.value = 0;
         return [];
@@ -108,7 +115,8 @@ LoginManagerStorage.prototype = {
     getLoginSavingEnabled: function(hostname) { return true; }, // always true
     setLoginSavingEnabled: function(hostname, enabled) { }, // ignore
 
-    findLogins: function _findLogins(outCount, hostname, submitURL, realm) {
+    findLogins: function findLogins(outCount, hostname, submitURL, realm) {
+        this.stub(arguments);
         let entries = this._kpf.get_logins(hostname, submitURL);
         outCount.value = entries.length;
         let logins = [];
@@ -127,7 +135,8 @@ LoginManagerStorage.prototype = {
         }
         return logins;
     },
-    countLogins: function _countLogins(hostname, submitURL, realm) {
+    countLogins: function countLogins(hostname, submitURL, realm) {
+        this.stub(arguments);
         let c = this._kpf.get_logins_count(hostname);
         return c;
     },
@@ -162,12 +171,28 @@ function KeePassFox() {
     XPCOMUtils.defineLazyGetter(this, "_crypto", function() {
         return new WeaveCrypto();
     });
+
+    this._prefBranch = Services.prefs.getBranch("signon.");
+    let kpf = this;
+    this._observer = {
+        QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver,
+                                               Ci.nsISupportsWeakReference]),
+        observe: function(subject, topic, data) {
+            kpf._debug = kpf._prefBranch.getBoolPref("debug");
+            kpf.log("debug pref updated: " + kpf._debug);
+        }
+    };
+    this._prefBranch.QueryInterface(Ci.nsIPrefBranch2);
+    this._prefBranch.addObserver("debug", this._observer, false);
+    this._debug = this._prefBranch.getBoolPref("debug");
 }
 
 KeePassFox.prototype = {
     _associated: false,
     log: function(m) {
-        Services.console.logStringMessage("LoginManagerStorage: " + m);
+        if (!this._debug)
+            return;
+        Services.console.logStringMessage("KeePassFox: " + m);
     },
     _cache: { }, // use a cache to throttle get_logins requests
     _set_crypto_key: function(id, key) {
@@ -439,9 +464,12 @@ KeePassFox.prototype = {
         xhr.open("POST", KEEPASS_HTTP_URL, false);
         xhr.setRequestHeader("Content-Type", "application/json");
         try {
-            xhr.send(JSON.stringify(request));
+            let r = JSON.stringify(request);
+            this.log("REQUEST: " + r);
+            xhr.send(r);
         }
         catch (e) { this.log("KeePassHttp: " + e); }
+        this.log("RESPONSE: " + xhr.status + " => " + xhr.responseText);
         return [xhr.status, xhr.responseText];
     },
     _success: function(s) {
