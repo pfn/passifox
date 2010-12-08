@@ -425,17 +425,18 @@ KeePassFox.prototype = {
         }
     },
     _verify_response: function(response, key, id) {
-         if (!response.Success)
-             return false;
-         let iv      = response.Nonce;
-         let crypted = response.Verifier;
-         let value   = this._crypto.decrypt(crypted, key, iv);
+        this._associated = response.Success;
+        if (!response.Success)
+            return false;
+        let iv      = response.Nonce;
+        let crypted = response.Verifier;
+        let value   = this._crypto.decrypt(crypted, key, iv);
 
-         this._associated = value == iv;
-         if (id) {
-             this._associated = this._associated && id == response.Id;
-         }
-         return this._associated;
+        this._associated = value == iv;
+        if (id) {
+            this._associated = this._associated && id == response.Id;
+        }
+        return this._associated;
     },
     _set_verifier: function(request, inkey) {
          let key = null;
