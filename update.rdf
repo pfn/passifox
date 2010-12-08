@@ -13,7 +13,7 @@
               <minVersion>4.0b1</minVersion>
               <maxVersion>4.1</maxVersion>
               <updateLink>https://github.com/pfn/keepassfox/raw/master/keepassfox.xpi</updateLink>
-              <updateHash>sha1:a117fc8610cafd27089acb568df90bf7e20f4034</updateHash>
+              <updateHash>sha1:4df1cc70763ebe4b794f89e3433338f66ece9505</updateHash>
             </r:Description>
           </targetApplication>
         </r:Description>
