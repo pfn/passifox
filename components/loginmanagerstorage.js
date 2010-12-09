@@ -11,11 +11,28 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/services-crypto/WeaveCrypto.js");
 
+let Singleton = {};
+XPCOMUtils.defineLazyGetter(Singleton, "service", function() {
+    return new LoginManagerStorage();
+});
+function _LoginManagerStorage() {
+    return Singleton.service;
+}
+
+_LoginManagerStorage.prototype = {
+    // why does it *have* to be both here and in LoginManagerStorage?
+    classDescription: "KeePassFox Login Manager Storage",
+    classID:          Components.ID("{fa199659-10c4-4e3a-a73b-e2b4e1deae96}"),
+    QueryInterface:   XPCOMUtils.generateQI([Ci.nsISupports,
+                                             Ci.nsILoginManagerStorage]),
+};
+
 function LoginManagerStorage() {
     this.wrappedJSObject = this;
     XPCOMUtils.defineLazyGetter(this, "_kpf", function() {
         return new KeePassFox();
     });
+    this.log("Creating storage service");
 }
 
 LoginManagerStorage.prototype = {
@@ -159,7 +176,7 @@ LoginManagerStorage.prototype = {
     },
 };
 
-const NSGetFactory = XPCOMUtils.generateNSGetFactory([LoginManagerStorage]);
+const NSGetFactory = XPCOMUtils.generateNSGetFactory([_LoginManagerStorage]);
 
 function KeePassFox() {
     XPCOMUtils.defineLazyGetter(this, "_mozStorage", function() {
@@ -271,7 +288,7 @@ KeePassFox.prototype = {
             return cached;
 
         if (!this._test_associate())
-            return;
+            return [];
 
         let request = {
             RequestType: "get-logins",

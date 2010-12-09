@@ -1,5 +1,7 @@
-skin keepassfox default file:chrome/skin/default/
+content keepassfox             file:chrome/content/
+skin    keepassfox classic/1.0 file:chrome/skin/default/
 
+overlay chrome://browser/content/browser.xul chrome://keepassfox/content/keepassfox.xul
 contract @hanhuy.com/login-manager-storage;1 {fa199659-10c4-4e3a-a73b-e2b4e1deae96}
 component {fa199659-10c4-4e3a-a73b-e2b4e1deae96} components/loginmanagerstorage.js
 category login-manager-storage nsILoginManagerStorage @hanhuy.com/login-manager-storage;1

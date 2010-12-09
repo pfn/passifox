@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+
+<overlay id="keepassfox"
+ xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+  <menupopup id="contentAreaContextMenu">
+    <!-- reverse order due to insertafter -->
+    <menuseparator id="kpf-context-sep" insertafter="context-sep-undo"/>
+    <menuitem id="kpf-insert-pass" label="Fill Password" accesskey="w" insertafter="context-sep-undo"/>
+    <menuitem id="kpf-insert-user" label="Fill Username" accesskey="m" insertafter="context-sep-undo"/>
+  </menupopup>
+  <script type="application/javascript;version=1.7">
+    (function() {
+        Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+        XPCOMUtils.defineLazyServiceGetter(this, "kpf",
+                "@hanhuy.com/login-manager-storage;1",
+                Ci.nsILoginManagerStorage);
+        function $(id) {
+            return document.getElementById(id);
+        }
+        addEventListener('DOMContentLoaded', function f() {
+            removeEventListener('DOMContentLoaded', f, false);
+            let popup = $('contentAreaContextMenu');
+            if (popup)
+                popup.addEventListener("popupshowing", toggleItems, false);
+            function toggleItems(e) {
+                let textinput = gContextMenu.onTextInput;
+                let password = false;
+                $('kpf-insert-user').hidden = !textinput;
+                $('kpf-context-sep').hidden = !textinput;
+
+                let node = document.popupNode;
+                if (node instanceof Ci.nsIDOMHTMLInputElement) {
+                    password = node.type.toLowerCase() == "password";
+                }
+                $('kpf-insert-pass').hidden = !password;
+            }
+            function getLogin(field) {
+                let node = document.popupNode;
+                let url = gBrowser.currentURI.spec;
+                let logins = kpf.findLogins({}, url, node.form.action, null);
+                // TODO support multiple login values
+                if (logins.length > 0) {
+                    let node = document.popupNode;
+                    node.value = logins[0][field];
+                }
+            }
+            $('kpf-insert-user').addEventListener('command', function() {
+                getLogin('username');
+            }, false);
+            $('kpf-insert-pass').addEventListener('command', function() {
+                getLogin('password');
+            }, false);
+        }, false);
+    })()
+  </script>
+</overlay>
