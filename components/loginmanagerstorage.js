@@ -11,22 +11,6 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/services-crypto/WeaveCrypto.js");
 
-let Singleton = {};
-XPCOMUtils.defineLazyGetter(Singleton, "service", function() {
-    return new LoginManagerStorage();
-});
-function _LoginManagerStorage() {
-    return Singleton.service;
-}
-
-_LoginManagerStorage.prototype = {
-    // why does it *have* to be both here and in LoginManagerStorage?
-    classDescription: "KeePassFox Login Manager Storage",
-    classID:          Components.ID("{fa199659-10c4-4e3a-a73b-e2b4e1deae96}"),
-    QueryInterface:   XPCOMUtils.generateQI([Ci.nsISupports,
-                                             Ci.nsILoginManagerStorage]),
-};
-
 function LoginManagerStorage() {
     this.wrappedJSObject = this;
     XPCOMUtils.defineLazyGetter(this, "_kpf", function() {
@@ -40,6 +24,15 @@ LoginManagerStorage.prototype = {
     classID:          Components.ID("{fa199659-10c4-4e3a-a73b-e2b4e1deae96}"),
     QueryInterface:   XPCOMUtils.generateQI([Ci.nsISupports,
                                              Ci.nsILoginManagerStorage]),
+    _xpcom_factory: {
+        createInstance: function(outer, iid) {
+            if (outer != null)
+                throw Components.results.NS_ERROR_NO_AGGREGATION;
+            if (!LoginManagerStorage.instance)
+                LoginManagerStorage.instance = new LoginManagerStorage();
+            return LoginManagerStorage.instance.QueryInterface(iid);
+        },
+    },
     uiBusy: false, // XXX seems to be needed in <=ff4.0b7
     log: function(m) {
         if (!this._kpf._debug)
@@ -176,7 +169,7 @@ LoginManagerStorage.prototype = {
     },
 };
 
-const NSGetFactory = XPCOMUtils.generateNSGetFactory([_LoginManagerStorage]);
+const NSGetFactory = XPCOMUtils.generateNSGetFactory([LoginManagerStorage]);
 
 function KeePassFox() {
     XPCOMUtils.defineLazyGetter(this, "_mozStorage", function() {
