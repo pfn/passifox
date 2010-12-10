@@ -127,6 +127,7 @@ LoginManagerStorage.prototype = {
 
     findLogins: function findLogins(outCount, hostname, submitURL, realm) {
         this.stub(arguments);
+
         let entries = this._kpf.get_logins(hostname, submitURL);
         outCount.value = entries.length;
         let logins = [];
@@ -275,9 +276,9 @@ KeePassFox.prototype = {
             }
         }
     },
-    get_logins: function(url, submiturl) {
+    get_logins: function(url, submiturl, force) {
         let cached = this._find_cache_item(url, submiturl);
-        if (cached)
+        if (cached && !force)
             return cached;
 
         if (!this._test_associate())
@@ -367,18 +368,26 @@ KeePassFox.prototype = {
                     [{ accessKey: "c", label: "Connect",
                        callback: function(n, b) {
                            kpf._associate();
-                       } }]);
+                       } }], "kpf-associate-note");
         }
         return l.length > 0 ? [l[0].username, l[0].password] : null;
     },
-    _showNotification: function(m, buttons) {
+    _showNotification: function(m, buttons, id) {
         let win     = Services.wm.getMostRecentWindow("navigator:browser");
+        if (id) {
+            let notif = win.document.getElementById(id);
+            if (notif)
+                return notif;
+        }
         let browser = win.gBrowser;
         let box     = browser.getNotificationBox(browser.selectedBrowser);
         let n       = box.appendNotification(m, null,
                 "chrome://keepassfox/skin/keepass.png", 3, buttons);
         // let the notification show for 30 seconds
         n.timeout = Date.now() + 30 * 1000;
+        if (id)
+            n.setAttribute("id", id);
+        return n;
     },
     _test_associate: function() {
         if (this._associated)
@@ -402,7 +411,7 @@ KeePassFox.prototype = {
                         [{ accessKey: "c", label: "Re-connect to KeePass",
                            callback: function(n, b) {
                                kpf._associate();
-                         } }]);
+                         } }], "kpf-associate-note");
             }
         }
         return this._associated;

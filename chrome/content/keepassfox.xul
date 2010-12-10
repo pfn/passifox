@@ -6,11 +6,13 @@
   <menupopup id="contentAreaContextMenu">
     <!-- reverse order due to insertafter -->
     <menuseparator id="kpf-context-sep" insertafter="context-sep-undo"/>
-    <menuitem id="kpf-insert-pass" label="Fill Password" accesskey="w" insertafter="context-sep-undo"/>
-    <menuitem id="kpf-insert-user" label="Fill Username" accesskey="m" insertafter="context-sep-undo"/>
+    <menuitem id="kpf-insert-pass" label="Fill Pass Only" accesskey="o" insertafter="context-sep-undo"/>
+    <menuitem id="kpf-insert-user" label="Fill User &amp; Pass" accesskey="r" insertafter="context-sep-undo"/>
   </menupopup>
   <script type="application/javascript;version=1.7">
+    <![CDATA[
     (function() {
+        Cu.import("resource://gre/modules/Services.jsm");
         Cu.import("resource://gre/modules/XPCOMUtils.jsm");
         XPCOMUtils.defineLazyServiceGetter(this, "kpf",
                 "@hanhuy.com/login-manager-storage;1",
@@ -23,6 +25,19 @@
             let popup = $('contentAreaContextMenu');
             if (popup)
                 popup.addEventListener("popupshowing", toggleItems, false);
+            function showNotification(m, id) {
+                if (id) {
+                    let notif = document.getElementById(id);
+                    if (notif)
+                        return notif;
+                }
+                let box = gBrowser.getNotificationBox(gBrowser.selectedBrowser);
+                let n   = box.appendNotification(m, null,
+                        "chrome://keepassfox/skin/keepass.png", 3, null);
+                if (id)
+                    n.setAttribute("id", id);
+                return n;
+            }
             function toggleItems(e) {
                 let textinput = gContextMenu.onTextInput;
                 let password = false;
@@ -30,28 +45,82 @@
                 $('kpf-context-sep').hidden = !textinput;
 
                 let node = document.popupNode;
-                if (node instanceof Ci.nsIDOMHTMLInputElement) {
+                if (node instanceof Ci.nsIDOMHTMLInputElement)
                     password = node.type.toLowerCase() == "password";
-                }
                 $('kpf-insert-pass').hidden = !password;
             }
-            function getLogin(field) {
+            function getFields(u,p) {
+                let form = u != null ? u.form : p.form;
+                let input = null;
+                for (let i = 0; i < form.elements.length; i++) {
+                    let e = form.elements[i];
+                    if (e instanceof Ci.nsIDOMHTMLInputElement) {
+                        if (u != null && u !== e &&
+                                e.type.toLowerCase() == "password") {
+                            p = e;
+                            break;
+                        }
+                        if (e.type.toLowerCase() != "password")
+                            input = e;
+                        if ((p != null & p == e)) {
+                            u = input;
+                            break;
+                        }
+                    }
+                }
+
+                return [u,p];
+            }
+            function fillLogin(u, p, login) {
+                if (u != null)
+                    u.value = login['Login'];
+                if (p != null)
+                    p.value = login['Password'];
+            }
+            function getLogin(both) {
                 let node = document.popupNode;
                 let url = gBrowser.currentURI.spec;
-                let logins = kpf.findLogins({}, url, node.form.action, null);
+                let logins = kpf.wrappedJSObject._kpf.get_logins(
+                        url, node.form.action, true);
                 // TODO support multiple login values
                 if (logins.length > 0) {
                     let node = document.popupNode;
-                    node.value = logins[0][field];
+                    let u,p;
+                    if (!both) {
+                        p = node;
+                    } else {
+                        // TODO handle password,password user,pass fields
+                        let fields = node.type.toLowerCase() == "password" ?
+                            [null,node] : [node,null];
+                        [u,p] = getFields.apply(this, fields);
+                    }
+
+                    if (logins.length == 1) {
+                        fillLogin(u, p, logins[0]);
+                    } else {
+                        // For some reason, can't open a menupopup from here
+                        // use a select prompt instead
+                        let selected = {};
+                        let items = logins.map(function(i) { return i.Login; });
+                        let r = Services.prompt.select(window,
+                                "Select a login", "Pick a login to fill in",
+                                logins.length, items, selected);
+                        if (r) {
+                            fillLogin(u, p, logins[selected.value]);
+                        }
+                    }
+                } else {
+                    showNotification("No logins found");
                 }
             }
-            $('kpf-insert-user').addEventListener('command', function() {
-                getLogin('username');
+            $('kpf-insert-user').addEventListener('command', function(e) {
+                getLogin(true);
             }, false);
-            $('kpf-insert-pass').addEventListener('command', function() {
-                getLogin('password');
+            $('kpf-insert-pass').addEventListener('command', function(e) {
+                getLogin(false);
             }, false);
         }, false);
     })()
+    ]]>
   </script>
 </overlay>
