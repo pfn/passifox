@@ -77,15 +77,72 @@ LoginManagerStorage.prototype = {
         //this._sendNotification("removeLogin", login);
     },
     // XXX TODO implement me!
-    modifyLogin: function modifyLogin(oldlogin, newlogindata) {
-        this.stub(arguments);
+    modifyLogin: function modifyLogin(oldLogin, newLoginData) {
+        let newLogin;
+        let needsUpdate = false;
+        newLogin = oldLogin.clone().QueryInterface(Ci.nsILoginMetaInfo);
+        if (newLoginData instanceof Ci.nsILoginInfo) {
+            newLogin.init(newLoginData.hostname,
+                    newLoginData.formSubmitURL, newLoginData.httpRealm,
+                    newLoginData.username, newLoginData.password,
+                    newLoginData.usernameField, newLoginData.passwordField);
+            newLogin.QueryInterface(Ci.nsILoginMetaInfo);
 
-        let newlogin = oldlogin.clone();
-        if (newlogindata instanceof Ci.nsILoginInfo) {
-        } else if (newlogindata instanceof Ci.nsIPropertyBag) {
+            if (newLogin.username != oldLogin.username) {
+                this.log("Updating username");
+                needsUpdate = true;
+            }
+            if (newLogin.password != oldLogin.password) {
+                this.log("Updating password");
+                needsUpdate = true;
+            }
+        }  else if (newLoginData instanceof Ci.nsIPropertyBag) {
+            let propEnum = newLoginData.enumerator;
+            while (propEnum.hasMoreElements()) {
+                let prop = propEnum.getNext().QueryInterface(Ci.nsIProperty);
+                switch (prop.name) {
+                    // nsILoginInfo properties...
+                    //
+                    // only care about these 4 for updating
+                    case "hostname":
+                    case "username":
+                    case "password":
+                    case "formSubmitURL":
+                        needsUpdate = true;
+                        this.log("updating field: " + prop.name);
+                    case "usernameField":
+                    case "passwordField":
+                    case "httpRealm":
+                    // nsILoginMetaInfo properties...
+                    case "guid":
+                    case "timeCreated":
+                    case "timeLastUsed":
+                    case "timePasswordChanged":
+                    case "timesUsed":
+                        if (prop.name == "guid") {
+                            this.log("Guid is changing?!  Not supported");
+                            break;
+                        }
+                        newLogin[prop.name] = prop.value;
+                        break;
+
+                    // Fake property, allows easy incrementing.
+                    case "timesUsedIncrement":
+                        newLogin.timesUsed += prop.value;
+                        break;
+
+                    // Fail if caller requests setting an unknown property.
+                    default:
+                        throw "Unexpected propertybag item: " + prop.name;
+                }
+            }
+        } else {
+            throw "newLoginData needs an expected interface!";
         }
-
-        //this._sendNotifiation("modifyLogin", [oldlogin, newlogin]);
+        if (needsUpdate) {
+            this.addLogin(newLogin);
+            this._sendNotification("modifyLogin", [oldLogin, newLogin]);
+        }
     },
     getAllLogins: function getAllLogins(outCount) {
         this.stub(arguments);
@@ -95,11 +152,8 @@ LoginManagerStorage.prototype = {
         for (let i = 0; i < entries.length; i++) {
             let l = Cc['@mozilla.org/login-manager/loginInfo;1']
                     .createInstance(Ci.nsILoginInfo);
-            l.hostname = entries[i].Name;
-            l.username = entries[i].Login;
-            l.password = "Stored in KeePass";
-            l.usernameField = "";
-            l.passwordField = "";
+            l.init(entries[i].Name, null, null,
+                    entries[i].Login, "Stored in KeePass", "", "");
             l.QueryInterface(Ci.nsILoginMetaInfo);
             l.guid = entries[i].Uuid;
             logins.push(l);
@@ -134,18 +188,15 @@ LoginManagerStorage.prototype = {
         for (let i = 0; i < entries.length; i++) {
             let l = Cc['@mozilla.org/login-manager/loginInfo;1']
                     .createInstance(Ci.nsILoginInfo);
-            l.hostname      = hostname;
-            l.formSubmitURL = submitURL;
-            l.username      = entries[i].Login;
-            l.password      = entries[i].Password;
-            l.usernameField = "";
-            l.passwordField = "";
+            l.init(hostname, submitURL, null,
+                    entries[i].Login, entries[i].Password, "", "");
             l.QueryInterface(Ci.nsILoginMetaInfo);
             l.guid = entries[i].Uuid;
             logins.push(l);
         }
         return logins;
     },
+    // is there anything wrong with always returning a non-zero value?
     countLogins: function countLogins(hostname, submitURL, realm) {
         this.stub(arguments);
         let c = this._kpf.get_logins_count(hostname);
@@ -215,11 +266,7 @@ KeePassFox.prototype = {
         this.log("Storing key in mozStorage");
         let l = Cc['@mozilla.org/login-manager/loginInfo;1']
                 .createInstance(Ci.nsILoginInfo);
-        l.hostname = AES_KEY_URL;
-        l.username = id;
-        l.password = key;
-        l.usernameField = "";
-        l.passwordField = "";
+        l.init(AES_KEY_URL, null, null, id, key, "", "");
         storage.addLogin(l);
     },
     _find_cache_item: function(url, submiturl) {
@@ -496,11 +543,14 @@ KeePassFox.prototype = {
         let success = s >= 200 && s <= 299;
         if (!success) {
             if (s == 503)
-                this._showNotification("KeePass database is not open");
+                this._showNotification("KeePass database is not open",
+                                "kpf-db-note");
             else if (s == 0)
-                this._showNotification("KeePassHttp is not running");
+                this._showNotification("KeePassHttp is not running",
+                                "kpf-running-note");
             else
-                this._showNotification("Unknown KeePassHttp error: " + s);
+                this._showNotification("Unknown KeePassHttp error: " + s,
+                                "kpf-error-note");
         }
         return success;
     },
