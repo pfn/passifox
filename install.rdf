@@ -11,6 +11,7 @@
     <!-- Front End MetaData -->
     <em:name>KeePassFox</em:name>
     <em:description>KeePass Login Manager Storage and Integration using the KeePassHttp plugin</em:description>
+    <em:iconURL>chrome://keepassfox/skin/keepass.png</em:iconURL>
     <em:creator>Perry Nguyen</em:creator>
     <em:homepageURL>https://github.com/pfn/keepassfox</em:homepageURL>
     <em:updateURL>https://github.com/pfn/keepassfox/raw/master/update.rdf</em:updateURL>
