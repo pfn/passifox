@@ -41,12 +41,15 @@
             function toggleItems(e) {
                 let textinput = gContextMenu.onTextInput;
                 let password = false;
+                let node = document.popupNode;
                 $('kpf-insert-user').hidden = !textinput;
                 $('kpf-context-sep').hidden = !textinput;
 
                 let node = document.popupNode;
                 if (node instanceof Ci.nsIDOMHTMLInputElement)
                     password = node.type.toLowerCase() == "password";
+                if (password && !node.form)
+                    $('kpf-insert-user').hidden = true;
                 $('kpf-insert-pass').hidden = !password;
             }
             function getFields(u,p) {
@@ -82,10 +85,9 @@
             function getLogin(both) {
                 let node = document.popupNode;
                 let url = gBrowser.currentURI.spec;
-                let action = "form" in node ? node.form.action : null;
+                let action = node.form ? node.form.action : null;
                 let logins = kpf.wrappedJSObject._kpf.get_logins(
                         url, action, true);
-                // TODO support multiple login values
                 if (logins.length > 0) {
                     let node = document.popupNode;
                     let u,p;
