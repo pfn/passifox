@@ -52,6 +52,8 @@
             function getFields(u,p) {
                 let form = u != null ? u.form : p.form;
                 let input = null;
+                if (form == null)
+                    return [u,p];
                 for (let i = 0; i < form.elements.length; i++) {
                     let e = form.elements[i];
                     if (e instanceof Ci.nsIDOMHTMLInputElement) {
@@ -80,8 +82,9 @@
             function getLogin(both) {
                 let node = document.popupNode;
                 let url = gBrowser.currentURI.spec;
+                let action = "form" in node ? node.form.action : null;
                 let logins = kpf.wrappedJSObject._kpf.get_logins(
-                        url, node.form.action, true);
+                        url, action, true);
                 // TODO support multiple login values
                 if (logins.length > 0) {
                     let node = document.popupNode;
