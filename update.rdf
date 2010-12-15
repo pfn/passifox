@@ -6,14 +6,14 @@
     <r:Seq>
       <r:li>
         <r:Description>
-          <version>1.3.2</version>
+          <version>1.3.3</version>
           <targetApplication>
             <r:Description>
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
               <minVersion>4.0b1</minVersion>
               <maxVersion>4.1</maxVersion>
               <updateLink>https://github.com/pfn/keepassfox/raw/master/keepassfox.xpi</updateLink>
-              <updateHash>sha1:3954cb96d55593148cd082e655a118e228c33269</updateHash>
+              <updateHash>sha1:c67b1b9416ef2d8df4253d0aad852b2777ee20ca</updateHash>
             </r:Description>
           </targetApplication>
         </r:Description>

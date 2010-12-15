@@ -543,13 +543,13 @@ KeePassFox.prototype = {
         let success = s >= 200 && s <= 299;
         if (!success) {
             if (s == 503)
-                this._showNotification("KeePass database is not open",
+                this._showNotification("KeePass database is not open", null,
                                 "kpf-db-note");
             else if (s == 0)
-                this._showNotification("KeePassHttp is not running",
+                this._showNotification("KeePassHttp is not running", null,
                                 "kpf-running-note");
             else
-                this._showNotification("Unknown KeePassHttp error: " + s,
+                this._showNotification("Unknown KeePassHttp error: " + s, null,
                                 "kpf-error-note");
         }
         return success;
