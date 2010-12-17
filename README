@@ -32,3 +32,10 @@ Configuration:
     notify you when passwords are requested and the hostnames do not exactly
     match. When those prompts occur, you can accept, deny and remember your
     choice.
+
+      For example, take the URL "http://www.google.com/" the entry in KeePass
+      can be named "http://www.google.com", "www.google.com", or "google.com"
+      Any will match a request for passwords, but if the entry is named
+      google.com, and a request for comes from "http://www.google.com" you
+      will be prompted to approve the request, and if you like, you can choose
+      to remember the selection so that you are not prompted again.
