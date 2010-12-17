@@ -2,7 +2,7 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 const Cc = Components.classes;
 
-const AES_KEY_URL = "chrome://keepassfox";
+const AES_KEY_URL = "chrome://passifox";
 const KEEPASS_HTTP_URL = "http://localhost:19455/";
 
 const KEEPASSFOX_CACHE_TIME = 30 * 1000; // milliseconds
@@ -429,7 +429,7 @@ KeePassFox.prototype = {
         let browser = win.gBrowser;
         let box     = browser.getNotificationBox(browser.selectedBrowser);
         let n       = box.appendNotification(m, null,
-                "chrome://keepassfox/skin/keepass.png", 3, buttons);
+                "chrome://passifox/skin/keepass.png", 3, buttons);
         // let the notification show for 30 seconds
         n.timeout = Date.now() + 30 * 1000;
         if (id)

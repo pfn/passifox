@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<overlay id="keepassfox"
+<overlay id="passifox"
  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <menupopup id="contentAreaContextMenu">
@@ -33,7 +33,7 @@
                 }
                 let box = gBrowser.getNotificationBox(gBrowser.selectedBrowser);
                 let n   = box.appendNotification(m, null,
-                        "chrome://keepassfox/skin/keepass.png", 3, null);
+                        "chrome://passifox/skin/keepass.png", 3, null);
                 if (id)
                     n.setAttribute("id", id);
                 return n;

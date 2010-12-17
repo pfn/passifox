@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
-    <em:id>keepassfox@hanhuy.com</em:id>
-    <em:version>1.3.3</em:version>
+    <em:id>passifox@hanhuy.com</em:id>
+    <em:version>1.0.0</em:version>
     <em:type>2</em:type>
     <!-- firefox -->
     <em:targetApplication>
       <Description em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}" em:minVersion="4.0b1" em:maxVersion="4.1"/>
     </em:targetApplication>
     <!-- Front End MetaData -->
-    <em:name>KeePassFox</em:name>
+    <em:name>PassIFox</em:name>
     <em:description>KeePass Login Manager Storage and Integration using the KeePassHttp plugin</em:description>
-    <em:iconURL>chrome://keepassfox/skin/keepass.png</em:iconURL>
+    <em:iconURL>chrome://passifox/skin/keepass.png</em:iconURL>
     <em:creator>Perry Nguyen</em:creator>
-    <em:homepageURL>https://github.com/pfn/keepassfox</em:homepageURL>
-    <em:updateURL>https://github.com/pfn/keepassfox/raw/master/update.rdf</em:updateURL>
+    <em:homepageURL>https://github.com/pfn/passifox</em:homepageURL>
+    <em:updateURL>https://github.com/pfn/passifox/raw/master/update.rdf</em:updateURL>
   </Description>
 </RDF>

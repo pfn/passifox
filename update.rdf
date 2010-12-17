@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <r:RDF xmlns:r="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
        xmlns="http://www.mozilla.org/2004/em-rdf#">
-<r:Description about="urn:mozilla:extension:keepassfox@hanhuy.com">
+<r:Description about="urn:mozilla:extension:passifox@hanhuy.com">
   <updates>
     <r:Seq>
       <r:li>
         <r:Description>
-          <version>1.3.3</version>
+          <version>1.0.0</version>
           <targetApplication>
             <r:Description>
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
               <minVersion>4.0b1</minVersion>
               <maxVersion>4.1</maxVersion>
-              <updateLink>https://github.com/pfn/keepassfox/raw/master/keepassfox.xpi</updateLink>
-              <updateHash>sha1:c67b1b9416ef2d8df4253d0aad852b2777ee20ca</updateHash>
+              <updateLink>https://github.com/pfn/passifox/raw/master/passifox.xpi</updateLink>
+              <updateHash>sha1:365a141def3b3c57e4845daff93ab8eea1906b3b</updateHash>
             </r:Description>
           </targetApplication>
         </r:Description>
