@@ -14,10 +14,10 @@ Install:
     1) Copy KeePassHttp.plgx to C:\Path\To\KeePass.exe\Dir
 
 Configuration:
-    There is no explicit configuration necessary. KeePassFox and KeePassHttp
+    There is no explicit configuration necessary. PassIFox and KeePassHttp
     will communicate with each other on http://localhost:19455/
 
-    When a login form is discovered for the first time, KeePassFox will
+    When a login form is discovered for the first time, PassIFox will
     initialize itself and request an "Association" with KeePass (KeePassHttp).
     Alternatively, for forms that do not fill automatically, a context menu
     item on text and password fields allow manually filling in a login.
