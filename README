@@ -39,3 +39,7 @@ Configuration:
       google.com, and a request for comes from http://www.google.com you
       will be prompted to approve the request, and if you like, you can choose
       to remember the selection so that you are not prompted again.
+
+      NOTE: Keep in mind, the field in which you put the names is the 'Title'
+      field, and not 'URL'.  Use 'URL' to store a shortcut link that will take
+      you to your site.  Use the 'Title' field to match sites for logins.
