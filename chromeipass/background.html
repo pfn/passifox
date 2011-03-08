@@ -289,6 +289,10 @@
             if (s == 503) {
                 console.log("KeePass database is not open");
                 errorMessage = "KeePass database is not open";
+            } else if (s == 0) {
+                console.log("could not connect to keepass");
+                errorMessage = "Is KeePassHttp installed and/or " +
+                        "is KeePass running?";
             }
         } else {
             setBadge("");
