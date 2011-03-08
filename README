@@ -1,4 +1,9 @@
-PassIFox extension for Firefox
+PassIFox extension for Firefox4+, now on Chrome as ChromeIPass (see
+https://chrome.google.com/webstore/detail/ompiailgknfdndiefoaoiligalphfdae)
+
+ChromeIPass effectively behaves identically to PassIFox with the exception
+of saving new and updated passwords, the feature has not been implemented
+yet.  Where you see Firefox below, replace with Chrome.
 
 Implements a transparent replacement for the built-in Firefox password storage
 
@@ -11,6 +16,7 @@ Prereqs:
     1) KeePass
        http://keepass.info/
     2) KeePassHttp
+       https://passifox.appspot.com/KeePassHttp.plgx
        https://github.com/pfn/keepasshttp/raw/master/KeePassHttp.plgx
 
 Install:
