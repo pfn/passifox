@@ -1,0 +1,25 @@
+{
+  "name": "ChromeIPass",
+  "version": "0.9.9",
+  "description": "Chrome and KeePass integration using KeePassHttp",
+  "icons": {
+    "16": "keepass.png",
+    "48": "keepass-big.png"
+  },
+  "page_action": {
+    "default_icon": "keepass.png",
+    "popup": "popup.html"
+  },
+  "background_page": "background.html",
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["chromeipass.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "permissions": [
+    "contextMenus", "tabs", "http://localhost/"
+  ]
+}
