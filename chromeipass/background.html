@@ -27,12 +27,11 @@
         return to_b(atob(d));
     }
 
-    function setBadge(text) {
-        //chrome.browserAction.setBadgeText({ text: text });
-    }
-    setBadge("?");
-
     function showPageAction(callback, tab) {
+        if (!isConfigured() || errorMessage)
+            chrome.pageAction.setIcon({ tabId: tab.id, path: "keepass-x.png" });
+        else
+            chrome.pageAction.setIcon({ tabId: tab.id, path: "keepass.png" });
         chrome.pageAction.setPopup({ tabId: tab.id, popup: "popup.html" });
         chrome.pageAction.show(tab.id);
     }
@@ -45,7 +44,7 @@
     }
     var tab_login_list = {};
     function selectLoginPopup(callback, tab, logins) {
-        // TODO set an icon indicating user action is required
+        chrome.pageAction.setIcon({ tabId: tab.id, path: "keepass-q.png" });
         chrome.pageAction.setPopup({
                 tabId: tab.id,
                 popup: "login_popup.html"
@@ -59,7 +58,7 @@
     });
 
     function selectFieldPopup(callback, tab) {
-        // TODO set an icon indicating user action is required
+        chrome.pageAction.setIcon({ tabId: tab.id, path: "keepass-bang.png" });
         chrome.pageAction.setPopup({
                 tabId: tab.id,
                 popup: "field_popup.html"
@@ -76,7 +75,11 @@
             callback(cached);
             return;
         }
-        if (!_test_associate()) return;
+        if (!_test_associate()) {
+            errorMessage = "Association was unsuccessful";
+            showPageAction(null, tab);
+            return;
+        }
         var request = {
             RequestType: "get-logins"
         };
@@ -109,12 +112,20 @@
         }
         callback(entries);
     }
+    function isConfigured() {
+        return KEYNAME in localStorage && KEYBODY in localStorage;
+    }
     function getStatus(callback) {
-        var configured = false;
+        var configured = isConfigured();
         var keyname;
-        if (KEYNAME in localStorage && KEYBODY in localStorage) {
-            configured = true;
+        if (configured)
             keyname = localStorage[KEYNAME];
+        if (!configured || errorMessage) {
+            chrome.tabs.getSelected(null, function(tab) {
+                chrome.pageAction.setIcon({
+                        tabId: tab.id, path: "keepass-x.png"
+                });
+            });
         }
         callback({
             configured: configured,
@@ -124,7 +135,7 @@
         });
         errorMessage = null;
     }
-    function associate() {
+    function associate(callback) {
         if (associated) return;
         var rawkey = cryptoHelpers.generateSharedKey(keySize);
         var key = b64e(rawkey);
@@ -138,12 +149,14 @@
             var r = JSON.parse(result[1]);
             var id = r.Id;
             if (!_verify_response(r, key)) {
-                setBadge("X");
                 errorMessage = "KeePass association failed, try again";
-                return;
+            } else {
+                _set_crypto_key(id, key);
+                associated = true;
             }
-            _set_crypto_key(id, key);
-            associated = true;
+            chrome.tabs.getSelected(null, function(tab) {
+                showPageAction(callback, tab);
+            });
         }
     }
 
@@ -191,7 +204,6 @@
                 console.log("Encryption key is unrecognized!");
             }
         }
-        if (associated) setBadge("");
         return associated;
     }
     function _set_verifier(request, inkey) {
@@ -235,9 +247,6 @@
         var key = null;
         if (keyname) {
             key = localStorage[KEYBODY];
-        }
-        if (!key) {
-            setBadge("!!!");
         }
         return key ? [keyname, key] : null;
     }
@@ -283,7 +292,6 @@
     function _success(s) {
         var success = s >= 200 && s <= 299;
         if (!success) {
-            setBadge("!!!");
             errorMessage = "Unknown error: " + s;
             console.log("error: "+ s);
             if (s == 503) {
@@ -294,8 +302,6 @@
                 errorMessage = "Is KeePassHttp installed and/or " +
                         "is KeePass running?";
             }
-        } else {
-            setBadge("");
         }
         return success;
     }

@@ -102,7 +102,6 @@ button to establish a new connection.
         $('not-configured').style.display = "none";
         $('configured-and-associated').style.display = "none";
         $('configured-not-associated').style.display = "none";
-        console.log("error is: "+ error);
         if (error && !configured) {
             $('need-reconfigure').style.display = "block";
             $('need-reconfigure-message').textContent = error;
