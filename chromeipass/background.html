@@ -137,7 +137,7 @@
     }
     function associate(callback) {
         if (associated) return;
-        var rawkey = cryptoHelpers.generateSharedKey(keySize);
+        var rawkey = cryptoHelpers.generateSharedKey(keySize * 2);
         var key = b64e(rawkey);
         var request = {
             RequestType: "associate",

@@ -1,6 +1,6 @@
 {
   "name": "ChromeIPass",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Chrome and KeePass integration using KeePassHttp",
   "icons": {
     "16": "keepass.png",
