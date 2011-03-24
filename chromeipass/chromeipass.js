@@ -61,7 +61,7 @@ function logins_callback(logins) {
     } else if (logins.length > 1) {
         var usernames = [];
         for (var i = 0; i < logins.length; i++) {
-            usernames.push(logins[i].Login);
+            usernames.push(logins[i].Name + " - " + logins[i].Login);
         }
         chrome.extension.sendRequest({
             'action': 'select_login',
@@ -105,6 +105,43 @@ function fillLogin(u, p) {
         }
     });
 }
+
+window.addEventListener("keydown", function(e) {
+    if (e.ctrlKey && e.shiftKey) {
+        if (e.keyCode == 80) { // P
+            fillInPassOnly();
+        } else if (e.keyCode == 85) { // U
+            fillInUserPass();
+        }
+    }
+}, false);
+function fillInUserPass() {
+    var u = document.activeElement;
+    if (u.tagName.toLowerCase() != "input")
+        return;
+    var p = getFields(u, null)[1];
+    if (p == null && u.type.toLowerCase() == "password") {
+        p = u;
+        u = getFields(null, p)[0];
+    }
+    fillLogin(u, p);
+}
+function fillInPassOnly() {
+    var p = document.activeElement;
+    if (p.tagName.toLowerCase() != "input")
+        return;
+    if (p.type.toLowerCase() != "password")
+        p = getFields(p, null)[1];
+    if (!p) {
+        var message = "Unable to find a password field";
+        chrome.extension.sendRequest({
+            action: 'alert',
+            args: [message]
+        });
+        return;
+    }
+    fillLogin(null, p);
+}
 chrome.extension.onRequest.addListener(function onRequest(req) {
     if ('id' in req) {
         if (_u)
@@ -116,26 +153,9 @@ chrome.extension.onRequest.addListener(function onRequest(req) {
     }
     if ('action' in req) {
         if (req.action == "fill_user_pass") {
-            var u = document.activeElement;
-            var p = getFields(u, null)[1];
-            if (p == null && u.type.toLowerCase() == "password") {
-                p = u;
-                u = getFields(null, p)[0];
-            }
-            fillLogin(u, p);
+            fillInUserPass();
         } else if (req.action == "fill_pass_only") {
-            var p = document.activeElement;
-            if (p.type.toLowerCase() != "password")
-                p = getFields(p, null)[1];
-            if (!p) {
-                var message = "Unable to find a password field";
-                chrome.extension.sendRequest({
-                    action: 'alert',
-                    args: [message]
-                });
-                return;
-            }
-            fillLogin(null, p);
+            fillInPassOnly();
         }
     }
 });
