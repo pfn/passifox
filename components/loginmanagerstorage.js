@@ -8,9 +8,30 @@ Cu.import("resource://passifox/modules/KeePassFox.jsm");
 
 function LoginManagerStorage() {
     this.wrappedJSObject = this;
-    XPCOMUtils.defineLazyGetter(this, "_kpf", function() {
-        return new KeePassFox();
+    XPCOMUtils.defineLazyGetter(this, "_kpf", function() new KeePassFox());
+    XPCOMUtils.defineLazyGetter(this, "_loginSavingDB", function() {
+        let f = Services.dirsvc.get("ProfD", Ci.nsIFile);
+        f.append("passifox-ignore-hosts.sqlite");
+        let ss = Cc["@mozilla.org/storage/service;1"]
+                    .getService(Ci.mozIStorageService);
+        let c = ss.openDatabase(f);
+        if (!c.tableExists("hosts")) {
+            c.beginTransaction();
+            c.executeSimpleSQL("CREATE TABLE hosts (name varchar)");
+            c.executeSimpleSQL("CREATE UNIQUE INDEX hostname ON hosts (name)");
+            c.commitTransaction();
+        }
+        return c;
     });
+    function makeSt(s) function() this._loginSavingDB.createStatement(s);
+    XPCOMUtils.defineLazyGetter(this, "_getAllLoginSavingSt",
+            makeSt("SELECT name FROM hosts"));
+    XPCOMUtils.defineLazyGetter(this, "_insLoginSavingSt",
+            makeSt("INSERT INTO hosts VALUES (:name)"));
+    XPCOMUtils.defineLazyGetter(this, "_delLoginSavingSt",
+            makeSt("DELETE FROM hosts WHERE name = :name"));
+    XPCOMUtils.defineLazyGetter(this, "_getLoginSavingSt",
+            makeSt("SELECT name FROM hosts WHERE name = :name"));
     this.log("Creating storage service");
 }
 
@@ -168,13 +189,47 @@ LoginManagerStorage.prototype = {
     },
 
     removeAllLogins: function() { }, // never, ever do this
-    // hosts are never disabled
+
     getAllDisabledHosts: function(count) {
         count.value = 0;
-        return [];
+        let result = [];
+
+        let st = this._getAllLoginSavingSt;
+        this._doWithLoginSavingDB(st, function() {
+            while (st.executeStep())
+                result.push(st.row['name']);
+            count.value = result.length;
+        });
+        return result;
     },
-    getLoginSavingEnabled: function(hostname) { return true; }, // always true
-    setLoginSavingEnabled: function(hostname, enabled) { }, // ignore
+    getLoginSavingEnabled: function(hostname) {
+        let st = this._getLoginSavingSt;
+        st.params['name'] = hostname;
+        let enabled = true;
+        this._doWithLoginSavingDB(st, function() {
+            enabled = !st.executeStep();
+        });
+        return enabled;
+    },
+    setLoginSavingEnabled: function(hostname, enabled) {
+        let st = enabled ?  this._delLoginSavingSt : this._insLoginSavingSt;
+        st.params['name'] = hostname;
+        this._doWithLoginSavingDB(st, function() st.execute());
+    },
+    _doWithLoginSavingDB: function(st, r) {
+        let c = this._loginSavingDB;
+        try {
+            c.beginTransaction();
+            r();
+            c.commitTransaction();
+        } catch (e) {
+            c.rollbackTransaction();
+            this.log("Error in login saving db: " + e);
+            Cu.reportError(e);
+        } finally {
+            st.reset();
+        }
+    },
 
     findLogins: function findLogins(outCount, hostname, submitURL, realm) {
         this.stub(arguments);
