@@ -27,8 +27,21 @@ for (var i = 0; i < inputs.length; i++) {
 function getFields(u, p) {
     var form = u != null ? u.form : p.form;
     var input = null;
-    if (form == null)
+    if (!form) {
+        if (!p)
+            return [u,p];
+        var lastinput;
+        for (var i = 0; i < inputs.length && !u; i++) {
+            if (inputs[i] == p) {
+                u = lastinput;
+            } else {
+                if (!inputs[i].hasAttribute("type") ||
+                        inputs[i].getAttribute("type").toLowerCase() == "text")
+                    lastinput = inputs[i];
+            }
+        }
         return [u,p];
+    }
     for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.tagName.toLowerCase() == "input") {
@@ -73,9 +86,12 @@ function logins_callback(logins) {
 }
 function fillLogin(u, p) {
     var form = u != null ? u.form : p.form;
+    var action = document.location.origin;
+    if (form)
+        action = form.action;
     chrome.extension.sendRequest({
         'action': 'get_passwords',
-        'args': [ document.location.origin, form.action ]
+        'args': [ document.location.origin, action ]
     }, function(logins) {
         if (logins.length == 0) {
             var message = "No logins found";
@@ -166,9 +182,16 @@ if (passwordinputs.length == 0) {
     });
 } else if (passwordinputs.length == 1) {
     _p = passwordinputs[0];
+    var action = document.location.origin;
+    if (_p.form)
+        action = _p.form.action;
+    if (typeof(action) != "string") {
+        // potential security issue if the real form action points elsewhere
+        action = document.location.origin;
+    }
     chrome.extension.sendRequest({
         'action': 'get_passwords',
-        'args': [ document.location.origin, passwordinputs[0].form.action ]
+        'args': [ document.location.origin, action ]
     }, logins_callback);
 } else if (passwordinputs.length > 1) {
     chrome.extension.sendRequest({

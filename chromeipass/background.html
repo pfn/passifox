@@ -68,13 +68,15 @@
 
     function getPasswords(callback, tab, url, submiturl, force) {
         console.log("url + submiturl: [" + url + "] => [" + submiturl + "]");
-        _prune_cache();
+        //_prune_cache();
         showPageAction(null, tab);
+        /*
         var cached = _find_cache_item(url, submiturl);
         if (cached && !force) {
             callback(cached);
             return;
         }
+        */
         if (!_test_associate()) {
             errorMessage = "Association was unsuccessful";
             showPageAction(null, tab);
@@ -104,9 +106,9 @@
                     _decrypt_entry(r.Entries[i], key, iv);
                 }
                 entries = r.Entries;
-                _cache_item(url, submiturl, entries);
+                //_cache_item(url, submiturl, entries);
             } else {
-                _cache_item(url, submiturl, []);
+                //_cache_item(url, submiturl, []);
                 console.log("getPasswords for " + url + " rejected");
             }
         }
