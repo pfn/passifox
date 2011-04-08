@@ -55,6 +55,8 @@
             function getFields(u,p) {
                 let form = u != null ? u.form : p.form;
                 let input = null;
+                // this suffers from the same bug as chromeipass did
+                // inputs that are not in a form will result in an error
                 if (form == null)
                     return [u,p];
                 for (let i = 0; i < form.elements.length; i++) {
@@ -106,7 +108,7 @@
                         // For some reason, can't open a menupopup from here
                         // use a select prompt instead
                         let selected = {};
-                        let items = logins.map(function(i) { return i.Login; });
+                        let items = logins.map(function(i) i.Name + " - " + i.Login);
                         let r = Services.prompt.select(window,
                                 "Select a login", "Pick a login to fill in",
                                 logins.length, items, selected);
