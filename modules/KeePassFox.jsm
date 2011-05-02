@@ -76,6 +76,7 @@ KeePassFox.prototype = {
         return null;
     },
     _cache_item: function(url, submiturl, realm, entries) {
+        if (!entries || entries.length == 0) return; // don't cache misses
         let key = url + "!!" + submiturl + "!!" + realm;
         let item = {};
         item.ts = Date.now();
@@ -329,14 +330,20 @@ KeePassFox.prototype = {
     _send: function(request) {
         let xhr = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
                 .createInstance(Ci.nsIXMLHttpRequest);
-        xhr.open("POST", KEEPASS_HTTP_URL, false);
+        xhr.open("POST", KEEPASS_HTTP_URL, true);
         xhr.setRequestHeader("Content-Type", "application/json");
+        let running = true;
         try {
             let r = JSON.stringify(request);
             this.log("REQUEST: " + r);
+            xhr.onabort = xhr.onerror = xhr.onload = function() running = false;
             xhr.send(r);
         }
-        catch (e) { this.log("KeePassHttp: " + e); }
+        catch (e) { running = false; this.log("KeePassHttp: " + e); }
+
+        while (running)
+            Services.tm.currentThread.processNextEvent(true);
+
         this.log("RESPONSE: " + xhr.status + " => " + xhr.responseText);
         return [xhr.status, xhr.responseText];
     },
