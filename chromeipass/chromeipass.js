@@ -45,11 +45,12 @@ function getFields(u, p) {
     for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.tagName.toLowerCase() == "input") {
-            if (u != null && u !== e && e.type.toLowerCase() == "password") {
+            var etype = e.type.toLowerCase();
+            if (u != null && u !== e && etype == "password") {
                 p = e;
                 break;
             }
-            if (e.type.toLowerCase() != "password")
+            if (etype == "text")
                 input = e;
             if ((p != null && p == e)) {
                 u = input;
