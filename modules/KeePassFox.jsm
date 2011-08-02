@@ -76,8 +76,14 @@ KeePassFox.prototype = {
         return null;
     },
     _cache_item: function(url, submiturl, realm, entries) {
-        if (!entries || entries.length == 0) return; // don't cache misses
+        if (entries && entries.length == 0) return; // don't cache misses
+
         let key = url + "!!" + submiturl + "!!" + realm;
+        if (!entries) {
+            delete this._cache[key];
+            return;
+        }
+
         let item = {};
         item.ts = Date.now();
         item.entries = entries;
@@ -90,6 +96,9 @@ KeePassFox.prototype = {
             if ((item.ts + KEEPASSFOX_CACHE_TIME) < now)
                 delete this._cache[i];
         }
+    },
+    _clear_cache: function() {
+        this._cache = {};
     },
     set_login: function(login) {
         if (!this._test_associate())
@@ -116,6 +125,8 @@ KeePassFox.prototype = {
             let r = JSON.parse(response);
             if (this._verify_response(r, key, id)) {
                 this.log("saved login for: " + login.url);
+                // clear cache for this entry
+                this._cache_item(login.url, login.submiturl, login.realm, null);
             } else {
                 this._showNotification(
                         "set_login for " + login.url + " rejected");

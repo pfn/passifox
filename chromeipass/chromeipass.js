@@ -110,7 +110,7 @@ function fillLogin(u, p) {
             _logins = logins;
             var usernames = [];
             for (var i = 0; i < logins.length; i++) {
-                usernames.push(logins[i].Login);
+                usernames.push(logins[i].Name + " - " + logins[i].Login);
             }
             chrome.extension.sendRequest({
                 'action': 'select_login',
