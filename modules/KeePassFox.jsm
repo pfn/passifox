@@ -120,8 +120,8 @@ KeePassFox.prototype = {
         if (login.realm)
             request.Realm     = this._crypto.encrypt(login.realm, key, iv);
 
-        let [s, response] = this._send(request);
-        if (this._success(s)) {
+        let [s, response, ready] = this._send(request);
+        if (this._success(s, ready)) {
             let r = JSON.parse(response);
             if (this._verify_response(r, key, id)) {
                 this.log("saved login for: " + login.url);
@@ -151,9 +151,9 @@ KeePassFox.prototype = {
             request.SubmitUrl = this._crypto.encrypt(submiturl, key, iv);
         if (realm)
             request.Realm = this._crypto.encrypt(realm, key, iv);
-        let [s, response] = this._send(request);
+        let [s, response, ready] = this._send(request);
         let entries = [];
-        if (this._success(s)) {
+        if (this._success(s, ready)) {
             let r = JSON.parse(response);
             if (this._verify_response(r, key, id)) {
                 let iv = r.Nonce;
@@ -179,9 +179,9 @@ KeePassFox.prototype = {
         };
         let [id, key] = this._set_verifier(request);
         request.Url = this._crypto.encrypt(url, key, request.Nonce);
-        let [s, response] = this._send(request);
+        let [s, response, ready] = this._send(request);
         let entries = [];
-        if (this._success(s)) {
+        if (this._success(s, ready)) {
             let r = JSON.parse(response);
             if (this._verify_response(r, key, id))
                 return r.Count;
@@ -195,9 +195,9 @@ KeePassFox.prototype = {
             RequestType: "get-all-logins",
         };
         let [id, key] = this._set_verifier(request);
-        let [s, response] = this._send(request);
+        let [s, response, ready] = this._send(request);
         let entries = [];
-        if (this._success(s)) {
+        if (this._success(s, ready)) {
             let r = JSON.parse(response);
             if (!this._verify_response(r, key, id))
                 return entries;
@@ -261,8 +261,8 @@ KeePassFox.prototype = {
 
         let [id, key] = info;
 
-        let [s, response] = this._send(request);
-        if (this._success(s)) {
+        let [s, response, ready] = this._send(request);
+        if (this._success(s, ready)) {
             let r = JSON.parse(response);
             if (!this._verify_response(r, key, id)) {
                 let kpf = this;
@@ -285,8 +285,8 @@ KeePassFox.prototype = {
                 Key:         key,
         };
         this._set_verifier(request, key);
-        let [s, response] = this._send(request);
-        if (this._success(s)) {
+        let [s, response, ready] = this._send(request);
+        if (this._success(s, ready)) {
             let r = JSON.parse(response);
             let id = r.Id;
             if (!this._verify_response(r, key)) {
@@ -356,10 +356,12 @@ KeePassFox.prototype = {
             Services.tm.currentThread.processNextEvent(true);
 
         this.log("RESPONSE: " + xhr.status + " => " + xhr.responseText);
-        return [xhr.status, xhr.responseText];
+        return [xhr.status, xhr.responseText, xhr.readyState];
     },
-    _success: function(s) {
+    _success: function(s, readyState) {
         let success = s >= 200 && s <= 299;
+        if (readyState < 2)  // request has not been sent yet
+            return success;
         if (!success) {
             if (s == 503)
                 this._showNotification("KeePass database is not open", null,
