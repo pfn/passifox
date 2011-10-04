@@ -3,6 +3,7 @@
 <head>
   <script src="aes.js"></script>
   <script src="cryptoHelpers.js"></script>
+  <script src="utf8.js"></script>
 </head>
 <body>
   <script>
@@ -282,14 +283,14 @@
         }
     }
     function _decrypt_entry(e, key, iv) {
-        e.Login = to_s(slowAES.decrypt(b64d(e.Login),
-                slowAES.modeOfOperation.CBC, b64d(key), b64d(iv)));
+        e.Login = UTF8.decode(to_s(slowAES.decrypt(b64d(e.Login),
+                slowAES.modeOfOperation.CBC, b64d(key), b64d(iv))));
         e.Uuid = to_s(slowAES.decrypt(b64d(e.Uuid),
                 slowAES.modeOfOperation.CBC, b64d(key), b64d(iv)));
-        e.Name = to_s(slowAES.decrypt(b64d(e.Name),
-                slowAES.modeOfOperation.CBC, b64d(key), b64d(iv)));
-        e.Password = to_s(slowAES.decrypt(b64d(e.Password),
-                slowAES.modeOfOperation.CBC, b64d(key), b64d(iv)));
+        e.Name = UTF8.decode(to_s(slowAES.decrypt(b64d(e.Name),
+                slowAES.modeOfOperation.CBC, b64d(key), b64d(iv))));
+        e.Password = UTF8.decode(to_s(slowAES.decrypt(b64d(e.Password),
+                slowAES.modeOfOperation.CBC, b64d(key), b64d(iv))));
     }
     function _success(s) {
         var success = s >= 200 && s <= 299;
