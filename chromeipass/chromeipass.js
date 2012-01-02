@@ -36,7 +36,8 @@ function getFields(u, p) {
                 u = lastinput;
             } else {
                 if (!inputs[i].hasAttribute("type") ||
-                        inputs[i].getAttribute("type").toLowerCase() == "text")
+                        inputs[i].getAttribute("type").toLowerCase()== "text" ||
+                        inputs[i].getAttribute("type").toLowerCase() == "email")
                     lastinput = inputs[i];
             }
         }
@@ -50,7 +51,7 @@ function getFields(u, p) {
                 p = e;
                 break;
             }
-            if (etype == "text")
+            if (etype == "text" || etype == "email")
                 input = e;
             if ((p != null && p == e)) {
                 u = input;
