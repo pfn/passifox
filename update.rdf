@@ -11,7 +11,7 @@
             <r:Description>
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
               <minVersion>4.0b1</minVersion>
-              <maxVersion>10.*</maxVersion>
+              <maxVersion>13.*</maxVersion>
               <updateLink>https://passifox.appspot.com/passifox.xpi</updateLink>
               <updateHash>sha1:0b23f8bd1d25f161ddcfd38a5efc600f5ee56ec3</updateHash>
             </r:Description>
