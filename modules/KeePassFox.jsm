@@ -4,7 +4,7 @@ let Ci = Components.interfaces;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/services-crypto/WeaveCrypto.js");
+Cu.import("resource://services-crypto/WeaveCrypto.js");
 
 let AES_KEY_URL = "chrome://passifox";
 let KEEPASS_HTTP_URL = "http://localhost:19455/";
