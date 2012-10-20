@@ -236,12 +236,13 @@ for(var i = 0; i < passwordinputs.length; i++) {
 					}
 				});
 				response(matches);
-			},
+			}/*,
 			select: function(e, ui) {
 				e.preventDefault();
 				cIPJQ(this).val(ui.item.value);
 				//fillLogin(cIPJQ(this)[0], getFields(cIPJQ(this)[0], null)[1], true, false);
 			}
+			*/
 		})
 		.blur(function(e) {
 			var p = getFields(cIPJQ(this)[0], null)[1];
