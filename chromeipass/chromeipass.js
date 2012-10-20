@@ -246,18 +246,8 @@ for(var i = 0; i < passwordinputs.length; i++) {
 		})
 		.blur(function(e) {
 			var p = getFields(cIPJQ(this)[0], null)[1];
-			//if(p.value == "") {
 				fillLogin(cIPJQ(this)[0], p, true, true);
-			//}
 		});
-		
-		/*
-		u.addEventListener("focusout", function(e) {
-			if(this.value == "") {
-				fillLogin(this, getFields(this, null)[1], true, true);
-			}
-		}, false);
-		*/
 	}
 }
 
