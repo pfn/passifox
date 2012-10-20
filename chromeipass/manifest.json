@@ -1,6 +1,7 @@
 {
   "name": "ChromeIPass",
-  "version": "1.0.7",
+  "version": "1.0.8",
+  "manifest_version": 2,
   "description": "Chrome and KeePass integration using KeePassHttp",
   "icons": {
     "16": "keepass.png",
@@ -10,7 +11,7 @@
     "default_icon": "keepass.png",
     "popup": "popup.html"
   },
-  "background_page": "background.html",
+  "background": {"scripts": ["aes.js","cryptoHelpers.js","utf8.js","background.js", "chromeipass.js"]},
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
