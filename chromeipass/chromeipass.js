@@ -1,6 +1,8 @@
 (function() {
 var inputs = document.getElementsByTagName("input");
 var passwordinputs = [];
+var usernameinputs = [];
+var availableUsernames = [];
 
 function visible(e) {
     var visible = true;
@@ -75,9 +77,14 @@ function logins_callback(logins) {
         passwordinputs[0].value = logins[0].Password;
     } else if (logins.length > 1) {
         var usernames = [];
+		availableUsernames = [];
         for (var i = 0; i < logins.length; i++) {
             usernames.push(logins[i].Name + " - " + logins[i].Login);
+			var item = { "label": logins[i].Login + " (" + logins[i].Name + ")", "value": logins[i].Login };
+			availableUsernames.push(item);
+			//availableUsernames.push(logins[i].Login);
         }
+		
         chrome.extension.sendRequest({
             'action': 'select_login',
             'args': [usernames]
@@ -214,6 +221,45 @@ chrome.extension.onRequest.addListener(function onRequest(req) {
     }
 });
 
+
+// add lost focus listener to all possible username fields
+for(var i = 0; i < passwordinputs.length; i++) {
+	u = getFields(null, passwordinputs[i])[0];
+	usernameinputs.push(u);
+	if(u) {
+		cIPJQ(u).autocomplete({
+			minLength: 0,
+			source: function( request, response ) {
+				var matches = cIPJQ.map( availableUsernames, function(tag) {
+					if ( tag.label.toUpperCase().indexOf(request.term.toUpperCase()) === 0 ) {
+						return tag;
+					}
+				});
+				response(matches);
+			},
+			select: function(e, ui) {
+				e.preventDefault();
+				cIPJQ(this).val(ui.item.value);
+				//fillLogin(cIPJQ(this)[0], getFields(cIPJQ(this)[0], null)[1], true, false);
+			}
+		})
+		.blur(function(e) {
+			var p = getFields(cIPJQ(this)[0], null)[1];
+			//if(p.value == "") {
+				fillLogin(cIPJQ(this)[0], p, true, true);
+			//}
+		});
+		
+		/*
+		u.addEventListener("focusout", function(e) {
+			if(this.value == "") {
+				fillLogin(this, getFields(this, null)[1], true, true);
+			}
+		}, false);
+		*/
+	}
+}
+
 if (passwordinputs.length == 0) {
     chrome.extension.sendRequest({
         'action': 'hide_actions'
@@ -235,16 +281,6 @@ if (passwordinputs.length == 0) {
     chrome.extension.sendRequest({
         'action': 'select_field'
     });
-}
-
-// add lost focus listener to all possible username fields
-for(var i = 0; i < passwordinputs.length; i++) {
-	u = getFields(null, passwordinputs[i])[0];
-	if(u) {
-		u.addEventListener("focusout", function(e) {
-			fillLogin(this, getFields(this, null)[1], true, true);
-		}, false);
-	}
 }
 
 })();

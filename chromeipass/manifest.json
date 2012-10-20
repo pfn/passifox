@@ -15,7 +15,8 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["chromeipass.js"],
+      "js": ["jquery-1.8.2.min.js", "jquery-ui-1.9.0.custom.min.js", "chromeipass.js"],
+	  "css": ["jquery-ui-1.9.0.custom.min.css"],
       "run_at": "document_idle",
       "all_frames": true
     }
