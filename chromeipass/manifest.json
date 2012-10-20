@@ -11,7 +11,7 @@
     "default_icon": "keepass.png",
     "popup": "popup.html"
   },
-  "background": {"scripts": ["aes.js","cryptoHelpers.js","utf8.js","background.js", "jquery-1.8.2.min.js", "jquery-ui-1.9.0.custom.min.js"]},
+  "background": {"scripts": ["aes.js","cryptoHelpers.js","utf8.js","background.js"]},
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
