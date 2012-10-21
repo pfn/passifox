@@ -110,8 +110,10 @@ function fillLogin(u, p, onlyPassword, suppressWarnings) {
         if (logins.length == 1) {
             if (u && !onlyPassword)
                 u.value = logins[0].Login;
-            if (p)
+            if (p) {
                 p.value = logins[0].Password;
+				cIPJQ(p).data("unchanged", true);
+			}
         } else {
 			// check if password for given username exists
 			var found = false;
@@ -127,8 +129,10 @@ function fillLogin(u, p, onlyPassword, suppressWarnings) {
 				}
 				
 				if(countPassword == 1) {
-					if(p && p.value != valPassword)
+					if(p) {
 						p.value = valPassword;
+						cIPJQ(p).data("unchanged", true);
+					}
 					found = true;
 				}
 			}
@@ -226,6 +230,11 @@ chrome.extension.onRequest.addListener(function onRequest(req) {
 for(var i = 0; i < passwordinputs.length; i++) {
 	u = getFields(null, passwordinputs[i])[0];
 	usernameinputs.push(u);
+	
+	cIPJQ(passwordinputs[i]).change(function(e) {
+		cIPJQ(this).data("unchanged", false);
+	});
+	
 	if(u) {
 		cIPJQ(u).autocomplete({
 			minLength: 0,
@@ -236,17 +245,30 @@ for(var i = 0; i < passwordinputs.length; i++) {
 					}
 				});
 				response(matches);
-			}/*,
+			},
 			select: function(e, ui) {
 				e.preventDefault();
 				cIPJQ(this).val(ui.item.value);
-				//fillLogin(cIPJQ(this)[0], getFields(cIPJQ(this)[0], null)[1], true, false);
+				fillLogin(cIPJQ(this)[0], getFields(cIPJQ(this)[0], null)[1], true, false);
+				cIPJQ(this).data("fetched", true);
 			}
-			*/
 		})
 		.blur(function(e) {
-			var p = getFields(cIPJQ(this)[0], null)[1];
-				fillLogin(cIPJQ(this)[0], p, true, true);
+			if(cIPJQ(this).data("fetched") == true) {
+				cIPJQ(this).data("fetched", false);
+			}
+			else {
+				var p = getFields(cIPJQ(this)[0], null)[1];
+				if(cIPJQ(p).data("unchanged") != true) {
+					fillLogin(cIPJQ(this)[0], p, true, true);
+				}
+			}
+		})
+		.focus(function(e) {
+			if(cIPJQ(this).val() == "") {
+				cIPJQ(this).autocomplete( "search", "" );
+				//cIPJQ(this).trigger("keydown");
+			}
 		});
 	}
 }
