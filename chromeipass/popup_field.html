@@ -1,0 +1,23 @@
+<html>
+	<head>
+		<title>KeePass - Popup</title>
+		<link rel="stylesheet" href="popup.css" />
+		<script type="text/javascript" src="jquery-1.8.2.min.js"></script>
+		<script type="text/javascript" src="popup_functions.js"></script>
+	</head>
+	<body>
+		<div id="settings" class="settings">
+			<label><input type="checkbox" name="autoFillAndSend" value="1" /> Auto fill HTTP Auth requests and send it.</label>
+			<label><input type="checkbox" name="autoCompleteUsernames" value="1" /> Activate autocomplete for username fields.</label>
+			<div class="description">Changes get active after page reload</div>
+		</div>
+
+		<div>
+			<p>
+				ChromeIPass found more than one password field on this page. To enter your
+				logins, right-click on one of the password fields, and choose either the
+				"<code>Fill User + Pass</code>" or "<code>Fill Pass Only</code>" command.
+			</p>
+		</div>
+	</body>
+</html>

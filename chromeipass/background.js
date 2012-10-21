@@ -12,6 +12,8 @@ var _cache = {};
 var to_s = cryptoHelpers.convertByteArrayToString;
 var to_b = cryptoHelpers.convertStringToByteArray;
 
+var _settings = typeof(localStorage.settings)=='undefined' ? {} : JSON.parse(localStorage.settings);
+
 function b64e(d) {
 	return btoa(to_s(d));
 }
@@ -34,12 +36,21 @@ function hidePageAction(callback, tab) {
 function showAlert(callback, tab, message) {
 	alert(message);
 }
+
+function loadSettings(callback, tab) {
+	_settings = JSON.parse(localStorage.settings);
+}
+
+function getSettings(callback, tab) {
+	callback({data: JSON.parse(localStorage.settings)});
+}
+
 var tab_login_list = {};
 function selectLoginPopup(callback, tab, logins) {
 	chrome.pageAction.setIcon({ tabId: tab.id, path: "keepass-q.png" });
 	chrome.pageAction.setPopup({
 			tabId: tab.id,
-			popup: "login_popup.html"
+			popup: "popup_login.html"
 	});
 	tab_login_list["tab" + tab.id] = logins;
 	chrome.pageAction.show(tab.id);
@@ -53,7 +64,7 @@ function selectFieldPopup(callback, tab) {
 	chrome.pageAction.setIcon({ tabId: tab.id, path: "keepass-bang.png" });
 	chrome.pageAction.setPopup({
 			tabId: tab.id,
-			popup: "field_popup.html"
+			popup: "popup_field.html"
 	});
 	chrome.pageAction.show(tab.id);
 }
@@ -161,7 +172,9 @@ var requestHandlers = {
 	'select_field': selectFieldPopup,
 	'get_status': getStatus,
 	'associate': associate,
-	'alert': showAlert
+	'alert': showAlert,
+	'load_settings': loadSettings,
+	'get_settings': getSettings
 };
 
 function onRequest(request, sender, callback) {
@@ -175,7 +188,6 @@ function onRequest(request, sender, callback) {
 chrome.extension.onRequest.addListener(onRequest);
 
 ///////////////////////////////////////////////////////////////////////////////
-
 function _test_associate() {
 	if (associated) {
 		return true;

@@ -84,7 +84,7 @@ function logins_callback(logins) {
 			availableUsernames.push(item);
 			//availableUsernames.push(logins[i].Login);
         }
-		
+
         chrome.extension.sendRequest({
             'action': 'select_login',
             'args': [usernames]
@@ -117,17 +117,17 @@ function fillLogin(u, p, onlyPassword, suppressWarnings) {
         } else {
 			// check if password for given username exists
 			var found = false;
-			
+
 			if(u) {
 				var valPassword = "";
 				var countPassword = 0;
 				for (var i = 0; i < logins.length; i++) {
 					if(logins[i].Login == u.value) {
 						countPassword += 1;
-						valPassword = logins[i].Password; 
+						valPassword = logins[i].Password;
 					}
 				}
-				
+
 				if(countPassword == 1) {
 					if(p) {
 						p.value = valPassword;
@@ -136,7 +136,7 @@ function fillLogin(u, p, onlyPassword, suppressWarnings) {
 					found = true;
 				}
 			}
-			
+
 			_u = u;
 			_p = p;
 			_logins = logins;
@@ -148,7 +148,7 @@ function fillLogin(u, p, onlyPassword, suppressWarnings) {
 				'action': 'select_login',
 				'args': [usernames, true]
 			});
-			
+
 			if(!found) {
 				if(!suppressWarnings) {
 					var message = "More than one login was found in KeePass, " +
@@ -197,14 +197,14 @@ function fillInPassOnly(suppressWarnings) {
         });
         return;
     }
-	
+
 	var u = _u;
 	if(!_u) {
 		u = getFields(null, p)[0];
 	}
-	
+
 	var onlyPassword = (u && u.value != "");
-	
+
     fillLogin(u, p, onlyPassword, suppressWarnings);
 }
 chrome.extension.onRequest.addListener(function onRequest(req) {
@@ -230,11 +230,11 @@ chrome.extension.onRequest.addListener(function onRequest(req) {
 for(var i = 0; i < passwordinputs.length; i++) {
 	u = getFields(null, passwordinputs[i])[0];
 	usernameinputs.push(u);
-	
+
 	cIPJQ(passwordinputs[i]).change(function(e) {
 		cIPJQ(this).data("unchanged", false);
 	});
-	
+
 	if(u) {
 		cIPJQ(u).autocomplete({
 			minLength: 0,
