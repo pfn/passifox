@@ -107,10 +107,6 @@
 			// wish I could clear out _logins and _u, but a subsequent
 			// selection may be requested.
 			}
-			// htaccess
-			if ('htaccess' in req && 'id' in req) {
-				console.log(req);
-			}
 			if ('action' in req) {
 				if (req.action == "fill_user_pass") {
 					fillInFromActiveElement(false);

@@ -23,10 +23,19 @@ function b64d(d) {
 
 function showPageAction(callback, tab) {
 	if (!isConfigured() || errorMessage)
-		chrome.pageAction.setIcon({ tabId: tab.id, path: "keepass-x.png" });
+		chrome.pageAction.setIcon({
+			tabId: tab.id,
+			path: "keepass-x.png"
+		});
 	else
-		chrome.pageAction.setIcon({ tabId: tab.id, path: "keepass.png" });
-	chrome.pageAction.setPopup({ tabId: tab.id, popup: "popup.html" });
+		chrome.pageAction.setIcon({
+			tabId: tab.id,
+			path: "keepass.png"
+		});
+	chrome.pageAction.setPopup({
+		tabId: tab.id,
+		popup: "popup.html"
+	});
 	chrome.pageAction.show(tab.id);
 }
 function hidePageAction(callback, tab) {
@@ -42,29 +51,52 @@ function loadSettings(callback, tab) {
 }
 
 function getSettings(callback, tab) {
-	callback({data: JSON.parse(localStorage.settings)});
+	callback({
+		data: JSON.parse(localStorage.settings)
+	});
 }
 
 var tab_login_list = {};
+var tab_httpauth_list = {};
 function selectLoginPopup(callback, tab, logins) {
-	chrome.pageAction.setIcon({ tabId: tab.id, path: "keepass-q.png" });
+	chrome.pageAction.setIcon({
+		tabId: tab.id,
+		path: "keepass-q.png"
+	});
 	chrome.pageAction.setPopup({
-			tabId: tab.id,
-			popup: "popup_login.html"
+		tabId: tab.id,
+		popup: "popup_login.html"
 	});
 	tab_login_list["tab" + tab.id] = logins;
 	chrome.pageAction.show(tab.id);
 }
 
+function selectHTTPAuthPopup(callback, tab, data) {
+	chrome.pageAction.setIcon({
+		tabId: tab.id,
+		path: "keepass-q.png"
+	});
+	chrome.pageAction.setPopup({
+		tabId: tab.id,
+		popup: "popup_httpauth.html"
+	});
+	tab_httpauth_list["tab" + tab.id] = data;
+	chrome.pageAction.show(tab.id);
+}
+
 chrome.tabs.onRemoved.addListener(function(tabId, info) {
 	delete tab_login_list["tab" + tabId];
+	delete tab_httpauth_list["tab" + tabId];
 });
 
 function selectFieldPopup(callback, tab) {
-	chrome.pageAction.setIcon({ tabId: tab.id, path: "keepass-bang.png" });
+	chrome.pageAction.setIcon({
+		tabId: tab.id,
+		path: "keepass-bang.png"
+	});
 	chrome.pageAction.setPopup({
-			tabId: tab.id,
-			popup: "popup_field.html"
+		tabId: tab.id,
+		popup: "popup_field.html"
 	});
 	chrome.pageAction.show(tab.id);
 }
@@ -93,7 +125,7 @@ function getPasswords(callback, tab, url, submiturl, force) {
 	var key = result[1];
 	var iv = request.Nonce;
 	request.Url = b64e(slowAES.encrypt(to_b(url),
-			slowAES.modeOfOperation.CBC, b64d(key), b64d(iv)));
+		slowAES.modeOfOperation.CBC, b64d(key), b64d(iv)));
 	if (submiturl)
 		request.SubmitUrl = b64e(slowAES.encrypt(to_b(submiturl),
 			slowAES.modeOfOperation.CBC, b64d(key), b64d(iv)));
@@ -109,7 +141,7 @@ function getPasswords(callback, tab, url, submiturl, force) {
 				_decrypt_entry(r.Entries[i], key, iv);
 			}
 			entries = r.Entries;
-			//_cache_item(url, submiturl, entries);
+		//_cache_item(url, submiturl, entries);
 		} else {
 			//_cache_item(url, submiturl, []);
 			console.log("getPasswords for " + url + " rejected");
@@ -128,7 +160,8 @@ function getStatus(callback) {
 	if (!configured || errorMessage) {
 		chrome.tabs.getSelected(null, function(tab) {
 			chrome.pageAction.setIcon({
-					tabId: tab.id, path: "keepass-x.png"
+				tabId: tab.id,
+				path: "keepass-x.png"
 			});
 		});
 	}
@@ -188,12 +221,71 @@ function onRequest(request, sender, callback) {
 chrome.extension.onRequest.addListener(onRequest);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+var _pendingCallbacks = [];
+var _requestId = "";
+var _callbackHTTPAuth = null;
+var _tabIdForHTTPAuth = 0;
+var _urlForHTTPAuth = null;
+
+chrome.webRequest.onAuthRequired.addListener(handleAuthRequest,
+	{ urls: ["<all_urls>"] }, ["asyncBlocking"]
+);
+
+function processPendingCallbacks(details) {
+	_callbackHTTPAuth = _pendingCallbacks.pop();
+	_tabIdForHTTPAuth = details.tabId;
+	_urlForHTTPAuth = details.url;
+
+
+	// WORKAROUND: second parameter should be tab, but is an own object with tab-id
+	// but in background.js only tab.id is used. To get tabs we could use
+	// chrome.tabs.get(tabId, callback) <-- but what should callback be?
+	getPasswords(_loginsForHTTPAuth, { "id" : details.tabId }, details.url, details.url);
+}
+
+function handleAuthRequest(details, callback) {
+	if(_requestId == details.requestId) {
+		callback({});
+	}
+	else {
+		_requestId = details.requestId;
+		_pendingCallbacks.push(callback);
+		processPendingCallbacks(details);
+	}
+}
+
+function _loginsForHTTPAuth (logins) {
+	// at least one login found --> use first to login
+	if (logins.length > 0) {
+		selectHTTPAuthPopup(null, {"id": _tabIdForHTTPAuth}, {"logins": logins, "url": _urlForHTTPAuth});
+		//generate popup-list for HTTP Auth usernames + descriptions
+
+		if(_settings.autoFillAndSend) {
+			_callbackHTTPAuth({
+				authCredentials: {
+					username: logins[0].Login,
+					password: logins[0].Password
+				}
+			});
+		}
+		else {
+			_callbackHTTPAuth({});
+		}
+	}
+	// no logins found
+	else {
+		_callbackHTTPAuth({});
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
 function _test_associate() {
 	if (associated) {
 		return true;
 	}
 	var request = {
-		"RequestType": "test-associate",
+		"RequestType": "test-associate"
 	};
 	var info = _set_verifier(request);
 	if (!info) return false;
@@ -230,7 +322,7 @@ function _set_verifier(request, inkey) {
 	request.Nonce = b64e(iv);
 	var decodedKey = b64d(key);
 	request.Verifier = b64e(slowAES.encrypt(to_b(request.Nonce),
-			slowAES.modeOfOperation.CBC, b64d(key), iv));
+		slowAES.modeOfOperation.CBC, b64d(key), iv));
 	return [id, key];
 }
 function _verify_response(response, key, id) {
@@ -239,7 +331,7 @@ function _verify_response(response, key, id) {
 	var iv = response.Nonce;
 	var crypted = response.Verifier;
 	var value = slowAES.decrypt(b64d(crypted),
-			slowAES.modeOfOperation.CBC, b64d(key), b64d(iv));
+		slowAES.modeOfOperation.CBC, b64d(key), b64d(iv));
 	value = to_s(value);
 	associated = value == iv;
 	if (id) {
@@ -287,13 +379,13 @@ function _prune_cache() {
 }
 function _decrypt_entry(e, key, iv) {
 	e.Login = UTF8.decode(to_s(slowAES.decrypt(b64d(e.Login),
-			slowAES.modeOfOperation.CBC, b64d(key), b64d(iv))));
+		slowAES.modeOfOperation.CBC, b64d(key), b64d(iv))));
 	e.Uuid = to_s(slowAES.decrypt(b64d(e.Uuid),
-			slowAES.modeOfOperation.CBC, b64d(key), b64d(iv)));
+		slowAES.modeOfOperation.CBC, b64d(key), b64d(iv)));
 	e.Name = UTF8.decode(to_s(slowAES.decrypt(b64d(e.Name),
-			slowAES.modeOfOperation.CBC, b64d(key), b64d(iv))));
+		slowAES.modeOfOperation.CBC, b64d(key), b64d(iv))));
 	e.Password = UTF8.decode(to_s(slowAES.decrypt(b64d(e.Password),
-			slowAES.modeOfOperation.CBC, b64d(key), b64d(iv))));
+		slowAES.modeOfOperation.CBC, b64d(key), b64d(iv))));
 }
 function _success(s) {
 	var success = s >= 200 && s <= 299;
@@ -306,7 +398,7 @@ function _success(s) {
 		} else if (s == 0) {
 			console.log("could not connect to keepass");
 			errorMessage = "Is KeePassHttp installed and/or " +
-					"is KeePass running?";
+		"is KeePass running?";
 		}
 	}
 	return success;
@@ -320,7 +412,9 @@ function _send(request) {
 		console.log("Request: " + r);
 		xhr.send(r);
 	}
-	catch (e) { console.log("KeePassHttp: " + e); }
+	catch (e) {
+		console.log("KeePassHttp: " + e);
+	}
 	console.log("Response: " + xhr.status + " => " + xhr.responseText);
 	return [xhr.status, xhr.responseText];
 }
@@ -329,13 +423,17 @@ chrome.contextMenus.create({
 	"title": "Fill User + Pass",
 	"contexts": [ "editable" ],
 	"onclick": function(info, tab) {
-		chrome.tabs.sendRequest(tab.id, { action: "fill_user_pass" });
+		chrome.tabs.sendRequest(tab.id, {
+			action: "fill_user_pass"
+		});
 	}
 });
 chrome.contextMenus.create({
 	"title": "Fill Pass Only",
 	"contexts": [ "editable" ],
 	"onclick": function(info, tab) {
-		chrome.tabs.sendRequest(tab.id, { action: "fill_pass_only" });
+		chrome.tabs.sendRequest(tab.id, {
+			action: "fill_pass_only"
+		});
 	}
 });
