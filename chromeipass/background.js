@@ -118,7 +118,8 @@ function getPasswords(callback, tab, url, submiturl, force) {
 		return;
 	}
 	var request = {
-		RequestType: "get-logins"
+		RequestType: "get-logins",
+		SortSelection: "true"
 	};
 	var result = _set_verifier(request);
 	var id = result[0];
