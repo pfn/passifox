@@ -100,6 +100,7 @@
 			if ('id' in req) {
 				if (_u) {
 					_u.val(_credentials.logins[req.id].Login);
+					_u.focus();
 				}
 				if (_p) {
 					_p.val(_credentials.logins[req.id].Password);
