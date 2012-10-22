@@ -65,7 +65,7 @@
 			var action = null;
 
 			if(form) {
-				action = form.attr("action");
+				action = form[0].action;
 			}
 
 			if (typeof(action) != "string") {
@@ -349,7 +349,7 @@
 
 	function fillInCredentials(credentialFields, onlyPassword, suppressWarnings) {
 		var form = (credentialFields.username) ? credentialFields.username.closest("form") : credentialFields.password.closest("form");
-		var action = form.attr("action");
+		var action = form[0].action;
 
 		var u = credentialFields.username;
 		var p = credentialFields.password;
