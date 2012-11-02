@@ -101,7 +101,7 @@ function selectFieldPopup(callback, tab) {
 	chrome.pageAction.show(tab.id);
 }
 
-function getPasswords(callback, tab, url, submiturl, force) {
+function getPasswords(callback, tab, url, submiturl, forceCallback) {
 	console.log("url + submiturl: [" + url + "] => [" + submiturl + "]");
 	//_prune_cache();
 	showPageAction(null, tab);
@@ -115,6 +115,11 @@ function getPasswords(callback, tab, url, submiturl, force) {
 	if (!_test_associate()) {
 		errorMessage = "Association was unsuccessful";
 		showPageAction(null, tab);
+
+		if(forceCallback) {
+			callback([]);
+		}
+
 		return;
 	}
 	var request = {
@@ -242,7 +247,7 @@ function processPendingCallbacks(details) {
 	// WORKAROUND: second parameter should be tab, but is an own object with tab-id
 	// but in background.js only tab.id is used. To get tabs we could use
 	// chrome.tabs.get(tabId, callback) <-- but what should callback be?
-	getPasswords(_loginsForHTTPAuth, { "id" : details.tabId }, details.url, details.url);
+	getPasswords(_loginsForHTTPAuth, { "id" : details.tabId }, details.url, details.url, true);
 }
 
 function handleAuthRequest(details, callback) {

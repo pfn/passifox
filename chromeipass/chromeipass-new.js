@@ -61,7 +61,7 @@
 			});
 		}
 		else {
-			var form = credentialInputs[0].username.closest("form");
+			var form = (credentialInputs[0].username) ? credentialInputs[0].username.closest("form") : null;
 			var action = null;
 
 			if(form) {
