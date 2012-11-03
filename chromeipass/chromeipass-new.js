@@ -1,4 +1,8 @@
 (function() {
+	//var consol = chrome.extension.getBackgroundPage().console;
+
+	// unique number as new IDs for input fields
+	var uniqueNum = Math.floor( Math.random()*99999 );
 	// settings of chromeIPass
 	var _settings = {};
 	// all possible inputs for credentials
@@ -40,7 +44,17 @@
 				var u = getUsernameFieldFromPasswordField(inputs[i], false);
 				// disable autocomplete for username field
 				if(u) {
+					if(!u.attr("id")) {
+						uniqueNum += 1;
+						u.attr("id", "cIPJQ"+String(uniqueNum));
+					}
 					u.attr("autocomplete", "off");
+				}
+
+
+				if(!inputs[i].attr("id")) {
+					uniqueNum += 1;
+					inputs[i].attr("id", "cIPJQ"+String(uniqueNum));
 				}
 
 				cIPJQ(inputs[i]).change(function() {
@@ -48,8 +62,8 @@
 				});
 
 				var fields = {
-					"username": u,
-					"password": inputs[i]
+					"username": u.attr("id"),
+					"password": inputs[i].attr("id")
 				};
 				credentialInputs.push(fields);
 			}
@@ -61,7 +75,7 @@
 			});
 		}
 		else {
-			var form = (credentialInputs[0].username) ? credentialInputs[0].username.closest("form") : null;
+			var form = (_f(credentialInputs[0].username)) ? _f(credentialInputs[0].username).closest("form") : null;
 			var action = null;
 
 			if(form) {
@@ -80,10 +94,6 @@
 				'args': [ document.location.origin, action ]
 			}, _logins_callback);
 		}
-
-
-
-
 
 		window.addEventListener("keydown", function(e) {
 			if (e.ctrlKey && e.shiftKey) {
@@ -159,7 +169,7 @@
 		if(usernameField && !checkDisabled) {
 			// check if lastInput is already used by another password field
 			for(var i = 0; i < credentialInputs.length; i++) {
-				if(credentialInputs[i].username[0] == usernameField[0]) {
+				if(_f(credentialInputs[i].username)[0] == usernameField[0]) {
 					usernameField = null;
 					break;
 				}
@@ -201,7 +211,7 @@
 		if(passwordField && !checkDisabled) {
 			// check if lastInput is already used by another password field
 			for(var i = 0; i < credentialInputs.length; i++) {
-				if(credentialInputs[i].password[0] == passwordField[0]) {
+				if(_f(credentialInputs[i].password)[0] == passwordField[0]) {
 					passwordField = null;
 					break;
 				}
@@ -221,8 +231,8 @@
 
 	function _logins_callback(logins) {
 		if (credentialInputs.length > 0) {
-			_u = credentialInputs[0].username;
-			_p = credentialInputs[0].password;
+			_u = _f(credentialInputs[0].username);
+			_p = _f(credentialInputs[0].password);
 		}
 
 		// only one login for this site
@@ -233,9 +243,11 @@
 			if(_p) {
 				_p.val(logins[0].Password);
 			}
+			_credentials.logins = logins;
 		}
 		//multiple logins for this site
 		else if (logins.length > 1) {
+			_credentials.logins = logins;
 			_preparePageForMultipleCredentials(logins);
 		}
 	}
@@ -259,15 +271,13 @@
 			'args': [usernames]
 		});
 
-		_credentials.logins = logins;
-
 		// initialize autocomplete for username fields
 		if(!preparedUsernameFields) {
 			preparedUsernameFields = true;
 			for(var i = 0; i < credentialInputs.length; i++) {
-				if(credentialInputs[i].username) {
+				if(_f(credentialInputs[i].username)) {
 					if(_settings.autoCompleteUsernames) {
-						credentialInputs[i].username
+						_f(credentialInputs[i].username)
 							.autocomplete({
 								minLength: 0,
 								source: autocompleteSource,
@@ -275,7 +285,7 @@
 							})
 							.focus(autocompleteFocus);
 					}
-					credentialInputs[i].username
+					_f(credentialInputs[i].username)
 						.blur(autocompleteBlur)
 						.focus(function() { _u = cIPJQ(this); });
 				}
@@ -305,7 +315,7 @@
 		}
 		else {
 			var credentials = getCredentialFields("username", cIPJQ(this));
-			if(credentials.password.data("unchanged") != true) {
+			if(_f(credentials.password).data("unchanged") != true) {
 				fillInCredentials(credentials, true, true);
 			}
 		}
@@ -323,7 +333,7 @@
 		}
 
 		for(var i = 0; i < credentialInputs; i++) {
-			if((type == "username" && credentialInputs[i].username[0] == field[0]) || (type == "password" && credentialInputs[i].password[0] == field[0])) {
+			if((type == "username" && _f(credentialInputs[i].username)[0] == field[0]) || (type == "password" && _f(credentialInputs[i].password)[0] == field[0])) {
 				return credentialInputs[i];
 			}
 		}
@@ -349,11 +359,11 @@
 
 
 	function fillInCredentials(credentialFields, onlyPassword, suppressWarnings) {
-		var form = (credentialFields.username) ? credentialFields.username.closest("form") : credentialFields.password.closest("form");
+		var form = (_f(credentialFields.username)) ? _f(credentialFields.username).closest("form") : _f(credentialFields.password).closest("form");
 		var action = form[0].action;
 
-		var u = credentialFields.username;
-		var p = credentialFields.password;
+		var u = _f(credentialFields.username);
+		var p = _f(credentialFields.password);
 
 		if(u) {
 			_u = u;
@@ -410,7 +420,7 @@
 			credentialFields = getCredentialFields("username", cIPJQ(el));
 		}
 
-		if(!credentialFields.password) {
+		if(!_f(credentialFields.password)) {
 			var message = "Unable to find a password field";
 			chrome.extension.sendRequest({
 				action: 'alert',
@@ -420,6 +430,10 @@
 		}
 
 		fillInCredentials(credentialFields, true, suppressWarnings);
+	}
+
+	function _f(fieldId) {
+		return cIPJQ("#"+fieldId);
 	}
 
 	function _fillIn(credentialFields, onlyPassword, suppressWarnings) {
@@ -435,12 +449,13 @@
 
 		// exactly one pair of credentials available
 		if (_credentials.logins.length == 1) {
-			if (credentialFields.username && !onlyPassword) {
-				credentialFields.username.val(_credentials.logins[0].Login);
+			if (_f(credentialFields.username) && !onlyPassword) {
+				_f(credentialFields.username).val(_credentials.logins[0].Login);
 			}
-			if (credentialFields.password) {
-				credentialFields.password.val(_credentials.logins[0].Password);
-				credentialFields.password.data("unchanged", true);
+			if (_f(credentialFields.password)) {
+				_f(credentialFields.password)[0].type = "password";
+				_f(credentialFields.password).val(_credentials.logins[0].Password);
+				_f(credentialFields.password).data("unchanged", true);
 			}
 		}
 		// multiple credentials available
@@ -448,11 +463,11 @@
 			// check if password for given username exists
 			var found = false;
 
-			if(credentialFields.username) {
+			if(_f(credentialFields.username)) {
 				var valPassword = "";
 				var countPasswords = 0;
 				for (var i = 0; i < _credentials.logins.length; i++) {
-					if(_credentials.logins[i].Login == credentialFields.username.val()) {
+					if(_credentials.logins[i].Login == _f(credentialFields.username).val()) {
 						countPasswords += 1;
 						valPassword = _credentials.logins[i].Password;
 					}
@@ -460,9 +475,9 @@
 
 				// only one mapping username found
 				if(countPasswords == 1) {
-					if(credentialFields.password) {
-						credentialFields.password.val(valPassword);
-						credentialFields.password.data("unchanged", true);
+					if(_f(credentialFields.password)) {
+						_f(credentialFields.password).val(valPassword);
+						_f(credentialFields.password).data("unchanged", true);
 					}
 					found = true;
 				}
