@@ -82,8 +82,8 @@
 				action = form[0].action;
 			}
 
-			if (typeof(action) != "string") {
-				action = document.location.origin;
+			if (typeof(action) != "string" || action == "") {
+				action = document.location.origin + document.location.pathname;
 			}
 
 			_credentials.url = document.location.origin;
@@ -370,6 +370,10 @@
 		}
 		if(p) {
 			_p = p;
+		}
+
+		if (typeof(action) != "string" || action == "") {
+			action = document.location.origin + document.location.pathname;
 		}
 
 		if(_credentials.url == document.location.origin && _credentials.submiturl == action) {
