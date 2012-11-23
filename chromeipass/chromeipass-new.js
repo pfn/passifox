@@ -244,6 +244,12 @@ function _logins_callback(logins) {
 			_p.val(logins[0].Password);
 		}
 		_credentials.logins = logins;
+
+		// generate popup-list of usernames + descriptions
+		chrome.extension.sendRequest({
+			'action': 'select_login',
+			'args': [[logins[0].Login + " (" + logins[0].Name + ")"]]
+		});
 	}
 	//multiple logins for this site
 	else if (logins.length > 1) {
