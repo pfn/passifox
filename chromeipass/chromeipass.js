@@ -79,7 +79,7 @@ function logins_callback(logins) {
         for (var i = 0; i < logins.length; i++) {
             usernames.push(logins[i].Name + " - " + logins[i].Login);
         }
-		
+
         chrome.extension.sendRequest({
             'action': 'select_login',
             'args': [usernames]
@@ -105,29 +105,33 @@ function fillLogin(u, p, onlyPassword, suppressWarnings) {
         if (logins.length == 1) {
             if (u && !onlyPassword)
                 u.value = logins[0].Login;
-            if (p)
+            if (p) {
                 p.value = logins[0].Password;
+				cIPJQ(p).data("unchanged", true);
+			}
         } else {
 			// check if password for given username exists
 			var found = false;
-			
+
 			if(u) {
 				var valPassword = "";
 				var countPassword = 0;
 				for (var i = 0; i < logins.length; i++) {
 					if(logins[i].Login == u.value) {
 						countPassword += 1;
-						valPassword = logins[i].Password; 
+						valPassword = logins[i].Password;
 					}
 				}
-				
+
 				if(countPassword == 1) {
-					if(p && p.value != valPassword)
+					if(p) {
 						p.value = valPassword;
+						cIPJQ(p).data("unchanged", true);
+					}
 					found = true;
 				}
 			}
-			
+
 			_u = u;
 			_p = p;
 			_logins = logins;
@@ -139,7 +143,7 @@ function fillLogin(u, p, onlyPassword, suppressWarnings) {
 				'action': 'select_login',
 				'args': [usernames, true]
 			});
-			
+
 			if(!found) {
 				if(!suppressWarnings) {
 					var message = "More than one login was found in KeePass, " +
@@ -188,14 +192,14 @@ function fillInPassOnly(suppressWarnings) {
         });
         return;
     }
-	
+
 	var u = _u;
 	if(!_u) {
 		u = getFields(null, p)[0];
 	}
-	
+
 	var onlyPassword = (u && u.value != "");
-	
+
     fillLogin(u, p, onlyPassword, suppressWarnings);
 }
 chrome.extension.onRequest.addListener(function onRequest(req) {
@@ -221,10 +225,46 @@ chrome.extension.onRequest.addListener(function onRequest(req) {
 for(var i = 0; i < passwordinputs.length; i++) {
 	u = getFields(null, passwordinputs[i])[0];
 	usernameinputs.push(u);
+
+	cIPJQ(passwordinputs[i]).change(function(e) {
+		cIPJQ(this).data("unchanged", false);
+	});
+
 	if(u) {
-		u.addEventListener("focusout", function(e) {
-			fillLogin(this, getFields(this, null)[1], true, true);
-		}, false);
+		cIPJQ(u).autocomplete({
+			minLength: 0,
+			source: function( request, response ) {
+				var matches = cIPJQ.map( availableUsernames, function(tag) {
+					if ( tag.label.toUpperCase().indexOf(request.term.toUpperCase()) === 0 ) {
+						return tag;
+					}
+				});
+				response(matches);
+			},
+			select: function(e, ui) {
+				e.preventDefault();
+				cIPJQ(this).val(ui.item.value);
+				fillLogin(cIPJQ(this)[0], getFields(cIPJQ(this)[0], null)[1], true, false);
+				cIPJQ(this).data("fetched", true);
+			}
+		})
+		.blur(function(e) {
+			if(cIPJQ(this).data("fetched") == true) {
+				cIPJQ(this).data("fetched", false);
+			}
+			else {
+				var p = getFields(cIPJQ(this)[0], null)[1];
+				if(cIPJQ(p).data("unchanged") != true) {
+					fillLogin(cIPJQ(this)[0], p, true, true);
+				}
+			}
+		})
+		.focus(function(e) {
+			if(cIPJQ(this).val() == "") {
+				cIPJQ(this).autocomplete( "search", "" );
+				//cIPJQ(this).trigger("keydown");
+			}
+		});
 	}
 }
 
