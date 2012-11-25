@@ -1,6 +1,6 @@
 {
 	"name": "ChromeIPass",
-	"version": "1.2.3",
+	"version": "1.2.4",
 	"manifest_version": 2,
 	"description": "Chrome and KeePass integration using KeePassHttp",
 	"icons": {
@@ -11,7 +11,7 @@
 		"default_icon": "keepass.png",
 		"popup": "popup.html"
 	},
-	"update_url": "http://mfhd.de/downloads/chrome-mfhd_updates.xml",
+	"update_url": "https://raw.github.com/lspcity/passifox/master/chromeipass_update.xml",
 	"background": {
 		"scripts": ["aes.js","cryptoHelpers.js","utf8.js","background.js"]
 		},
