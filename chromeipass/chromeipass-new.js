@@ -35,18 +35,11 @@ var _credentials = {
 			var u = getUsernameFieldFromPasswordField(inputs[i], false);
 			// disable autocomplete for username field
 			if(u) {
-				if(!u.attr("id")) {
-					uniqueNum += 1;
-					u.attr("id", "cIPJQ"+String(uniqueNum));
-				}
+				setUniqueId(u);
 				u.attr("autocomplete", "off");
 			}
 
-
-			if(!inputs[i].attr("id")) {
-				uniqueNum += 1;
-				inputs[i].attr("id", "cIPJQ"+String(uniqueNum));
-			}
+			setUniqueId(inputs[i]);
 
 			cIPJQ(inputs[i]).change(function() {
 				cIPJQ(this).data("unchanged", false);
@@ -67,6 +60,13 @@ var _credentials = {
 		init();
 	});
 })();
+
+function setUniqueId(field) {
+	if(!field.attr("id")) {
+		uniqueNum += 1;
+		field.attr("id", "cIPJQ"+String(uniqueNum));
+	}
+}
 
 function init() {
 	if(credentialInputs.length == 0) {
@@ -188,7 +188,7 @@ function getPasswordFieldFromUsernameField(usernameField, checkDisabled) {
 
 	// search all inputs on this one form
 	if(form[0]) {
-		passwordField = cIPJQ(cIPJQ("input[type='password']", form[0])[0]);
+		passwordField = cIPJQ("input[type='password']:first", form[0]);
 	}
 	// search all inputs on page
 	else {
@@ -353,16 +353,22 @@ function getCredentialFields(type, field) {
 		}
 	}
 
+	setUniqueId(field);
+
 	if(type == "username") {
+		var passwordField = getPasswordFieldFromUsernameField(field);
+		setUniqueId(passwordField);
 		return {
-			"username": field,
-			"password": getPasswordFieldFromUsernameField(field)
+			"username": field.attr("id"),
+			"password": passwordField.attr("id")
 		};
 	}
 	else if(type == "password") {
+		var usernameField = getUsernameFieldFromPasswordField(field, true);
+		setUniqueId(usernameField);
 		return {
-			"username": getUsernameFieldFromPasswordField(field, true),
-			"password": field
+			"username": usernameField.attr("id"),
+			"password": field.attr("id")
 		};
 	}
 
