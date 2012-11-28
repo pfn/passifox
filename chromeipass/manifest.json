@@ -25,12 +25,12 @@
 	}
 	],
 	"permissions": [
-	"contextMenus",
-	"tabs",
-	"http://localhost/",
-	"webRequest",
-	"webRequestBlocking",
-	"https://*/*",
-	"http://*/*"
+		"contextMenus",
+		"tabs",
+		"http://localhost/",
+		"webRequest",
+		"webRequestBlocking",
+		"https://*/*",
+		"http://*/*"
 	]
 }
