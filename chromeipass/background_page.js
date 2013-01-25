@@ -4,7 +4,7 @@ var page = page || {};
 page.tabs = {};
 
 page.currentTabId = 0;
-page.settings = typeof(localStorage.settings)=='undefined' ? {} : JSON.parse(localStorage.settings);
+page.settings = (typeof(localStorage.settings) == 'undefined') ? {} : JSON.parse(localStorage.settings);
 
 page.onRequest = function(request, sender, callback) {
 	if (request.action in page.requestHandlers) {
@@ -184,7 +184,7 @@ page.eventShowAlert = function(callback, tab, message) {
 }
 
 page.eventLoadSettings = function(callback, tab) {
-	page.settings = JSON.parse(localStorage.settings);
+	page.settings = (typeof(localStorage.settings) == 'undefined') ? {} : JSON.parse(localStorage.settings);
 }
 
 page.eventGetSettings = function(callback, tab) {
