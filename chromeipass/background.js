@@ -13,6 +13,9 @@ var to_s = cryptoHelpers.convertByteArrayToString;
 var to_b = cryptoHelpers.convertStringToByteArray;
 
 var _settings = typeof(localStorage.settings)=='undefined' ? {} : JSON.parse(localStorage.settings);
+var _tabInformation = {};
+var _currentTabId = 0;
+var _iconIndexes = ["keepass", "keepass_green"];
 
 function b64e(d) {
 	return btoa(to_s(d));
@@ -22,22 +25,128 @@ function b64d(d) {
 }
 
 function showPageAction(callback, tab) {
-	if (!isConfigured() || errorMessage)
+	if (!isConfigured() || errorMessage) {
 		chrome.pageAction.setIcon({
 			tabId: tab.id,
 			path: "keepass-x.png"
 		});
-	else
+	}
+	else {
 		chrome.pageAction.setIcon({
 			tabId: tab.id,
 			path: "keepass.png"
 		});
+	}
+
 	chrome.pageAction.setPopup({
 		tabId: tab.id,
 		popup: "popup.html"
 	});
+
 	chrome.pageAction.show(tab.id);
 }
+
+function setRememberPopup(callback, tab, username, password, usernameExists) {
+	chrome.pageAction.setPopup({
+		tabId: tab.id,
+		popup: "popup_remember.html"
+	});
+	chrome.pageAction.show(tab.id);
+
+	console.log(tab);
+	console.log(username);
+
+	if(!_tabInformation[tab.id]) {
+		_tabInformation[tab.id] = {
+			interval: 0,
+			iconIndex: 0,
+			clicked: false,
+			rememberCredentials: true,
+			username: "",
+			password: "",
+			usernameExists: false
+		};
+	}
+
+	_tabInformation[tab.id].rememberCredentials = true;
+	_tabInformation[tab.id].clicked = false;
+	_tabInformation[tab.id].iconIndex = 0;
+	if(typeof username != "undefined")
+		_tabInformation[tab.id].username = username;
+	if(typeof password != "undefined")
+		_tabInformation[tab.id].password = password;
+	if(typeof usernameExists != "undefined")
+		_tabInformation[tab.id].usernameExists = usernameExists;
+}
+
+function setStaticRememberIcon(callback, tab, icon) {
+	if(!_tabInformation[_currentTabId]) {
+		return;
+	}
+
+	if(_tabInformation[_currentTabId].rememberCredentials) {
+		_tabInformation[_currentTabId].clicked = true;
+		chrome.pageAction.setIcon({
+			path: icon,
+			tabId: _currentTabId
+		});
+	}
+}
+
+function updateRememberIcon() {
+	if(!_tabInformation[_currentTabId]) {
+		return;
+	}
+
+	if(_tabInformation[_currentTabId].rememberCredentials && !_tabInformation[_currentTabId].clicked) {
+		_tabInformation[_currentTabId].interval += 1;
+		if(_tabInformation[_currentTabId].interval < 10) {
+			return;
+		}
+		_tabInformation[_currentTabId].interval = 0;
+
+		_tabInformation[_currentTabId].iconIndex += 1;
+		if(_tabInformation[_currentTabId].iconIndex > _iconIndexes.length - 1) {
+			_tabInformation[_currentTabId].iconIndex = 0;
+		}
+		console.log(_tabInformation[_currentTabId].iconIndex);
+
+		chrome.pageAction.setIcon({
+			tabId: _currentTabId,
+			path: _iconIndexes[_tabInformation[_currentTabId].iconIndex] + ".png"
+		});
+
+		chrome.pageAction.setPopup({
+			tabId: _currentTabId,
+			popup: "popup_remember.html"
+		});
+		chrome.pageAction.show(_currentTabId);
+	}
+}
+
+// remove tabInformation when tab is closed
+chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+	delete _tabInformation[tabId];
+});
+
+chrome.tabs.onActivated.addListener(function(activeInfo) {
+	_currentTabId = activeInfo.tabId;
+});
+
+window.setInterval(function() {
+	updateRememberIcon();
+}, 50);
+
+
+
+
+
+
+
+
+
+
+
 function hidePageAction(callback, tab) {
 	chrome.pageAction.hide(tab.id);
 }
@@ -51,9 +160,14 @@ function loadSettings(callback, tab) {
 }
 
 function getSettings(callback, tab) {
+	loadSettings();
 	callback({
-		data: JSON.parse(localStorage.settings)
+		data: _settings
 	});
+}
+
+function rememberCredentials(callback, tab, username, password, usernameExists) {
+	setRememberPopup(callback, tab, username, password, usernameExists);
 }
 
 var tab_login_list = {};
@@ -102,6 +216,7 @@ function selectFieldPopup(callback, tab) {
 }
 
 function getPasswords(callback, tab, url, submiturl, forceCallback) {
+	errorMessage = null;
 	console.log("url + submiturl: [" + url + "] => [" + submiturl + "]");
 	//_prune_cache();
 	showPageAction(null, tab);
@@ -113,7 +228,9 @@ function getPasswords(callback, tab, url, submiturl, forceCallback) {
 	}
 	*/
 	if (!_test_associate()) {
-		errorMessage = "Association was unsuccessful";
+		if(!errorMessage) {
+			errorMessage = "Association was unsuccessful";
+		}
 		showPageAction(null, tab);
 
 		if(forceCallback) {
@@ -139,6 +256,7 @@ function getPasswords(callback, tab, url, submiturl, forceCallback) {
 	var s = result[0];
 	var response = result[1];
 	var entries = [];
+
 	if (_success(s)) {
 		var r = JSON.parse(response);
 		if (_verify_response(r, key, id)) {
@@ -161,8 +279,9 @@ function isConfigured() {
 function getStatus(callback) {
 	var configured = isConfigured();
 	var keyname;
-	if (configured)
+	if (configured) {
 		keyname = localStorage[KEYNAME];
+	}
 	if (!configured || errorMessage) {
 		chrome.tabs.getSelected(null, function(tab) {
 			chrome.pageAction.setIcon({
@@ -177,10 +296,12 @@ function getStatus(callback) {
 		associated: associated,
 		error: errorMessage
 	});
-	errorMessage = null;
+	//errorMessage = null;
 }
 function associate(callback) {
 	if (associated) return;
+
+	errorMessage = null;
 	var rawkey = cryptoHelpers.generateSharedKey(keySize * 2);
 	var key = b64e(rawkey);
 	var request = {
@@ -205,6 +326,7 @@ function associate(callback) {
 }
 
 var requestHandlers = {
+	'hide_actions': hidePageAction,
 	'show_actions': showPageAction,
 	'get_passwords': getPasswords,
 	'select_login': selectLoginPopup,
@@ -213,7 +335,9 @@ var requestHandlers = {
 	'associate': associate,
 	'alert': showAlert,
 	'load_settings': loadSettings,
-	'get_settings': getSettings
+	'get_settings': getSettings,
+	'remember_credentials': rememberCredentials,
+	'set_static_remember_icon': setStaticRememberIcon
 };
 
 function onRequest(request, sender, callback) {
@@ -290,6 +414,8 @@ function _test_associate() {
 	if (associated) {
 		return true;
 	}
+
+	errorMessage = null;
 	var request = {
 		"RequestType": "test-associate"
 	};
@@ -399,12 +525,11 @@ function _success(s) {
 		errorMessage = "Unknown error: " + s;
 		console.log("error: "+ s);
 		if (s == 503) {
-			console.log("KeePass database is not open");
-			errorMessage = "KeePass database is not open";
+			console.log("KeePass database is not opened");
+			errorMessage = "KeePass database is not opened";
 		} else if (s == 0) {
 			console.log("could not connect to keepass");
-			errorMessage = "Is KeePassHttp installed and/or " +
-		"is KeePass running?";
+			errorMessage = "Is KeePassHttp installed and is KeePass running?";
 		}
 	}
 	return success;
@@ -421,7 +546,7 @@ function _send(request) {
 	catch (e) {
 		console.log("KeePassHttp: " + e);
 	}
-	console.log("Response: " + xhr.status + " => " + xhr.responseText);
+	//console.log("Response: " + xhr.status + " => " + xhr.responseText);
 	return [xhr.status, xhr.responseText];
 }
 

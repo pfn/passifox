@@ -3,6 +3,7 @@ body {
 	min-width:357px;
 	overflow-x:hidden;
 	background: #eee;
+	font-size: 15px;
 }
 .credentials ul {
 	margin-left: 0;
@@ -13,6 +14,8 @@ body {
 }
 .credentials li {
 	list-style: none;
+	padding-top: 1px;
+	padding-bottom: 1px;
 	padding-left: 10px;
 	padding-right: 5px;
 	margin-left: 10px;

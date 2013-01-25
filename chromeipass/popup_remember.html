@@ -1,0 +1,34 @@
+<html>
+	<head>
+		<title>KeePass - Popup</title>
+		<link rel="stylesheet" href="popup.css" />
+		<link rel="stylesheet" href="bootstrap-btn.css" />
+		<script type="text/javascript" src="jquery-1.8.2.min.js"></script>
+		<script type="text/javascript" src="popup_functions.js"></script>
+		<script type="text/javascript" src="popup_remember.js"></script>
+		<style type="text/css">
+			.credentials {display: none; border-top: 1px solid #333; padding-top: 5px;}
+			.credentials .username-new {display: none;}
+			.credentials .username-exists {display: none;}
+		</style>
+	</head>
+	<body>
+		<div class="buttons">
+			<p>Username or password changed! Save it?</p>
+			<p>
+				<button id="btn-new" class="btn btn-success">New</button>
+				<button id="btn-update" class="btn btn-warning">Update</button>
+				<button id="btn-dismiss" class="btn btn-danger">Dismiss</button>
+			</p>
+		</div>
+
+		<div class="credentials">
+			<p class="username-new">The used username <em></em> is currently not saved!</p>
+			<p class="username-exists">The credentials with the used username <em></em> are marked bold.</p>
+			<p>
+				Please choose the credentials you want to update:
+			</p>
+			<ul id="list"></ul>
+		</div>
+	</body>
+</html>

@@ -33,11 +33,13 @@ var _credentials = {
 	for(var i = 0; i < inputs.length; i++) {
 		if(cIPJQ(inputs[i]).attr("type") == "password") {
 			var u = getUsernameFieldFromPasswordField(inputs[i], false);
-			// disable autocomplete for username field
-			if(u) {
-				setUniqueId(u);
-				u.attr("autocomplete", "off");
+			if(!u) {
+				continue;
 			}
+
+			// disable autocomplete for username field
+			setUniqueId(u);
+			u.attr("autocomplete", "off");
 
 			setUniqueId(inputs[i]);
 
@@ -71,7 +73,8 @@ function setUniqueId(field) {
 function init() {
 	if(credentialInputs.length == 0) {
 		chrome.extension.sendRequest({
-			'action': 'hide_actions'
+			'action': 'hide_action_level',
+			'args': [1] // hide all levels <= X
 		});
 	}
 	else {
@@ -80,6 +83,7 @@ function init() {
 
 		if(form) {
 			action = form[0].action;
+			initForm(form, credentialInputs[0]);
 		}
 
 		if (typeof(action) != "string" || action == "") {
@@ -90,16 +94,21 @@ function init() {
 		_credentials.submiturl = action;
 
 		chrome.extension.sendRequest({
-			'action': 'get_passwords',
+			'action': 'retrieve_credentials',
 			'args': [ document.location.origin, action ]
 		}, _logins_callback);
 	}
 
+	// Hotkeys for every page
+	// ctrl + shift + p = fill only password
+	// ctrl + shift + u = fill username + password
 	window.addEventListener("keydown", function(e) {
 		if (e.ctrlKey && e.shiftKey) {
 			if (e.keyCode == 80) { // P
+				e.preventDefault();
 				fillInFromActiveElementPassOnly(false);
 			} else if (e.keyCode == 85) { // U
+				e.preventDefault();
 				fillInFromActiveElement(false);
 			}
 		}
@@ -129,6 +138,61 @@ function init() {
 } // end function init
 
 
+
+function initForm(form, credentialFields) {
+	setFormInputs(form, credentialFields);
+	form.submit(formSubmit);
+}
+
+function setFormInputs(form, credentialFields) {
+	form.data("cipUsername", credentialFields.username);
+	form.data("cipPassword", credentialFields.password);
+}
+
+function formSubmit() {
+	var usernameId = cIPJQ(this).data("cipUsername");
+	var passwordId = cIPJQ(this).data("cipPassword");
+
+	var usernameValue = _f(usernameId).val();
+	var passwordValue = _f(passwordId).val();
+
+	var usernameExists = false;
+
+	var found = false;
+	for(var i = 0; i < _credentials.logins.length; i++) {
+		if(_credentials.logins[i].Login == usernameValue && _credentials.logins[i].Password == passwordValue) {
+			found = true;
+			break;
+		}
+
+		if(_credentials.logins[i].Login == usernameValue) {
+			usernameExists = true;
+		}
+	}
+
+	if(!found) {
+		if(!usernameExists) {
+			for(var i = 0; i < _credentials.logins.length; i++) {
+				if(_credentials.logins[i].Login == usernameValue) {
+					usernameExists = true;
+					break;
+				}
+			}
+		}
+		var credentialsList = [];
+		for(var i = 0; i < _credentials.logins.length; i++) {
+			credentialsList.push({
+				"Login": _credentials.logins[i].Login,
+				"Name": _credentials.logins[i].Name,
+				"Uuid": _credentials.logins[i].Uuid
+			});
+		}
+		chrome.extension.sendRequest({
+			'action': 'set_remember_credentials',
+			'args': [usernameValue, passwordValue, document.location.origin, usernameExists, credentialsList]
+		});
+	}
+}
 
 /**
 	 * return the username field or null if it not exists
@@ -247,7 +311,7 @@ function _logins_callback(logins) {
 
 		// generate popup-list of usernames + descriptions
 		chrome.extension.sendRequest({
-			'action': 'select_login',
+			'action': 'popup_login',
 			'args': [[logins[0].Login + " (" + logins[0].Name + ")"]]
 		});
 	}
@@ -274,7 +338,7 @@ function _preparePageForMultipleCredentials(logins) {
 
 	// generate popup-list of usernames + descriptions
 	chrome.extension.sendRequest({
-		'action': 'select_login',
+		'action': 'popup_login',
 		'args': [usernames]
 	});
 
@@ -405,7 +469,7 @@ function fillInCredentials(credentialFields, onlyPassword, suppressWarnings) {
 		_credentials.submiturl = action;
 
 		chrome.extension.sendRequest({
-			'action': 'get_passwords',
+			'action': 'retrieve_credentials',
 			'args': [ document.location.origin, action ]
 		}, function(logins) {
 			_logins_callback(logins);

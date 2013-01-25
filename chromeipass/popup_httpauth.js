@@ -2,7 +2,8 @@ $(function() {
 	var global = chrome.extension.getBackgroundPage();
 
 	chrome.tabs.getSelected(null, function(tab) {
-		var data = global.tab_httpauth_list["tab" + tab.id];
+		//var data = global.tab_httpauth_list["tab" + tab.id];
+		var data = global.page.tabs[tab.id].loginList;
 		var ul = document.getElementById("login-list");
 		for (var i = 0; i < data.logins.length; i++) {
 			var li = document.createElement("li");
