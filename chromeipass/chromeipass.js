@@ -55,8 +55,6 @@ var _credentials = {
 		}
 	}
 
-	console.log(credentialInputs);
-
 	chrome.extension.sendRequest({
 		"action": "get_settings"
 	}, function(response) {
@@ -423,8 +421,6 @@ function getCredentialFields(type, field) {
 
 	if(type == "username") {
 		var passwordField = getPasswordFieldFromUsernameField(field, true);
-		console.log("passwordfield:");
-		console.log(passwordField);
 		setUniqueId(passwordField);
 		return {
 			"username": field.attr("id"),
