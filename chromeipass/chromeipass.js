@@ -296,7 +296,7 @@ function initChooseInputFields() {
 
 function initChooserDescription() {
 	var $description = cIPJQ("div#cip-choose-description");
-	var $h1 = cIPJQ("<h1>").addClass("cip-chooser-headline").text("1. Choose a username field");
+	var $h1 = cIPJQ("<div>").addClass("cip-chooser-headline").text("1. Choose a username field");
 	$description.append($h1);
 
 	var $btnDismiss = cIPJQ("<button>").text("Dismiss").attr("id", "cip-btn-dismiss")
@@ -307,11 +307,12 @@ function initChooserDescription() {
 		});
 	var $btnAgain = cIPJQ("<button>").text("Again").attr("id", "cip-btn-again")
 		.addClass("cip-btn").addClass("cip-btn-warning")
+		.css("margin-right", "5px")
 		.click(function(e) {
 			cIPJQ(this).hide();
 			cIPJQ("button#cip-btn-confirm").hide();
 			cIPJQ("div.cip-fixed-field", cIPJQ("div#cip-choose-fields")).remove();
-			cIPJQ("h1:first", cIPJQ("div#cip-choose-description")).text("1. Choose a username field");
+			cIPJQ("div:first", cIPJQ("div#cip-choose-description")).text("1. Choose a username field");
 			chooserMarkAllUsernameFields(cIPJQ("#cip-choose-fields"));
 		})
 		.hide();
@@ -345,7 +346,9 @@ function initChooserDescription() {
 		var $btnDiscard = cIPJQ("<button>")
 			.attr("id", "cip-btn-discard")
 			.text("Discard selection")
+			.css("margin-top", "5px")
 			.addClass("cip-btn")
+			.addClass("cip-btn-small")
 			.addClass("cip-btn-danger")
 			.click(function(e) {
 				delete _settings["defined-credential-fields"][document.location.origin];
@@ -383,7 +386,7 @@ function chooserMarkAllPasswordFields($chooser) {
 					cIPJQ(this).addClass("cip-fixed-password-field").text("Password").unbind("click");
 					cIPJQ("div.cip-fixed-field:not(.cip-fixed-password-field,.cip-fixed-username-field)", cIPJQ("div#cip-choose-fields")).remove();
 					cIPJQ("button#cip-btn-confirm").show();
-					cIPJQ("h1:first", cIPJQ("div#cip-choose-description")).text("3. Confirm selection");
+					cIPJQ("div:first", cIPJQ("div#cip-choose-description")).text("3. Confirm selection");
 				})
 				.hover(function() {cIPJQ(this).addClass("cip-fixed-hover-field");}, function() {cIPJQ(this).removeClass("cip-fixed-hover-field");});
 			$chooser.append($field);
@@ -404,7 +407,7 @@ function chooserMarkAllUsernameFields($chooser) {
 					cIPJQ("div#cip-choose-fields").data("username", cIPJQ(this).data("id"));
 					cIPJQ(this).addClass("cip-fixed-username-field").text("Username").unbind("click");
 					cIPJQ("div.cip-fixed-field:not(.cip-fixed-username-field)", cIPJQ("div#cip-choose-fields")).remove();
-					cIPJQ("h1:first", cIPJQ("div#cip-choose-description")).text("2. Now choose a password field");
+					cIPJQ("div:first", cIPJQ("div#cip-choose-description")).text("2. Now choose a password field");
 					cIPJQ("button#cip-btn-again").show();
 					chooserMarkAllPasswordFields(cIPJQ("#cip-choose-fields"));
 				})

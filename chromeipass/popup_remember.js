@@ -5,7 +5,7 @@ function _initialize(tab) {
 	_tab = tab;
 
 	if(_tab.credentials.list.length == 0) {
-		$("#btn-update").attr("disabled", true);
+		$("#btn-update").attr("disabled", true).removeClass("cip-btn-warning");
 	}
 
 	$("#btn-new").click(function(e) {

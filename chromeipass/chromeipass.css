@@ -33,12 +33,14 @@
 	background-color:rgba(255,255,255,0.3);
 	font-size: 15px;
 }
-#cip-choose-description h1 {
+#cip-choose-description div:first-of-type {
 	margin-top: 0;
 	padding-top: 0;
 	text-align: left;
 	color: #efefef;
 	padding-bottom: 8px;
+	font-weight: bold;
+	font-size: 160%;
 }
 #cip-choose-description p {
 	margin-top: 10px;
