@@ -246,8 +246,8 @@ function getUsernameFieldFromPasswordField(passwordField, checkDisabled) {
 }
 
 /**
-	 * return the password field or null if it not exists
-	 */
+* return the password field or null if it not exists
+*/
 function getPasswordFieldFromUsernameField(usernameField, checkDisabled) {
 	var form = cIPJQ(usernameField).closest("form");
 	var passwordField = null;
@@ -277,7 +277,7 @@ function getPasswordFieldFromUsernameField(usernameField, checkDisabled) {
 	if(passwordField && !checkDisabled) {
 		// check if lastInput is already used by another password field
 		for(var i = 0; i < credentialInputs.length; i++) {
-			if(_f(credentialInputs[i].password)[0] == passwordField[0]) {
+			if(credentialInputs[i].password == passwordField.attr("id")) {
 				passwordField = null;
 				break;
 			}
@@ -422,7 +422,9 @@ function getCredentialFields(type, field) {
 	setUniqueId(field);
 
 	if(type == "username") {
-		var passwordField = getPasswordFieldFromUsernameField(field);
+		var passwordField = getPasswordFieldFromUsernameField(field, true);
+		console.log("passwordfield:");
+		console.log(passwordField);
 		setUniqueId(passwordField);
 		return {
 			"username": field.attr("id"),

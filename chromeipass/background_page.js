@@ -28,62 +28,70 @@ page.onRequest = function(request, sender, callback) {
 }
 
 page.showPageAction = function(callback, tab) {
-	if(!page.tabs[tab.id]) {
-		return;
-	}
+	chrome.tabs.get(tab.id, function(tab) {
+		if(tab) {
+			if(!page.tabs[tab.id]) {
+				return;
+			}
 
-	if(page.tabs[tab.id].stack.length == 0) {
-		chrome.pageAction.hide(tab.id);
-		return;
-	}
+			if(page.tabs[tab.id].stack.length == 0) {
+				chrome.pageAction.hide(tab.id);
+				return;
+			}
 
-	var data = page.tabs[tab.id].stack[page.tabs[tab.id].stack.length - 1];
+			var data = page.tabs[tab.id].stack[page.tabs[tab.id].stack.length - 1];
 
-	chrome.pageAction.setIcon({
-		tabId: tab.id,
-		path: data.icon
+			chrome.pageAction.setIcon({
+				tabId: tab.id,
+				path: data.icon
+			});
+
+			if(data.popup) {
+				chrome.pageAction.setPopup({
+					tabId: tab.id,
+					popup: data.popup
+				});
+			}
+
+			chrome.pageAction.show(tab.id);
+		}
 	});
-
-	if(data.popup) {
-		chrome.pageAction.setPopup({
-			tabId: tab.id,
-			popup: data.popup
-		});
-	}
-
-	chrome.pageAction.show(tab.id);
 }
 
 page.hidePageActionLevel = function(callback, tab, level, type) {
-	if(!page.tabs[tab.id]) {
-		return;
-	}
+	chrome.tabs.get(tab.id, function(tab) {
+		if(tab) {
+			if(!page.tabs[tab.id]) {
+				return;
+			}
 
-	if(!type) {
-		type = "<=";
-	}
+			if(!type) {
+				type = "<=";
+			}
 
-	var newStack = [];
-	for(var i = 0; i < page.tabs[tab.id].stack.length; i++) {
-		if(
-			(type == "<" && page.tabs[tab.id].stack[i].level >= level) ||
-			(type == "<=" && page.tabs[tab.id].stack[i].level > level) ||
-			(type == "=" && page.tabs[tab.id].stack[i].level == level) ||
-			(type == ">" && page.tabs[tab.id].stack[i].level <= level) ||
-			(type == ">=" && page.tabs[tab.id].stack[i].level < level)
-		) {
-			newStack.push(page.tabs[tab.id].stack[i]);
+			var newStack = [];
+			for(var i = 0; i < page.tabs[tab.id].stack.length; i++) {
+				if(
+					(type == "<" && page.tabs[tab.id].stack[i].level >= level) ||
+					(type == "<=" && page.tabs[tab.id].stack[i].level > level) ||
+					(type == "=" && page.tabs[tab.id].stack[i].level == level) ||
+					(type == ">" && page.tabs[tab.id].stack[i].level <= level) ||
+					(type == ">=" && page.tabs[tab.id].stack[i].level < level)
+				) {
+					newStack.push(page.tabs[tab.id].stack[i]);
+				}
+			}
+
+			page.tabs[tab.id].stack = newStack;
+
+			if(newStack.length == 0) {
+				chrome.pageAction.hide(tab.id);
+			}
+			else {
+				page.showPageAction(callback, tab);
+			}
 		}
-	}
-
-	page.tabs[tab.id].stack = newStack;
-
-	if(newStack.length == 0) {
-		chrome.pageAction.hide(tab.id);
-	}
-	else {
-		page.showPageAction(callback, tab);
-	}
+	});
 }
 
 page.updatePageAction = function() {
