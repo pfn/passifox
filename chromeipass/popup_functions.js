@@ -15,6 +15,14 @@ function initSettings() {
             args: []
         });
 	});
+
+	$("#settings #btn-choose-credential-fields").click(function() {
+		var global = chrome.extension.getBackgroundPage();
+		chrome.tabs.sendRequest(global.page.currentTabId, {
+			action: "choose_credential_fields"
+		});
+		close();
+	});
 }
 
 

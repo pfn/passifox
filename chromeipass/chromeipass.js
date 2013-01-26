@@ -1,5 +1,5 @@
 // unique number as new IDs for input fields
-var uniqueNum = Math.floor( Math.random()*99999 );
+var uniqueNum = 342845638;
 // settings of chromeIPass
 var _settings = {};
 // all possible inputs for credentials
@@ -22,38 +22,68 @@ var _credentials = {
 };
 
 (function() {
-	// get all input fields which are text, email or password and visible
-	cIPJQ("input[type='text'], input[type='email'], input[type='password'], input:not([type])").each(function() {
-		if(cIPJQ(this).is(":visible") && cIPJQ(this).css("visibility") != "hidden" && cIPJQ(this).css("visibility") != "collapsed") {
-			inputs.push(cIPJQ(this));
-		}
-	});
+	/* PlugTrade.com - jQuery draggit Function */
+	/* Drag A Div with jQuery */
+	cIPJQ.fn.draggit = function (el) {
+		var thisdiv = this;
+		var thistarget = cIPJQ(el);
+		var relX;
+		var relY;
+		var targetw = thistarget.width();
+		var targeth = thistarget.height();
+		var docw;
+		var doch;
+		var ismousedown;
 
-	// get all combinations of username + password fields
-	for(var i = 0; i < inputs.length; i++) {
-		if(cIPJQ(inputs[i]).attr("type") == "password") {
-			var u = getUsernameFieldFromPasswordField(inputs[i], false);
-			if(!u) {
-				continue;
+		thistarget.css('position','absolute');
+
+
+		thisdiv.bind('mousedown', function(e){
+			var pos = cIPJQ(el).offset();
+			var srcX = pos.left;
+			var srcY = pos.top;
+
+			docw = cIPJQ('body').width();
+			doch = cIPJQ('body').height();
+
+			relX = e.pageX - srcX;
+			relY = e.pageY - srcY;
+
+			ismousedown = true;
+		});
+
+		cIPJQ(document).bind('mousemove',function(e){
+			if(ismousedown)
+			{
+				targetw = thistarget.width();
+				targeth = thistarget.height();
+
+				var maxX = docw - targetw - 10;
+				var maxY = doch - targeth - 10;
+
+				var mouseX = e.pageX;
+				var mouseY = e.pageY;
+
+				var diffX = mouseX - relX;
+				var diffY = mouseY - relY;
+
+				// check if we are beyond document bounds ...
+				if(diffX < 0)   diffX = 0;
+				if(diffY < 0)   diffY = 0;
+				if(diffX > maxX) diffX = maxX;
+				if(diffY > maxY) diffY = maxY;
+
+				cIPJQ(el).css('top', (diffY)+'px');
+				cIPJQ(el).css('left', (diffX)+'px');
 			}
+		});
 
-			// disable autocomplete for username field
-			setUniqueId(u);
-			u.attr("autocomplete", "off");
+		cIPJQ(window).bind('mouseup', function(e){
+			ismousedown = false;
+		});
 
-			setUniqueId(inputs[i]);
-
-			cIPJQ(inputs[i]).change(function() {
-				cIPJQ(this).data("unchanged", false);
-			});
-
-			var fields = {
-				"username": u.attr("id"),
-				"password": inputs[i].attr("id")
-			};
-			credentialInputs.push(fields);
-		}
-	}
+		return this;
+	} // end jQuery draggit function //
 
 	chrome.extension.sendRequest({
 		"action": "get_settings"
@@ -71,6 +101,57 @@ function setUniqueId(field) {
 }
 
 function init() {
+	// get all input fields which are text, email or password and visible
+	cIPJQ("input[type='text'], input[type='email'], input[type='password'], input:not([type])").each(function() {
+		if(cIPJQ(this).is(":visible") && cIPJQ(this).css("visibility") != "hidden" && cIPJQ(this).css("visibility") != "collapsed") {
+			setUniqueId(cIPJQ(this));
+			inputs.push(cIPJQ(this));
+		}
+	});
+
+	var getAllCombinations = true;
+	if(_settings["defined-credential-fields"] && _settings["defined-credential-fields"][document.location.origin]) {
+		if(cIPJQ("input#"+_settings["defined-credential-fields"][document.location.origin].username).length == 1 &&
+			cIPJQ("input#"+_settings["defined-credential-fields"][document.location.origin].password).length == 1
+		) {
+			var fields = {
+				"username": _settings["defined-credential-fields"][document.location.origin].username,
+				"password": _settings["defined-credential-fields"][document.location.origin].password
+			};
+			credentialInputs.push(fields);
+
+			getAllCombinations = false;
+		}
+	}
+
+	if(getAllCombinations) {
+		// get all combinations of username + password fields
+		for(var i = 0; i < inputs.length; i++) {
+			if(cIPJQ(inputs[i]).attr("type") == "password") {
+				var u = getUsernameFieldFromPasswordField(inputs[i], false);
+				if(!u) {
+					continue;
+				}
+
+				// disable autocomplete for username field
+				//setUniqueId(u);
+				u.attr("autocomplete", "off");
+
+				//setUniqueId(inputs[i]);
+
+				cIPJQ(inputs[i]).change(function() {
+					cIPJQ(this).data("unchanged", false);
+				});
+
+				var fields = {
+					"username": _prepareId(u.attr("id")),
+					"password": _prepareId(inputs[i].attr("id"))
+				};
+				credentialInputs.push(fields);
+			}
+		}
+	}
+
 	if(credentialInputs.length == 0) {
 		chrome.extension.sendRequest({
 			'action': 'hide_action_level',
@@ -130,8 +211,12 @@ function init() {
 		if ('action' in req) {
 			if (req.action == "fill_user_pass") {
 				fillInFromActiveElement(false);
-			} else if (req.action == "fill_pass_only") {
+			}
+			else if (req.action == "fill_pass_only") {
 				fillInFromActiveElementPassOnly(false);
+			}
+			else if (req.action == "choose_credential_fields") {
+				initChooseInputFields();
 			}
 		}
 	});
@@ -194,9 +279,144 @@ function formSubmit() {
 	}
 }
 
+function initChooseInputFields() {
+	var $backdrop = cIPJQ("<div>").attr("id", "cip-backdrop").addClass("cip-modal-backdrop");
+	cIPJQ("body").append($backdrop);
+
+	var $chooser = cIPJQ("<div>").attr("id", "cip-choose-fields");
+	cIPJQ("body").append($chooser);
+
+	var $description = cIPJQ("<div>").attr("id", "cip-choose-description");
+	$backdrop.append($description);
+
+	initChooserDescription();
+
+	chooserMarkAllUsernameFields($chooser);
+}
+
+function initChooserDescription() {
+	var $description = cIPJQ("div#cip-choose-description");
+	var $h1 = cIPJQ("<h1>").addClass("cip-chooser-headline").text("1. Choose a username field");
+	$description.append($h1);
+
+	var $btnDismiss = cIPJQ("<button>").text("Dismiss").attr("id", "cip-btn-dismiss")
+		.addClass("cip-btn").addClass("cip-btn-danger")
+		.click(function(e) {
+			cIPJQ("div#cip-backdrop").remove();
+			cIPJQ("div#cip-choose-fields").remove();
+		});
+	var $btnAgain = cIPJQ("<button>").text("Again").attr("id", "cip-btn-again")
+		.addClass("cip-btn").addClass("cip-btn-warning")
+		.click(function(e) {
+			cIPJQ(this).hide();
+			cIPJQ("button#cip-btn-confirm").hide();
+			cIPJQ("div.cip-fixed-field", cIPJQ("div#cip-choose-fields")).remove();
+			cIPJQ("h1:first", cIPJQ("div#cip-choose-description")).text("1. Choose a username field");
+			chooserMarkAllUsernameFields(cIPJQ("#cip-choose-fields"));
+		})
+		.hide();
+	var $btnConfirm = cIPJQ("<button>").text("Confirm").attr("id", "cip-btn-confirm")
+		.addClass("cip-btn").addClass("cip-btn-primary")
+		.css("margin-right", "15px")
+		.click(function(e) {
+			if(!_settings["defined-credential-fields"]) {
+				_settings["defined-credential-fields"] = {};
+			}
+			_settings["defined-credential-fields"][document.location.origin] = {
+				"username": _prepareId(cIPJQ("div#cip-choose-fields").data("username")),
+				"password": _prepareId(cIPJQ("div#cip-choose-fields").data("password"))
+			};
+
+			chrome.extension.sendRequest({
+				action: 'save_settings',
+				args: [_settings]
+			});
+
+			cIPJQ("button#cip-btn-dismiss").click();
+		})
+		.hide();
+
+	$description.append($btnConfirm);
+	$description.append($btnAgain);
+	$description.append($btnDismiss);
+
+	if(_settings["defined-credential-fields"] && _settings["defined-credential-fields"][document.location.origin]) {
+		var $p = cIPJQ("<p>").html("For this page credential fields are already selected.<br />");
+		var $btnDiscard = cIPJQ("<button>")
+			.attr("id", "cip-btn-discard")
+			.text("Discard selection")
+			.addClass("cip-btn")
+			.addClass("cip-btn-danger")
+			.click(function(e) {
+				delete _settings["defined-credential-fields"][document.location.origin];
+
+				chrome.extension.sendRequest({
+					action: 'save_settings',
+					args: [_settings]
+				});
+
+				chrome.extension.sendRequest({
+					action: 'load_settings',
+					args: []
+				});
+
+				cIPJQ(this).parent("p").remove();
+			});
+		$p.append($btnDiscard);
+		$description.append($p);
+	}
+
+	cIPJQ("div#cip-backdrop").draggit("div#cip-choose-description");
+}
+
+function chooserMarkAllPasswordFields($chooser) {
+	cIPJQ("input[type='password']").each(function() {
+		if(cIPJQ(this).is(":visible") && cIPJQ(this).css("visibility") != "hidden" && cIPJQ(this).css("visibility") != "collapsed") {
+			var $field = cIPJQ("<div>").addClass("cip-fixed-field")
+				.css("top", cIPJQ(this).offset().top)
+				.css("left", cIPJQ(this).offset().left)
+				.css("width", cIPJQ(this).outerWidth())
+				.css("height", cIPJQ(this).outerHeight())
+				.data("id", cIPJQ(this).attr("id"))
+				.click(function(e) {
+					cIPJQ("div#cip-choose-fields").data("password", cIPJQ(this).data("id"));
+					cIPJQ(this).addClass("cip-fixed-password-field").text("Password").unbind("click");
+					cIPJQ("div.cip-fixed-field:not(.cip-fixed-password-field,.cip-fixed-username-field)", cIPJQ("div#cip-choose-fields")).remove();
+					cIPJQ("button#cip-btn-confirm").show();
+					cIPJQ("h1:first", cIPJQ("div#cip-choose-description")).text("3. Confirm selection");
+				})
+				.hover(function() {cIPJQ(this).addClass("cip-fixed-hover-field");}, function() {cIPJQ(this).removeClass("cip-fixed-hover-field");});
+			$chooser.append($field);
+		}
+	});
+}
+
+function chooserMarkAllUsernameFields($chooser) {
+	cIPJQ("input[type='text'], input[type='email'], input:not([type])").each(function() {
+		if(cIPJQ(this).is(":visible") && cIPJQ(this).css("visibility") != "hidden" && cIPJQ(this).css("visibility") != "collapsed") {
+			var $field = cIPJQ("<div>").addClass("cip-fixed-field")
+				.css("top", cIPJQ(this).offset().top)
+				.css("left", cIPJQ(this).offset().left)
+				.css("width", cIPJQ(this).outerWidth())
+				.css("height", cIPJQ(this).outerHeight())
+				.data("id", cIPJQ(this).attr("id"))
+				.click(function(e) {
+					cIPJQ("div#cip-choose-fields").data("username", cIPJQ(this).data("id"));
+					cIPJQ(this).addClass("cip-fixed-username-field").text("Username").unbind("click");
+					cIPJQ("div.cip-fixed-field:not(.cip-fixed-username-field)", cIPJQ("div#cip-choose-fields")).remove();
+					cIPJQ("h1:first", cIPJQ("div#cip-choose-description")).text("2. Now choose a password field");
+					cIPJQ("button#cip-btn-again").show();
+					chooserMarkAllPasswordFields(cIPJQ("#cip-choose-fields"));
+				})
+				.hover(function() {cIPJQ(this).addClass("cip-fixed-hover-field");}, function() {cIPJQ(this).removeClass("cip-fixed-hover-field");});
+			$chooser.append($field);
+		}
+	});
+}
+
 /**
-	 * return the username field or null if it not exists
-	 */
+* return the username field or null if it not exists
+*/
 function getUsernameFieldFromPasswordField(passwordField, checkDisabled) {
 	var form = cIPJQ(passwordField).closest("form");
 	var usernameField = null;
@@ -417,22 +637,22 @@ function getCredentialFields(type, field) {
 		}
 	}
 
-	setUniqueId(field);
+	//setUniqueId(field);
 
 	if(type == "username") {
 		var passwordField = getPasswordFieldFromUsernameField(field, true);
-		setUniqueId(passwordField);
+		//setUniqueId(passwordField);
 		return {
-			"username": field.attr("id"),
-			"password": passwordField.attr("id")
+			"username": _prepareId(field.attr("id")),
+			"password": _prepareId(passwordField.attr("id"))
 		};
 	}
 	else if(type == "password") {
 		var usernameField = getUsernameFieldFromPasswordField(field, true);
-		setUniqueId(usernameField);
+		//setUniqueId(usernameField);
 		return {
-			"username": usernameField.attr("id"),
-			"password": field.attr("id")
+			"username": _prepareId(usernameField.attr("id")),
+			"password": _prepareId(field.attr("id"))
 		};
 	}
 
@@ -521,6 +741,19 @@ function fillInFromActiveElementPassOnly(suppressWarnings) {
 	}
 
 	fillInCredentials(credentialFields, true, suppressWarnings);
+}
+
+function _prepareId(id) {
+	id = id.replace(":", "\\:")
+		.replace("#", "\\#")
+		.replace(".", "\\.")
+		.replace("[", "\\[")
+		.replace("]", "\\]")
+		.replace("(", "\\(")
+		.replace(")", "\\)")
+		.replace("'", "\\'")
+		.replace("\"", "\\\"");
+	return id;
 }
 
 function _f(fieldId) {

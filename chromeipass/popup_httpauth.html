@@ -2,7 +2,8 @@
 	<head>
 		<title>KeePass - Popup</title>
 		<link rel="stylesheet" href="popup.css" />
-		<script type="text/javascript" src="jquery-1.8.2.min.js"></script>
+		<link rel="stylesheet" href="bootstrap-btn.css" />
+		<script type="text/javascript" src="jquery-1.9.0.min.js"></script>
 		<script type="text/javascript" src="popup_functions.js"></script>
 		<script type="text/javascript" src="popup_httpauth.js"></script>
 	</head>
@@ -10,6 +11,7 @@
 		<div id="settings" class="settings">
 			<label><input type="checkbox" name="autoFillAndSend" value="1" /> Auto fill HTTP Auth requests and send it.</label>
 			<label><input type="checkbox" name="autoCompleteUsernames" value="1" /> Activate autocomplete for username fields.</label>
+			<label><button id="btn-choose-credential-fields" class="cip-btn cip-btn-small">Choose own credential fields for this page</button></label>
 			<div class="description">Changes get active after page reload</div>
 		</div>
 

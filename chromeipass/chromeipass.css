@@ -1,0 +1,71 @@
+.cip-modal-backdrop {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 1040;
+}
+.cip-modal-backdrop:after {
+	content:'';
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-color: #000000;
+	opacity: 0.8;
+	filter: alpha(opacity=80);
+}
+#cip-choose-fields {
+	z-index: 1050;
+}
+#cip-choose-description {
+	z-index: 1050;
+	color: #efefef;
+	border: 2px solid #555555;
+	padding: 7px 5px;
+	position: absolute;
+	top: 100px;
+	left: 150px;
+	text-align: left;
+	cursor: pointer;
+	background-color:rgba(255,255,255,0.3);
+	font-size: 15px;
+}
+#cip-choose-description h1 {
+	margin-top: 0;
+	padding-top: 0;
+	text-align: left;
+	color: #efefef;
+	padding-bottom: 8px;
+}
+#cip-choose-description p {
+	margin-top: 10px;
+	padding-top: 10px;
+	border-top: 2px solid #666666;
+	line-height: 110%;
+}
+.cip-fixed-field {
+	position: absolute;
+	border: 2px solid #efefef;
+	cursor: pointer;
+	z-index: 1050;
+	text-align: left;
+	font-weight: bold;
+	background-color:rgba(239,239,239,0.4);
+}
+.cip-fixed-hover-field {
+	border: 2px solid orange;
+	background-color:rgba(255,165,239,0.4);
+}
+.cip-fixed-password-field {
+	border: 2px solid red;
+	color: #efefef;
+	background-color:rgba(255,0,0,0.4);
+}
+.cip-fixed-username-field {
+	border: 2px solid limegreen;
+	color: #efefef;
+	background-color:rgba(50,205,50,0.4);
+}

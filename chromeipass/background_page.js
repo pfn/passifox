@@ -242,6 +242,10 @@ page.eventGetSettings = function(callback, tab) {
 	callback({ data: page.settings });
 }
 
+page.eventSaveSettings = function(callback, tab, settings) {
+	localStorage.settings = JSON.stringify(settings);
+}
+
 page.eventGetStatus = function(callback, tab) {
 	var configured = keepass.isConfigured();
 	var keyId = null;
@@ -359,6 +363,7 @@ page.requestHandlers = {
 	'alert': page.eventShowAlert,
 	'load_settings': page.eventLoadSettings,
 	'get_settings': page.eventGetSettings,
+	'save_settings': page.eventSaveSettings,
 	'set_remember_credentials': page.eventSetRememberPopup,
 	'add_page_action': page.eventAddPageAction,
 	'pop_stack': page.eventPopStack,
