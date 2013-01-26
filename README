@@ -3,10 +3,20 @@ Howto install this unofficial version of ChromeIPass:
 	2. Just drag and drop my version of ChromeIPass into this tab
 	3. Installation starts
 
-To get the best matching credentials in the HTTP-Auth dialog you need to use my version of KeePassHTTP,
-which is sorting the credentials by the best matching url.
+To get the best matching credentials in the HTTP-Auth dialog you need to use my version of KeePassHTTP, which is sorting the credentials by the best matching url.
 You get the plugin here: https://github.com/lspcity/keepasshttp
 Just download the KeePassHttp.plgx and drop it into your KeePass-Home-Directory.
+
+New features of my ChromeIPass version:
+- save new credentials
+- update existing credentials
+- autocomplete for username fields
+- shows you possible credentials for HTTP-Auth requests (also known as htaccess-logins)
+- auto-login for HTTP-Auth requests
+- choose the credentials fields by yourself
+
+For feature requests, just write a new issue.
+
 
 
 
