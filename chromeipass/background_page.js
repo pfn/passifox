@@ -28,6 +28,10 @@ page.onRequest = function(request, sender, callback) {
 }
 
 page.showPageAction = function(callback, tab) {
+	if(!page.tabs[tab.id]) {
+		return;
+	}
+
 	if(page.tabs[tab.id].stack.length == 0) {
 		chrome.pageAction.hide(tab.id);
 		return;
@@ -50,10 +54,24 @@ page.showPageAction = function(callback, tab) {
 	chrome.pageAction.show(tab.id);
 }
 
-page.hidePageActionLevel = function(callback, tab, level) {
+page.hidePageActionLevel = function(callback, tab, level, type) {
+	if(!page.tabs[tab.id]) {
+		return;
+	}
+
+	if(!type) {
+		type = "<=";
+	}
+
 	var newStack = [];
 	for(var i = 0; i < page.tabs[tab.id].stack.length; i++) {
-		if(page.tabs[tab.id].stack[i].level > level) {
+		if(
+			(type == "<" && page.tabs[tab.id].stack[i].level >= level) ||
+			(type == "<=" && page.tabs[tab.id].stack[i].level > level) ||
+			(type == "=" && page.tabs[tab.id].stack[i].level == level) ||
+			(type == ">" && page.tabs[tab.id].stack[i].level <= level) ||
+			(type == ">=" && page.tabs[tab.id].stack[i].level < level)
+		) {
 			newStack.push(page.tabs[tab.id].stack[i]);
 		}
 	}
@@ -126,10 +144,30 @@ page.stackPop = function(tabId) {
 	}
 }
 
+page.removeRememberPageAction = function(tabId) {
+	if(!page.tabs[tabId]) {
+		return;
+	}
+
+	if(page.tabs[tabId].stack.length == 0) {
+		return;
+	}
+
+	if(typeof page.tabs[tabId].stack[page.tabs[tabId].stack.length - 1].visibleForPageUpdates != "undefined") {
+		if(page.tabs[tabId].stack[page.tabs[tabId].stack.length - 1].visibleForPageUpdates <= 0) {
+			page.stackPop(tabId);
+			page.showPageAction(null, {id: tabId});
+			return;
+		}
+		page.tabs[tabId].stack[page.tabs[tabId].stack.length - 1].visibleForPageUpdates -= 1;
+	}
+}
+
 page.setRememberPopup = function(tabId, username, password, url, usernameExists, credentialsList) {
 	var id = tabId || page.currentTabId;
 
 	var stackData = {
+		visibleForPageUpdates: 1,
 		level: 10,
 		intervalIcon: {
 			index: 0,
@@ -153,7 +191,7 @@ page.setRememberPopup = function(tabId, username, password, url, usernameExists,
 }
 
 
-page.eventAddPageAction = function(callback, tab, icon, popup, level, push) {
+page.eventAddPageAction = function(callback, tab, icon, popup, level, push, visibleForPageUpdates) {
 	var id = tab.id || page.currentTabId;
 
 	if(!level) {
@@ -167,6 +205,10 @@ page.eventAddPageAction = function(callback, tab, icon, popup, level, push) {
 
 	if(popup) {
 		stackData.popup = popup;
+	}
+
+	if(visibleForPageUpdates) {
+		stackData.visibleForPageUpdates = visibleForPageUpdates;
 	}
 
 	if(push) {

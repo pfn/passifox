@@ -96,7 +96,7 @@ function _close() {
 $(function() {
 	chrome.extension.sendRequest({
 		action: 'add_page_action',
-		args: ["keepass_inverse_red_background.png", "popup_remember.html", 10, true]
+		args: ["keepass_inverse_red_background.png", "popup_remember.html", 10, true, 0]
 	});
 
 	chrome.extension.sendRequest({

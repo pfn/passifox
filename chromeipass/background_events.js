@@ -17,6 +17,12 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 	page.currentTabId = activeInfo.tabId;
 });
 
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+	if(changeInfo.status == "complete") {
+		page.removeRememberPageAction(tabId);
+	}
+});
+
 
 
 // auto-login user or show logins on HTTPAuth
