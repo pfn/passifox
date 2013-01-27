@@ -18,8 +18,6 @@ keepass.updateCredentials = function(callback, tab, entryId, username, password,
 	// unset error message
 	page.tabs[tab.id].errorMessage = null;
 
-	console.log("updateCredentials(" + entryId + ", " + username + ", " + password + ", " + url + ")");
-
 	// is browser associated to keepass?
 	if(!keepass.testAssociation(tab)) {
 		page.eventPopup(null, tab);
