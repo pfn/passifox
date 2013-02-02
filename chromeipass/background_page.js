@@ -256,7 +256,9 @@ page.eventGetStatus = function(callback, tab) {
 		page.eventPopup(callback, tab);
 	}
 
-	console.log(page.tabs[tab.id].errorMessage);
+	if(!keepass.isAssociated) {
+		keepass.testAssociation({"id": page.currentTabId});
+	}
 
 	callback({
 		configured: configured,

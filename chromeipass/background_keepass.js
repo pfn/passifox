@@ -1,6 +1,6 @@
 var keepass = keepass || {};
 
-keepass.isAssociated = false;
+keepass.isAssociated = null;
 keepass.keySize = 8; // wtf? stupid cryptoHelpers
 keepass.pluginUrl = "http://localhost:19455/";
 keepass.cacheTimeout = 30 * 1000; // milliseconds
@@ -256,6 +256,7 @@ keepass.testAssociation = function (tab) {
 
 	var verifier = keepass.setVerifier(request);
 	if(!verifier) {
+		keepass.isAssociated = false;
 		return false;
 	}
 
@@ -272,6 +273,7 @@ keepass.testAssociation = function (tab) {
 			delete localStorage[keepass.keyId];
 			console.log("Encryption key is unrecognized!");
 			page.tabs[tab.id].errorMessage = "Encryption key is unrecognized";
+			keepass.isAssociated = false;
 		}
 		else if(!keepass.isAssociated) {
 			console.log("Association was not successful");

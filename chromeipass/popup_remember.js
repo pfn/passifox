@@ -9,7 +9,6 @@ function _initialize(tab) {
 	}
 
 	$("#btn-new").click(function(e) {
-		//global.console.log(_tab.credentials);
 		chrome.extension.sendRequest({
 			action: 'add_credentials',
 			args: [_tab.credentials.username, _tab.credentials.password, _tab.credentials.url]
@@ -21,7 +20,6 @@ function _initialize(tab) {
 
 		// only one entry which could be updated
 		if(_tab.credentials.list.length == 1) {
-			//global.console.log(_tab.credentials.list[0]);
 			chrome.extension.sendRequest({
 				action: 'update_credentials',
 				args: [_tab.credentials.list[0].Uuid, _tab.credentials.username, _tab.credentials.password, _tab.credentials.url]
@@ -47,7 +45,6 @@ function _initialize(tab) {
 					.data("entryId", i)
 					.click(function(e) {
 						e.preventDefault();
-						//global.console.log(_tab.credentials.list[$(this).data("entryId")]);
 						chrome.extension.sendRequest({
 							action: 'update_credentials',
 							args: [_tab.credentials.list[$(this).data("entryId")].Uuid, _tab.credentials.username, _tab.credentials.password, _tab.credentials.url]
@@ -73,7 +70,6 @@ function _initialize(tab) {
 }
 
 function _verifyResult(code) {
-	//global.console.log(code);
 	if(code == "success") {
 		_close();
 	}

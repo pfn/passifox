@@ -750,11 +750,13 @@ function _prepareId(id) {
 	id = id.replace(":", "\\:")
 		.replace("#", "\\#")
 		.replace(".", "\\.")
+		.replace(",", "\\,")
 		.replace("[", "\\[")
 		.replace("]", "\\]")
 		.replace("(", "\\(")
 		.replace(")", "\\)")
 		.replace("'", "\\'")
+		.replace(" ", "\\ ")
 		.replace("\"", "\\\"");
 	return id;
 }
