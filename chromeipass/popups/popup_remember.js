@@ -1,5 +1,4 @@
 var _tab;
-//var global = chrome.extension.getBackgroundPage();
 
 function _initialize(tab) {
 	_tab = tab;

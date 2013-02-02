@@ -1,5 +1,12 @@
 var $ = cIPJQ.noConflict(true);
 var _settings = typeof(localStorage.settings)=='undefined' ? {} : JSON.parse(localStorage.settings);
+//var global = chrome.extension.getBackgroundPage();
+
+function updateAvailableResponse(available) {
+	if(available) {
+		$("#update-available").show();
+	}
+}
 
 function initSettings() {
 	$("#settings input[type=checkbox]").each(function() {
@@ -28,4 +35,8 @@ function initSettings() {
 
 $(function() {
 	initSettings();
+
+	chrome.extension.sendRequest({
+		action: "update_available_keepasshttp"
+	}, updateAvailableResponse);
 });

@@ -1,19 +1,25 @@
 {
 	"name": "ChromeIPass",
-	"version": "1.4.4",
+	"version": "1.5.0",
 	"manifest_version": 2,
 	"description": "Chrome and KeePass integration using KeePassHttp",
 	"icons": {
-		"16": "keepass.png",
-		"48": "keepass-big.png"
+		"16": "icons/keepass.png",
+		"48": "icons/keepass-big.png"
 	},
 	"page_action": {
-		"default_icon": "keepass.png",
+		"default_icon": "icons/keepass.png",
 		"popup": "popup.html"
 	},
 	"update_url": "https://raw.github.com/lspcity/passifox/master/chromeipass_update.xml",
 	"background": {
-		"scripts": ["aes.js","cryptoHelpers.js","utf8.js","background_keepass.js","background_httpauth.js","background_page.js","background_events.js"]
+		"scripts": ["background/aes.js",
+			"background/cryptoHelpers.js",
+			"background/utf8.js",
+			"background/keepass.js",
+			"background/httpauth.js",
+			"background/page.js",
+			"background/events.js"]
 		},
 	"content_scripts": [
 	{
@@ -27,7 +33,6 @@
 	"permissions": [
 		"contextMenus",
 		"tabs",
-		"http://localhost/",
 		"webRequest",
 		"webRequestBlocking",
 		"https://*/*",

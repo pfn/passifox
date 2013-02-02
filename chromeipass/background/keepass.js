@@ -1,6 +1,8 @@
 var keepass = keepass || {};
 
 keepass.isAssociated = null;
+keepass.currentKeePassHttpVersion = 0;
+keepass.latestKeePassHttpVersion = 1075;
 keepass.keySize = 8; // wtf? stupid cryptoHelpers
 keepass.pluginUrl = "http://localhost:19455/";
 keepass.cacheTimeout = 30 * 1000; // milliseconds
@@ -245,6 +247,10 @@ keepass.checkStatus = function (status, tab) {
 	return success;
 }
 
+keepass.keePassHttpUpdateAvailable = function() {
+	return (keepass.currentKeePassHttpVersion < keepass.latestKeePassHttpVersion);
+}
+
 keepass.testAssociation = function (tab) {
 	if(keepass.isAssociated) {
 		return true;
@@ -268,6 +274,10 @@ keepass.testAssociation = function (tab) {
 		var r = JSON.parse(response);
 		var id = verifier[0];
 		var key = verifier[1];
+
+		if(r.Version) {
+			keepass.currentKeePassHttpVersion = parseInt(r.Version.replace(/\./g,""));
+		}
 
 		if(!keepass.verifyResponse(r, key, id)) {
 			delete localStorage[keepass.keyId];

@@ -43,13 +43,13 @@ page.showPageAction = function(callback, tab) {
 
 			chrome.pageAction.setIcon({
 				tabId: tab.id,
-				path: data.icon
+				path: "icons/" + page.iconColor(data.icon)
 			});
 
 			if(data.popup) {
 				chrome.pageAction.setPopup({
 					tabId: tab.id,
-					popup: data.popup
+					popup: "popups/" + data.popup
 				});
 			}
 
@@ -198,6 +198,16 @@ page.setRememberPopup = function(tabId, username, password, url, usernameExists,
 	};
 }
 
+page.iconColor = function(icon) {
+	if(keepass.keePassHttpUpdateAvailable()) {
+		icon = icon.replace("keepass.png", "keepass_green.png").replace("keepass-", "keepass_green-");
+	}
+	else {
+		icon = icon.replace("keepass_green", "keepass");
+	}
+	return icon;
+}
+
 
 page.eventAddPageAction = function(callback, tab, icon, popup, level, push, visibleForPageUpdates) {
 	var id = tab.id || page.currentTabId;
@@ -277,6 +287,10 @@ page.eventGetTabInformation = function(callback, tab) {
 	var id = tab.id || page.currentTabId;
 
 	callback(page.tabs[id]);
+}
+
+page.eventUpdateAvailableKeePassHttp = function(callback, tab) {
+	callback(keepass.keePassHttpUpdateAvailable());
 }
 
 page.eventRemoveCredentialsFromTabInformation = function(callback, tab) {
@@ -370,6 +384,7 @@ page.requestHandlers = {
 	'add_page_action': page.eventAddPageAction,
 	'pop_stack': page.eventPopStack,
 	'get_tab_information': page.eventGetTabInformation,
+	'update_available_keepasshttp': page.eventUpdateAvailableKeePassHttp,
 	'remove_credentials_from_tab_information': page.eventRemoveCredentialsFromTabInformation
 };
 
