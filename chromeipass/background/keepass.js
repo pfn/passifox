@@ -159,6 +159,11 @@ keepass.retrieveCredentials = function (callback, tab, url, submiturl, forceCall
 	// verify response
 	if(keepass.checkStatus(status, tab)) {
 		var r = JSON.parse(response);
+
+		if(r.Version) {
+			keepass.currentKeePassHttpVersion = parseInt(r.Version.replace(/\./g,""));
+		}
+
 		if (keepass.verifyResponse(r, key, id)) {
 			var rIv = r.Nonce;
 			for (var i = 0; i < r.Entries.length; i++) {
@@ -194,6 +199,11 @@ keepass.associate = function(callback, tab) {
 
 	if(keepass.checkStatus(result[0], tab)) {
 		var r = JSON.parse(result[1]);
+
+		if(r.Version) {
+			keepass.currentKeePassHttpVersion = parseInt(r.Version.replace(/\./g,""));
+		}
+		
 		var id = r.Id;
 		if(!keepass.verifyResponse(r, key)) {
 			page.tabs[tab.id].errorMessage = "KeePass association failed, try again";
