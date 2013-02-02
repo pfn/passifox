@@ -20,6 +20,7 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	if(changeInfo.status == "complete") {
 		page.removeRememberPageAction(tabId);
+		page.clearCredentials(tabId);
 	}
 });
 

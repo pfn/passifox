@@ -152,6 +152,14 @@ page.stackPop = function(tabId) {
 	}
 }
 
+page.clearCredentials = function(tabId) {
+	if(page.tabs[tabId]) {
+		delete page.tabs[tabId].loginList;
+		delete page.tabs[tabId].credentials;
+		page.tabs[tabId].loginList = {};
+	}
+}
+
 page.removeRememberPageAction = function(tabId) {
 	if(!page.tabs[tabId]) {
 		return;
