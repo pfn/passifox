@@ -162,7 +162,7 @@ function init() {
 		var form = (_f(credentialInputs[0].username)) ? _f(credentialInputs[0].username).closest("form") : null;
 		var action = null;
 
-		if(form) {
+		if(form && form.length > 0) {
 			action = form[0].action;
 			initForm(form, credentialInputs[0]);
 		}
@@ -668,7 +668,7 @@ function getCredentialFields(type, field) {
 
 function fillInCredentials(credentialFields, onlyPassword, suppressWarnings) {
 	var form = (_f(credentialFields.username)) ? _f(credentialFields.username).closest("form") : _f(credentialFields.password).closest("form");
-	var action = form[0].action;
+	var action = null;
 
 	var u = _f(credentialFields.username);
 	var p = _f(credentialFields.password);
@@ -678,6 +678,10 @@ function fillInCredentials(credentialFields, onlyPassword, suppressWarnings) {
 	}
 	if(p) {
 		_p = p;
+	}
+
+	if(form && form.length > 0) {
+		action = form[0].action;
 	}
 
 	if (typeof(action) != "string" || action == "") {
