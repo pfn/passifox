@@ -203,7 +203,7 @@ keepass.associate = function(callback, tab) {
 		if(r.Version) {
 			keepass.currentKeePassHttpVersion = parseInt(r.Version.replace(/\./g,""));
 		}
-		
+
 		var id = r.Id;
 		if(!keepass.verifyResponse(r, key)) {
 			page.tabs[tab.id].errorMessage = "KeePass association failed, try again";
@@ -258,7 +258,7 @@ keepass.checkStatus = function (status, tab) {
 }
 
 keepass.keePassHttpUpdateAvailable = function() {
-	return (keepass.currentKeePassHttpVersion < keepass.latestKeePassHttpVersion);
+	return (keepass.currentKeePassHttpVersion > 0 && keepass.currentKeePassHttpVersion < keepass.latestKeePassHttpVersion);
 }
 
 keepass.testAssociation = function (tab) {
