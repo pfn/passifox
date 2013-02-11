@@ -1,8 +1,0 @@
-content  passifox             chrome/content/
-skin     passifox classic/1.0 chrome/skin/default/
-resource passifox ./
-
-overlay chrome://browser/content/browser.xul chrome://passifox/content/passifox.xul
-contract @hanhuy.com/login-manager-storage;1 {fa199659-10c4-4e3a-a73b-e2b4e1deae96}
-component {fa199659-10c4-4e3a-a73b-e2b4e1deae96} components/loginmanagerstorage.js
-category login-manager-storage nsILoginManagerStorage @hanhuy.com/login-manager-storage;1
