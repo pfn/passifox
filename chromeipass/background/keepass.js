@@ -385,14 +385,14 @@ keepass.checkForNewKeePassHttpVersion = function() {
 }
 
 keepass.testAssociation = function (tab) {
-	if(keepass.isAssociated()) {
-		return true;
-	}
-
 	keepass.getDatabaseHash(tab);
 
 	if(keepass.isDatabaseClosed || !keepass.isKeePassHttpAvailable) {
 		return false;
+	}
+	
+	if(keepass.isAssociated()) {
+		return true;
 	}
 
 	var request = {
@@ -446,6 +446,8 @@ keepass.getDatabaseHash = function (tab) {
 		"RequestType": "test-associate"
 	};
 
+	var oldDatabaseHash = keepass.databaseHash;
+
 	var result = keepass.send(request);
 	if(keepass.checkStatus(result[0], tab)) {
 		var response = JSON.parse(result[1]);
@@ -453,6 +455,12 @@ keepass.getDatabaseHash = function (tab) {
 	}
 	else {
 		keepass.databaseHash = 0;
+	}
+
+	if(oldDatabaseHash != keepass.databaseHash) {
+		console.log("clear association");
+		keepass.associated.value = false;
+		keepass.associated.hash = null;
 	}
 
 	return keepass.databaseHash;
