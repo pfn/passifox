@@ -1,11 +1,11 @@
 {
 	"name": "chromeIPass",
-	"version": "2.0",
+	"version": "2.0.1",
 	"manifest_version": 2,
 	"description": "KeePass integration for browser Chrome using KeePassHttp",
 	"icons": {
 		"16": "icons/icon_normal_purple_16x16.png",
-		"48": "icons/keepass-big.png"
+		"48": "icons/keepass_49x49.png"
 	},
 	"page_action": {
 		"default_icon": "icons/icon_normal_purple_16x16.png",
