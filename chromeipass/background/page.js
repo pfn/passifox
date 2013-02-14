@@ -5,6 +5,21 @@ page.tabs = {};
 
 page.currentTabId = 0;
 page.settings = (typeof(localStorage.settings) == 'undefined') ? {} : JSON.parse(localStorage.settings);
+page.popupTabIds = {};
+
+page.initSettings = function() {
+	page.eventLoadSettings();
+	if(!("checkUpdateKeePassHttp" in page.settings)) {
+		page.settings.checkUpdateKeePassHttp = 3;
+	}
+	if(!("autoCompleteUsernames" in page.settings)) {
+		page.settings.autoCompleteUsernames = 1;
+	}
+	if(!("autoFillAndSend" in page.settings)) {
+		page.settings.autoFillAndSend = 1;
+	}
+	localStorage.settings = JSON.stringify(page.settings);
+}
 
 page.onRequest = function(request, sender, callback) {
 	if (request.action in page.requestHandlers) {
@@ -43,7 +58,7 @@ page.showPageAction = function(callback, tab) {
 
 			chrome.pageAction.setIcon({
 				tabId: tab.id,
-				path: "icons/" + page.iconColor(data.icon)
+				path: "/icons/" + page.generateIconName(data.iconType, data.icon)
 			});
 
 			if(data.popup) {
@@ -116,7 +131,7 @@ page.updatePageAction = function() {
 
 		chrome.pageAction.setIcon({
 			tabId: page.currentTabId,
-			path: data.intervalIcon.icons[data.intervalIcon.index]
+			path: "/icons/" + page.generateIconName(null, data.intervalIcon.icons[data.intervalIcon.index])
 		});
 	}
 }
@@ -148,15 +163,17 @@ page.stackPop = function(tabId) {
 	var id = tabId || page.currentTabId;
 
 	if(page.tabs[id]) {
-		page.tabs[id].stack.pop();
+		var stack = page.tabs[id].stack.pop();
+		if(stack.level == 10) {
+			page.clearCredentials(id);
+		}
 	}
 }
 
 page.clearCredentials = function(tabId) {
 	if(page.tabs[tabId]) {
-		delete page.tabs[tabId].loginList;
 		delete page.tabs[tabId].credentials;
-		page.tabs[tabId].loginList = {};
+		page.tabs[tabId].credentials = {};
 	}
 }
 
@@ -173,6 +190,7 @@ page.removeRememberPageAction = function(tabId) {
 		if(page.tabs[tabId].stack[page.tabs[tabId].stack.length - 1].visibleForPageUpdates <= 0) {
 			page.stackPop(tabId);
 			page.showPageAction(null, {id: tabId});
+			page.clearCredentials(tabId);
 			return;
 		}
 		page.tabs[tabId].stack[page.tabs[tabId].stack.length - 1].visibleForPageUpdates -= 1;
@@ -183,15 +201,15 @@ page.setRememberPopup = function(tabId, username, password, url, usernameExists,
 	var id = tabId || page.currentTabId;
 
 	var stackData = {
-		visibleForPageUpdates: 1,
+		visibleForPageUpdates: 2,
 		level: 10,
 		intervalIcon: {
 			index: 0,
 			counter: 0,
 			max: 5,
-			icons: ["keepass_inverse_red_background.png", "keepass_inverse_red_lock.png"]
+			icons: ["icon_remember_red_background_16x16.png", "icon_remember_red_lock_16x16.png"]
 		},
-		icon: "keepass_inverse_red_background.png",
+		icon: "icon_remember_red_background_16x16.png",
 		popup: "popup_remember.html"
 	}
 
@@ -206,14 +224,18 @@ page.setRememberPopup = function(tabId, username, password, url, usernameExists,
 	};
 }
 
-page.iconColor = function(icon) {
-	if(keepass.keePassHttpUpdateAvailable()) {
-		icon = icon.replace("keepass.png", "keepass_green.png").replace("keepass-", "keepass_green-");
+page.generateIconName = function(iconType, icon) {
+	if(icon) {
+		return icon;
 	}
-	else {
-		icon = icon.replace("keepass_green", "keepass");
-	}
-	return icon;
+
+	var name = "icon_";
+	name += (keepass.keePassHttpUpdateAvailable()) ? "new_" : "";
+	name += (!iconType || iconType == "normal") ? "normal_" : iconType + "_";
+	name += keepass.getIconColor();
+	name += "_16x16.png";
+
+	return name;
 }
 
 
@@ -255,6 +277,16 @@ page.eventLoadSettings = function(callback, tab) {
 	page.settings = (typeof(localStorage.settings) == 'undefined') ? {} : JSON.parse(localStorage.settings);
 }
 
+page.eventLoadKeyRing = function(callback, tab) {
+	keepass.keyRing = (typeof(localStorage.keyRing) == 'undefined') ? {} : JSON.parse(localStorage.keyRing);
+	if(keepass.isAssociated() && !keepass.keyRing[keepass.associated.hash]) {
+		keepass.associated = {
+			"value": false,
+			"hash": null
+		};
+	}
+}
+
 page.eventGetSettings = function(callback, tab) {
 	page.eventLoadSettings();
 	callback({ data: page.settings });
@@ -262,26 +294,27 @@ page.eventGetSettings = function(callback, tab) {
 
 page.eventSaveSettings = function(callback, tab, settings) {
 	localStorage.settings = JSON.stringify(settings);
+	page.eventLoadSettings();
 }
 
 page.eventGetStatus = function(callback, tab) {
+	keepass.testAssociation(tab);
+
 	var configured = keepass.isConfigured();
 	var keyId = null;
 	if (configured) {
-		keyId = localStorage[keepass.keyId];
-	}
-	if (!configured || page.tabs[tab.id].errorMessage) {
-		page.eventPopup(callback, tab);
+		keyId = keepass.keyRing[keepass.databaseHash].id;
 	}
 
-	if(!keepass.isAssociated) {
-		keepass.testAssociation({"id": page.currentTabId});
-	}
+	page.eventPopup(null, tab);
 
 	callback({
+		identifier: keyId,
 		configured: configured,
-		keyname: keyId,
-		associated: keepass.isAssociated,
+		databaseClosed: keepass.isDatabaseClosed,
+		keePassHttpAvailable: keepass.isKeePassHttpAvailable,
+		encryptionKeyUnrecognized: keepass.isEncryptionKeyUnrecognized,
+		associated: keepass.isAssociated(),
 		error: page.tabs[tab.id].errorMessage
 	});
 }
@@ -297,6 +330,22 @@ page.eventGetTabInformation = function(callback, tab) {
 	callback(page.tabs[id]);
 }
 
+page.eventGetConnectedDatabase = function(callback, tab) {
+	callback({
+		"count": Object.keys(keepass.keyRing).length,
+		"identifier": (keepass.keyRing[keepass.associated.hash]) ? keepass.keyRing[keepass.associated.hash].id : null
+	});
+}
+
+page.eventGetKeePassHttpVersions = function(callback, tab) {
+	callback({"current": keepass.currentKeePassHttp.version, "latest": keepass.latestKeePassHttp.version});
+}
+
+page.eventCheckUpdateKeePassHttp = function(callback, tab) {
+	keepass.checkForNewKeePassHttpVersion();
+	callback({"current": keepass.currentKeePassHttp.version, "latest": keepass.latestKeePassHttp.version});
+}
+
 page.eventUpdateAvailableKeePassHttp = function(callback, tab) {
 	callback(keepass.keePassHttpUpdateAvailable());
 }
@@ -304,17 +353,22 @@ page.eventUpdateAvailableKeePassHttp = function(callback, tab) {
 page.eventRemoveCredentialsFromTabInformation = function(callback, tab) {
 	var id = tab.id || page.currentTabId;
 
-	page.tabs[id].credentials.password = "";
-	page.tabs[id].credentials.username = "";
-	page.tabs[id].credentials.url = "";
-	page.tabs[id].credentials.usernameExists = false;
-	page.tabs[id].credentials.list = [];
+	if(page.tabs[id].credentials) {
+		page.tabs[id].credentials.password = "";
+		page.tabs[id].credentials.username = "";
+		page.tabs[id].credentials.url = "";
+		page.tabs[id].credentials.usernameExists = false;
+		page.tabs[id].credentials.list = [];
 
-	delete page.tabs[id].credentials.password;
-	delete page.tabs[id].credentials.username;
-	delete page.tabs[id].credentials.url;
-	delete page.tabs[id].credentials.usernameExists;
-	delete page.tabs[id].credentials.list;
+		delete page.tabs[id].credentials.password;
+		delete page.tabs[id].credentials.username;
+		delete page.tabs[id].credentials.url;
+		delete page.tabs[id].credentials.usernameExists;
+		delete page.tabs[id].credentials.list;
+
+		page.tabs[id].credentials = {};
+		delete page.tabs[id].credentials;
+	}
 }
 
 page.eventSetRememberPopup = function(callback, tab, username, password, url, usernameExists, credentialsList) {
@@ -324,7 +378,7 @@ page.eventSetRememberPopup = function(callback, tab, username, password, url, us
 page.eventLoginPopup = function(callback, tab, logins) {
 	var stackData = {
 		level: 1,
-		icon: "keepass-q.png",
+		iconType: "questionmark",
 		popup: "popup_login.html"
 	}
 	page.stackUnshift(stackData, tab.id);
@@ -337,7 +391,7 @@ page.eventLoginPopup = function(callback, tab, logins) {
 page.eventHTTPAuthPopup = function(callback, tab, data) {
 	var stackData = {
 		level: 1,
-		icon: "keepass-q.png",
+		iconType: "questionmark",
 		popup: "popup_httpauth.html"
 	}
 	page.stackUnshift(stackData, tab.id);
@@ -350,7 +404,7 @@ page.eventHTTPAuthPopup = function(callback, tab, data) {
 page.eventMultipleFieldsPopup = function(callback, tab) {
 	var stackData = {
 		level: 1,
-		icon: "keepass.png",
+		iconType: "normal",
 		popup: "popup_multiple-fields.html"
 	}
 	page.stackUnshift(stackData, tab.id);
@@ -361,11 +415,11 @@ page.eventMultipleFieldsPopup = function(callback, tab) {
 page.eventPopup = function(callback, tab) {
 	var stackData = {
 		level: 1,
-		icon: "keepass.png",
+		iconType: "normal",
 		popup: "popup.html"
 	}
-	if(!keepass.isConfigured() || page.tabs[tab.id].errorMessage) {
-		stackData.icon = "keepass-x.png";
+	if(!keepass.isConfigured() || keepass.isDatabaseClosed || !keepass.isKeePassHttpAvailable || page.tabs[tab.id].errorMessage) {
+		stackData.iconType = "cross";
 	}
 
 	page.stackUnshift(stackData, tab.id);
@@ -386,40 +440,16 @@ page.requestHandlers = {
 	'associate': keepass.associate,
 	'alert': page.eventShowAlert,
 	'load_settings': page.eventLoadSettings,
+	'load_keyring': page.eventLoadKeyRing,
 	'get_settings': page.eventGetSettings,
 	'save_settings': page.eventSaveSettings,
 	'set_remember_credentials': page.eventSetRememberPopup,
 	'add_page_action': page.eventAddPageAction,
 	'pop_stack': page.eventPopStack,
 	'get_tab_information': page.eventGetTabInformation,
+	'get_connected_database': page.eventGetConnectedDatabase,
+	'get_keepasshttp_versions': page.eventGetKeePassHttpVersions,
+	'check_update_keepasshttp': page.eventCheckUpdateKeePassHttp,
 	'update_available_keepasshttp': page.eventUpdateAvailableKeePassHttp,
 	'remove_credentials_from_tab_information': page.eventRemoveCredentialsFromTabInformation
 };
-
-
-/*
-function _find_cache_item(url, submiturl) {
-	var key = url + "!!" + submiturl;
-	var item = _cache[key];
-	var now = Date.now();
-	if (item && (item.ts + CHROMEIPASS_CACHE_TIME) > now) {
-		item.ts = now;
-		return item.entries;
-	}
-	return null;
-}
-function _cache_item(url, submiturl, entries) {
-	var key = url + "!!" + submiturl;
-	var item = {};
-	item.ts = Date.now();
-	item.entries = entries;
-	_cache[key] = item;
-}
-function _prune_cache() {
-	var now = Date.now();
-	for (var i in _cache) {
-		var item = _cache[i];
-		if ((item.ts + CHROMEIPASS_CACHE_TIME) < now) delete _cache[i];
-	}
-}
-*/

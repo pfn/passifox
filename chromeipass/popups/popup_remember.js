@@ -4,7 +4,7 @@ function _initialize(tab) {
 	_tab = tab;
 
 	if(_tab.credentials.list.length == 0) {
-		$("#btn-update").attr("disabled", true).removeClass("cip-btn-warning");
+		$("#btn-update").attr("disabled", true).removeClass("b2c-btn-warning");
 	}
 
 	$("#btn-new").click(function(e) {
@@ -68,6 +68,16 @@ function _initialize(tab) {
 	});
 }
 
+function _connected_database(db) {
+	if(db.count > 1 && db.identifier) {
+		$(".connected-database:first em:first").text(db.identifier);
+		$(".connected-database:first").show();
+	}
+	else {
+		$(".connected-database:first").hide();
+	}
+}
+
 function _verifyResult(code) {
 	if(code == "success") {
 		_close();
@@ -91,11 +101,16 @@ function _close() {
 $(function() {
 	chrome.extension.sendRequest({
 		action: 'add_page_action',
-		args: ["keepass_inverse_red_background.png", "popup_remember.html", 10, true, 0]
+		args: ["icon_remember_red_background_16x16.png", "popup_remember.html", 10, true, 0]
 	});
 
 	chrome.extension.sendRequest({
 		action: 'get_tab_information',
 		args: []
 	}, _initialize);
+
+	chrome.extension.sendRequest({
+		action: 'get_connected_database',
+		args: []
+	}, _connected_database);
 });

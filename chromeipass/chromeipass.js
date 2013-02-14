@@ -148,6 +148,11 @@ function init() {
 					"password": _prepareId(inputs[i].attr("id"))
 				};
 				credentialInputs.push(fields);
+
+				var form = (_f(fields.username)) ? _f(fields.username).closest("form") : null;
+				if(form && form.length > 0) {
+					initForm(form, fields);
+				}
 			}
 		}
 	}
@@ -164,7 +169,6 @@ function init() {
 
 		if(form && form.length > 0) {
 			action = form[0].action;
-			initForm(form, credentialInputs[0]);
 		}
 
 		if (typeof(action) != "string" || action == "") {
@@ -241,6 +245,10 @@ function formSubmit() {
 	var usernameValue = _f(usernameId).val();
 	var passwordValue = _f(passwordId).val();
 
+	if(passwordValue == "") {
+		return true;
+	}
+
 	var usernameExists = false;
 
 	var found = false;
@@ -272,21 +280,33 @@ function formSubmit() {
 				"Uuid": _credentials.logins[i].Uuid
 			});
 		}
+
+		var url = cIPJQ(this)[0].action;
+		if(!url) {
+			url = document.location.href;
+			if(url.indexOf("?") > 0) {
+				url = url.substring(0, url.indexOf("?"));
+				if(url.length < document.location.origin.length) {
+					url = document.location.origin;
+				}
+			}
+		}
+
 		chrome.extension.sendRequest({
 			'action': 'set_remember_credentials',
-			'args': [usernameValue, passwordValue, document.location.origin, usernameExists, credentialsList]
+			'args': [usernameValue, passwordValue, url, usernameExists, credentialsList]
 		});
 	}
 }
 
 function initChooseInputFields() {
-	var $backdrop = cIPJQ("<div>").attr("id", "cip-backdrop").addClass("cip-modal-backdrop");
+	var $backdrop = cIPJQ("<div>").attr("id", "b2c-backdrop").addClass("b2c-modal-backdrop");
 	cIPJQ("body").append($backdrop);
 
-	var $chooser = cIPJQ("<div>").attr("id", "cip-choose-fields");
+	var $chooser = cIPJQ("<div>").attr("id", "b2c-choose-fields");
 	cIPJQ("body").append($chooser);
 
-	var $description = cIPJQ("<div>").attr("id", "cip-choose-description");
+	var $description = cIPJQ("<div>").attr("id", "b2c-choose-description");
 	$backdrop.append($description);
 
 	initChooserDescription();
@@ -295,37 +315,37 @@ function initChooseInputFields() {
 }
 
 function initChooserDescription() {
-	var $description = cIPJQ("div#cip-choose-description");
-	var $h1 = cIPJQ("<div>").addClass("cip-chooser-headline").text("1. Choose a username field");
+	var $description = cIPJQ("div#b2c-choose-description");
+	var $h1 = cIPJQ("<div>").addClass("b2c-chooser-headline").text("1. Choose a username field");
 	$description.append($h1);
 
-	var $btnDismiss = cIPJQ("<button>").text("Dismiss").attr("id", "cip-btn-dismiss")
-		.addClass("cip-btn").addClass("cip-btn-danger")
+	var $btnDismiss = cIPJQ("<button>").text("Dismiss").attr("id", "b2c-btn-dismiss")
+		.addClass("b2c-btn").addClass("b2c-btn-danger")
 		.click(function(e) {
-			cIPJQ("div#cip-backdrop").remove();
-			cIPJQ("div#cip-choose-fields").remove();
+			cIPJQ("div#b2c-backdrop").remove();
+			cIPJQ("div#b2c-choose-fields").remove();
 		});
-	var $btnAgain = cIPJQ("<button>").text("Again").attr("id", "cip-btn-again")
-		.addClass("cip-btn").addClass("cip-btn-warning")
+	var $btnAgain = cIPJQ("<button>").text("Again").attr("id", "b2c-btn-again")
+		.addClass("b2c-btn").addClass("b2c-btn-warning")
 		.css("margin-right", "5px")
 		.click(function(e) {
 			cIPJQ(this).hide();
-			cIPJQ("button#cip-btn-confirm").hide();
-			cIPJQ("div.cip-fixed-field", cIPJQ("div#cip-choose-fields")).remove();
-			cIPJQ("div:first", cIPJQ("div#cip-choose-description")).text("1. Choose a username field");
-			chooserMarkAllUsernameFields(cIPJQ("#cip-choose-fields"));
+			cIPJQ("button#b2c-btn-confirm").hide();
+			cIPJQ("div.b2c-fixed-field", cIPJQ("div#b2c-choose-fields")).remove();
+			cIPJQ("div:first", cIPJQ("div#b2c-choose-description")).text("1. Choose a username field");
+			chooserMarkAllUsernameFields(cIPJQ("#b2c-choose-fields"));
 		})
 		.hide();
-	var $btnConfirm = cIPJQ("<button>").text("Confirm").attr("id", "cip-btn-confirm")
-		.addClass("cip-btn").addClass("cip-btn-primary")
+	var $btnConfirm = cIPJQ("<button>").text("Confirm").attr("id", "b2c-btn-confirm")
+		.addClass("b2c-btn").addClass("b2c-btn-primary")
 		.css("margin-right", "15px")
 		.click(function(e) {
 			if(!_settings["defined-credential-fields"]) {
 				_settings["defined-credential-fields"] = {};
 			}
 			_settings["defined-credential-fields"][document.location.origin] = {
-				"username": _prepareId(cIPJQ("div#cip-choose-fields").data("username")),
-				"password": _prepareId(cIPJQ("div#cip-choose-fields").data("password"))
+				"username": _prepareId(cIPJQ("div#b2c-choose-fields").data("username")),
+				"password": _prepareId(cIPJQ("div#b2c-choose-fields").data("password"))
 			};
 
 			chrome.extension.sendRequest({
@@ -333,7 +353,7 @@ function initChooserDescription() {
 				args: [_settings]
 			});
 
-			cIPJQ("button#cip-btn-dismiss").click();
+			cIPJQ("button#b2c-btn-dismiss").click();
 		})
 		.hide();
 
@@ -344,12 +364,12 @@ function initChooserDescription() {
 	if(_settings["defined-credential-fields"] && _settings["defined-credential-fields"][document.location.origin]) {
 		var $p = cIPJQ("<p>").html("For this page credential fields are already selected.<br />");
 		var $btnDiscard = cIPJQ("<button>")
-			.attr("id", "cip-btn-discard")
+			.attr("id", "b2c-btn-discard")
 			.text("Discard selection")
 			.css("margin-top", "5px")
-			.addClass("cip-btn")
-			.addClass("cip-btn-small")
-			.addClass("cip-btn-danger")
+			.addClass("b2c-btn")
+			.addClass("b2c-btn-small")
+			.addClass("b2c-btn-danger")
 			.click(function(e) {
 				delete _settings["defined-credential-fields"][document.location.origin];
 
@@ -369,26 +389,26 @@ function initChooserDescription() {
 		$description.append($p);
 	}
 
-	cIPJQ("div#cip-backdrop").draggit("div#cip-choose-description");
+	cIPJQ("div#b2c-backdrop").draggit("div#b2c-choose-description");
 }
 
 function chooserMarkAllPasswordFields($chooser) {
 	cIPJQ("input[type='password']").each(function() {
 		if(cIPJQ(this).is(":visible") && cIPJQ(this).css("visibility") != "hidden" && cIPJQ(this).css("visibility") != "collapsed") {
-			var $field = cIPJQ("<div>").addClass("cip-fixed-field")
+			var $field = cIPJQ("<div>").addClass("b2c-fixed-field")
 				.css("top", cIPJQ(this).offset().top)
 				.css("left", cIPJQ(this).offset().left)
 				.css("width", cIPJQ(this).outerWidth())
 				.css("height", cIPJQ(this).outerHeight())
 				.data("id", cIPJQ(this).attr("id"))
 				.click(function(e) {
-					cIPJQ("div#cip-choose-fields").data("password", cIPJQ(this).data("id"));
-					cIPJQ(this).addClass("cip-fixed-password-field").text("Password").unbind("click");
-					cIPJQ("div.cip-fixed-field:not(.cip-fixed-password-field,.cip-fixed-username-field)", cIPJQ("div#cip-choose-fields")).remove();
-					cIPJQ("button#cip-btn-confirm").show();
-					cIPJQ("div:first", cIPJQ("div#cip-choose-description")).text("3. Confirm selection");
+					cIPJQ("div#b2c-choose-fields").data("password", cIPJQ(this).data("id"));
+					cIPJQ(this).addClass("b2c-fixed-password-field").text("Password").unbind("click");
+					cIPJQ("div.b2c-fixed-field:not(.b2c-fixed-password-field,.b2c-fixed-username-field)", cIPJQ("div#b2c-choose-fields")).remove();
+					cIPJQ("button#b2c-btn-confirm").show();
+					cIPJQ("div:first", cIPJQ("div#b2c-choose-description")).text("3. Confirm selection");
 				})
-				.hover(function() {cIPJQ(this).addClass("cip-fixed-hover-field");}, function() {cIPJQ(this).removeClass("cip-fixed-hover-field");});
+				.hover(function() {cIPJQ(this).addClass("b2c-fixed-hover-field");}, function() {cIPJQ(this).removeClass("b2c-fixed-hover-field");});
 			$chooser.append($field);
 		}
 	});
@@ -397,21 +417,21 @@ function chooserMarkAllPasswordFields($chooser) {
 function chooserMarkAllUsernameFields($chooser) {
 	cIPJQ("input[type='text'], input[type='email'], input:not([type])").each(function() {
 		if(cIPJQ(this).is(":visible") && cIPJQ(this).css("visibility") != "hidden" && cIPJQ(this).css("visibility") != "collapsed") {
-			var $field = cIPJQ("<div>").addClass("cip-fixed-field")
+			var $field = cIPJQ("<div>").addClass("b2c-fixed-field")
 				.css("top", cIPJQ(this).offset().top)
 				.css("left", cIPJQ(this).offset().left)
 				.css("width", cIPJQ(this).outerWidth())
 				.css("height", cIPJQ(this).outerHeight())
 				.data("id", cIPJQ(this).attr("id"))
 				.click(function(e) {
-					cIPJQ("div#cip-choose-fields").data("username", cIPJQ(this).data("id"));
-					cIPJQ(this).addClass("cip-fixed-username-field").text("Username").unbind("click");
-					cIPJQ("div.cip-fixed-field:not(.cip-fixed-username-field)", cIPJQ("div#cip-choose-fields")).remove();
-					cIPJQ("div:first", cIPJQ("div#cip-choose-description")).text("2. Now choose a password field");
-					cIPJQ("button#cip-btn-again").show();
-					chooserMarkAllPasswordFields(cIPJQ("#cip-choose-fields"));
+					cIPJQ("div#b2c-choose-fields").data("username", cIPJQ(this).data("id"));
+					cIPJQ(this).addClass("b2c-fixed-username-field").text("Username").unbind("click");
+					cIPJQ("div.b2c-fixed-field:not(.b2c-fixed-username-field)", cIPJQ("div#b2c-choose-fields")).remove();
+					cIPJQ("div:first", cIPJQ("div#b2c-choose-description")).text("2. Now choose a password field");
+					cIPJQ("button#b2c-btn-again").show();
+					chooserMarkAllPasswordFields(cIPJQ("#b2c-choose-fields"));
 				})
-				.hover(function() {cIPJQ(this).addClass("cip-fixed-hover-field");}, function() {cIPJQ(this).removeClass("cip-fixed-hover-field");});
+				.hover(function() {cIPJQ(this).addClass("b2c-fixed-hover-field");}, function() {cIPJQ(this).removeClass("b2c-fixed-hover-field");});
 			$chooser.append($field);
 		}
 	});
@@ -829,7 +849,7 @@ function _fillIn(credentialFields, onlyPassword, suppressWarnings) {
 		if(countPasswords > 1) {
 			if(!suppressWarnings) {
 				var message = "More than one login was found in KeePass, " +
-				"press the ChromeIPass icon for more options";
+				"press the chromeIPass icon for more options";
 				chrome.extension.sendRequest({
 					action: 'alert',
 					args: [message]

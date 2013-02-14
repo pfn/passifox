@@ -6,7 +6,7 @@
 	font-family: Verdana, Arial, sans-serif;
 	color: #222222;
 }
-.cip-modal-backdrop {
+.b2c-modal-backdrop {
 	position: fixed;
 	top: 0;
 	right: 0;
@@ -14,7 +14,7 @@
 	left: 0;
 	z-index: 1040;
 }
-.cip-modal-backdrop:after {
+.b2c-modal-backdrop:after {
 	content:'';
 	position: fixed;
 	top: 0;
@@ -25,10 +25,10 @@
 	opacity: 0.8;
 	filter: alpha(opacity=80);
 }
-#cip-choose-fields {
+#b2c-choose-fields {
 	z-index: 1050;
 }
-#cip-choose-description {
+#b2c-choose-description {
 	z-index: 1050;
 	color: #efefef;
 	border: 2px solid #555555;
@@ -41,7 +41,7 @@
 	background-color:rgba(255,255,255,0.3);
 	font-size: 15px;
 }
-#cip-choose-description div:first-of-type {
+#b2c-choose-description div:first-of-type {
 	margin-top: 0;
 	padding-top: 0;
 	text-align: left;
@@ -50,13 +50,13 @@
 	font-weight: bold;
 	font-size: 160%;
 }
-#cip-choose-description p {
+#b2c-choose-description p {
 	margin-top: 10px;
 	padding-top: 10px;
 	border-top: 2px solid #666666;
 	line-height: 110%;
 }
-.cip-fixed-field {
+.b2c-fixed-field {
 	position: absolute;
 	border: 2px solid #efefef;
 	cursor: pointer;
@@ -65,16 +65,16 @@
 	font-weight: bold;
 	background-color:rgba(239,239,239,0.4);
 }
-.cip-fixed-hover-field {
+.b2c-fixed-hover-field {
 	border: 2px solid orange;
 	background-color:rgba(255,165,239,0.4);
 }
-.cip-fixed-password-field {
+.b2c-fixed-password-field {
 	border: 2px solid red;
 	color: #efefef;
 	background-color:rgba(255,0,0,0.4);
 }
-.cip-fixed-username-field {
+.b2c-fixed-username-field {
 	border: 2px solid limegreen;
 	color: #efefef;
 	background-color:rgba(50,205,50,0.4);

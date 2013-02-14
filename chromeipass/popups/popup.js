@@ -1,31 +1,36 @@
-var last_response = null;
-
-function status_response(response) {
-	last_response = response;
-	var error = response.error;
-	var configured = response.configured;
-	var keyname = response.keyname;
-	var associated = response.associated;
+function status_response(r) {
 	$('#initial-state').hide();
 	$('#error-encountered').hide();
 	$('#need-reconfigure').hide();
 	$('#not-configured').hide();
 	$('#configured-and-associated').hide();
 	$('#configured-not-associated').hide();
-	if (error && !configured) {
-		$('#need-reconfigure').show();
-		$('#need-reconfigure-message').html(error);
-	} else if (error) {
+
+
+	if(!r.keePassHttpAvailable || r.databaseClosed) {
+		$('#error-message').html(r.error);
 		$('#error-encountered').show();
-		$('#error-message').html(error);
-	} else if (!configured) {
+	}
+	else if(!r.configured) {
 		$('#not-configured').show();
-	} else if (keyname && !associated) {
-		$('#configured-not-associated').show();
-		$('#unassociated-keyname').html(keyname);
-	} else if (keyname && associated) {
+	}
+	else if(r.encryptionKeyUnrecognized) {
+		$('#need-reconfigure').show();
+		$('#need-reconfigure-message').html(r.error);
+	}
+	else if(!r.associated) {
+		//$('#configured-not-associated').show();
+		//$('#unassociated-identifier').html(r.identifier);
+		$('#need-reconfigure').show();
+		$('#need-reconfigure-message').html(r.error);
+	}
+	else if(typeof(r.error) != "undefined") {
+		$('#error-encountered').show();
+		$('#error-message').html(r.error);
+	}
+	else {
 		$('#configured-and-associated').show();
-		$('#associated-keyname').html(keyname);
+		$('#associated-identifier').html(r.identifier);
 	}
 }
 
@@ -44,9 +49,10 @@ $(function() {
 		close();
 	});
 
-	$("#clear-button").click(function() {
-		last_response.error = null;
-		status_response(last_response);
+	$("#reload-status-button").click(function() {
+		chrome.extension.sendRequest({
+			action: "get_status"
+		}, status_response);
 	});
 
 	chrome.extension.sendRequest({

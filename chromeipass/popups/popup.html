@@ -9,9 +9,8 @@
 	</head>
 	<body>
 		<div id="settings" class="settings">
-			<label><input type="checkbox" name="autoFillAndSend" value="1" /> Auto fill HTTP Auth requests and send it.</label>
-			<label><input type="checkbox" name="autoCompleteUsernames" value="1" /> Activate autocomplete for username fields.</label>
-			<label><button id="btn-choose-credential-fields" class="cip-btn cip-btn-small">Choose own credential fields for this page</button></label>
+			<button id="btn-options" class="b2c-btn b2c-btn-small b2c-btn-warning">Settings</button>
+			<button id="btn-choose-credential-fields" class="b2c-btn b2c-btn-small">Choose own credential fields for this page</button>
 			<div class="description">Changes get active after page reload</div>
 
 			<div id="update-available">
@@ -22,58 +21,60 @@
 		</div>
 
 		<div id="initial-state">
-			<p><img style="margin-right: 1em" src="throbber.gif"/> Checking status...</p>
+			<p><img style="margin-right: 1em" src="/popups/throbber.gif"/> Checking status...</p>
 		</div>
 
 		<div id="not-configured" style="display: none">
 			<p>
-				ChromeIPass has not been configured.  Press the connect button to register
-				and pair with KeePassHttp.
+				chromeIPass has not been configured.
+				Press the connect button to register and pair with KeePassHttp.
 			</p>
 			<div style="text-align: right">
-				<button id="connect-button">Connect</button>
+				<button id="connect-button" class="b2c-btn b2c-btn-primary">Connect</button>
 			</div>
 		</div>
 
 		<div id="need-reconfigure" style="display: none">
 			<p>
-				ChromeIPass has been disconnected from KeePassHttp.
+				chromeIPass has been disconnected from KeePassHttp.
 			</p>
 			<code id="need-reconfigure-message"></code>
 			<p>
-				Press the reconnect
-				button to establish a new connection.
+				Press the reconnect button to establish a new connection.
 			</p>
 			<div style="text-align: right">
-				<button id="reconnect-button">Reconnect</button>
+				<button id="reconnect-button" class="b2c-btn b2c-btn-primary">Reconnect</button>
 			</div>
 		</div>
 
 		<div id="configured-not-associated" style="display: none">
 			<p>
-				ChromeIPass has been configured using the keyname
-				<em id="unassociated-keyname"></em> and has not yet
+				chromeIPass has been configured using the identifier
+				<em id="unassociated-identifier"></em> and has not yet
 				connected to KeePassHttp.
 			</p>
 		</div>
 
 		<div id="configured-and-associated" style="display: none">
 			<p>
-				ChromeIPass has been configured using the keyname
-				"<em id="associated-keyname"></em>" and is successfully
+				chromeIPass has been configured using the identifier
+				"<em id="associated-identifier"></em>" and is successfully
 				connected to KeePassHttp.
+			</p>
+			<p>
+				If there are no credentials shown, please reload the page to retrieve the credentials.
 			</p>
 		</div>
 
 		<div id="error-encountered" style="display: none">
 			<p>
-				ChromeIPass has encountered an error:
+				chromeIPass has encountered an error:
 			</p>
-			<p>
-				<code style="margin-left: 1em" id="error-message"></code>
+			<p style="margin-left: 1em">
+				<code id="error-message"></code>
 			</p>
 			<div style="text-align: right">
-				<button id="clear-button">Clear</button>
+				<button id="reload-status-button" class="b2c-btn">Reload</button>
 			</div>
 		</div>
 	</body>

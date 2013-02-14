@@ -7,7 +7,8 @@
 		<script type="text/javascript" src="popup_functions.js"></script>
 		<script type="text/javascript" src="popup_remember.js"></script>
 		<style type="text/css">
-			.credentials {display: none; border-top: 1px solid #333; padding-top: 5px;}
+			.credentials {display: none; border-top: 1px solid #333;}
+			.connected-database {display: none; font-size: 85%; color: #787878;}
 			.credentials .username-new {display: none;}
 			.credentials .username-exists {display: none;}
 		</style>
@@ -16,10 +17,14 @@
 		<div class="buttons">
 			<p>Username or password changed! Save it?</p>
 			<p>
-				<button id="btn-new" class="cip-btn cip-btn-success">New</button>
-				<button id="btn-update" class="cip-btn cip-btn-warning">Update</button>
-				<button id="btn-dismiss" class="cip-btn cip-btn-danger">Dismiss</button>
+				<button id="btn-new" class="b2c-btn b2c-btn-success">New</button>
+				<button id="btn-update" class="b2c-btn b2c-btn-warning">Update</button>
+				<button id="btn-dismiss" class="b2c-btn b2c-btn-danger">Dismiss</button>
 			</p>
+		</div>
+
+		<div class="connected-database">
+			<p>Credentials will be saved in connected Database with identifier <em></em>.</p>
 		</div>
 
 		<div class="credentials">

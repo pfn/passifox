@@ -1,26 +1,37 @@
+// since version 2.0 the extension is using a keyRing instead of a single key-name-pair
+keepass.convertKeyToKeyRing();
+page.initSettings();
+
 // remove tab-information when it is closed
 chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
 	delete page.tabs[tabId];
+	delete page.popupTabIds[tabId];
 });
 
 // add tab-information when tab is created
 chrome.tabs.onCreated.addListener(function(tab) {
-	page.tabs[tab.id] = {
-		stack: [],
-		errorMessage: null,
-		loginList: {}
-	};
+	if(tab.url.substring(0, 18) == "chrome-devtools://") {
+		page.popupTabIds["t"+tab.id.toString()] = true;
+	}
+	else {
+		page.tabs[tab.id] = {
+			stack: [],
+			errorMessage: null,
+			loginList: {}
+		};
+	}
 });
 
 // set the currently active tabId
 chrome.tabs.onActivated.addListener(function(activeInfo) {
-	page.currentTabId = activeInfo.tabId;
+	if(!page.popupTabIds["t"+activeInfo.tabId.toString()]) {
+		page.currentTabId = activeInfo.tabId;
+	}
 });
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-	if(changeInfo.status == "complete") {
+	if(changeInfo.status == "complete" && !page.popupTabIds["t"+tabId.toString()]) {
 		page.removeRememberPageAction(tabId);
-		page.clearCredentials(tabId);
 	}
 });
 
