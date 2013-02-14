@@ -1,6 +1,8 @@
 (function() {
 var inputs = document.getElementsByTagName("input");
 var passwordinputs = [];
+var usernameinputs = [];
+var availableUsernames = [];
 
 function visible(e) {
     var visible = true;
@@ -75,9 +77,14 @@ function logins_callback(logins) {
         passwordinputs[0].value = logins[0].Password;
     } else if (logins.length > 1) {
         var usernames = [];
+		availableUsernames = [];
         for (var i = 0; i < logins.length; i++) {
             usernames.push(logins[i].Name + " - " + logins[i].Login);
+			var item = { "label": logins[i].Login + " (" + logins[i].Name + ")", "value": logins[i].Login };
+			availableUsernames.push(item);
+			//availableUsernames.push(logins[i].Login);
         }
+
         chrome.extension.sendRequest({
             'action': 'select_login',
             'args': [usernames]
@@ -86,7 +93,7 @@ function logins_callback(logins) {
         _u = u;
     }
 }
-function fillLogin(u, p) {
+function fillLogin(u, p, onlyPassword, suppressWarnings) {
     var form = u != null ? u.form : p.form;
     var action = document.location.origin;
     if (form)
@@ -95,31 +102,60 @@ function fillLogin(u, p) {
         'action': 'get_passwords',
         'args': [ document.location.origin, action ]
     }, function(logins) {
-        if (logins.length == 0) {
+		if (logins.length == 0 && !suppressWarnings) {
             var message = "No logins found";
             chrome.extension.sendRequest({ action: 'alert', args: [message] });
             return;
         }
         if (logins.length == 1) {
-            if (u)
+            if (u && !onlyPassword)
                 u.value = logins[0].Login;
-            if (p)
+            if (p) {
                 p.value = logins[0].Password;
+				cIPJQ(p).data("unchanged", true);
+			}
         } else {
-            _u = u;
-            _p = p;
-            _logins = logins;
-            var usernames = [];
-            for (var i = 0; i < logins.length; i++) {
-                usernames.push(logins[i].Name + " - " + logins[i].Login);
-            }
-            chrome.extension.sendRequest({
-                'action': 'select_login',
-                'args': [usernames, true]
-            });
-            var message = "More than one login was found in KeePass, " +
-                    "press the ChromeIPass icon for more options";
-            chrome.extension.sendRequest({ action: 'alert', args: [message] });
+			// check if password for given username exists
+			var found = false;
+
+			if(u) {
+				var valPassword = "";
+				var countPassword = 0;
+				for (var i = 0; i < logins.length; i++) {
+					if(logins[i].Login == u.value) {
+						countPassword += 1;
+						valPassword = logins[i].Password;
+					}
+				}
+
+				if(countPassword == 1) {
+					if(p) {
+						p.value = valPassword;
+						cIPJQ(p).data("unchanged", true);
+					}
+					found = true;
+				}
+			}
+
+			_u = u;
+			_p = p;
+			_logins = logins;
+			var usernames = [];
+			for (var i = 0; i < logins.length; i++) {
+				usernames.push(logins[i].Name + " - " + logins[i].Login);
+			}
+			chrome.extension.sendRequest({
+				'action': 'select_login',
+				'args': [usernames, true]
+			});
+
+			if(!found) {
+				if(!suppressWarnings) {
+					var message = "More than one login was found in KeePass, " +
+							"press the ChromeIPass icon for more options";
+					chrome.extension.sendRequest({ action: 'alert', args: [message] });
+				}
+			}
         }
     });
 }
@@ -133,18 +169,21 @@ window.addEventListener("keydown", function(e) {
         }
     }
 }, false);
-function fillInUserPass() {
+function fillInUserPass(suppressWarnings) {
     var u = document.activeElement;
     if (u.tagName.toLowerCase() != "input")
         return;
-    var p = getFields(u, null)[1];
-    if (p == null && u.type.toLowerCase() == "password") {
-        p = u;
-        u = getFields(null, p)[0];
-    }
-    fillLogin(u, p);
+	var p = null;
+	if(u.type.toLowerCase() == "password") {
+		p = u;
+		u = getFields(null, p)[0];
+	}
+	else {
+		p = getFields(u, null)[1];
+	}
+    fillLogin(u, p, false, suppressWarnings);
 }
-function fillInPassOnly() {
+function fillInPassOnly(suppressWarnings) {
     var p = document.activeElement;
     if (p.tagName.toLowerCase() != "input")
         return;
@@ -158,7 +197,15 @@ function fillInPassOnly() {
         });
         return;
     }
-    fillLogin(null, p);
+
+	var u = _u;
+	if(!_u) {
+		u = getFields(null, p)[0];
+	}
+
+	var onlyPassword = (u && u.value != "");
+
+    fillLogin(u, p, onlyPassword, suppressWarnings);
 }
 chrome.extension.onRequest.addListener(function onRequest(req) {
     if ('id' in req) {
@@ -177,6 +224,54 @@ chrome.extension.onRequest.addListener(function onRequest(req) {
         }
     }
 });
+
+
+// add lost focus listener to all possible username fields
+for(var i = 0; i < passwordinputs.length; i++) {
+	u = getFields(null, passwordinputs[i])[0];
+	usernameinputs.push(u);
+
+	cIPJQ(passwordinputs[i]).change(function(e) {
+		cIPJQ(this).data("unchanged", false);
+	});
+
+	if(u) {
+		cIPJQ(u).autocomplete({
+			minLength: 0,
+			source: function( request, response ) {
+				var matches = cIPJQ.map( availableUsernames, function(tag) {
+					if ( tag.label.toUpperCase().indexOf(request.term.toUpperCase()) === 0 ) {
+						return tag;
+					}
+				});
+				response(matches);
+			},
+			select: function(e, ui) {
+				e.preventDefault();
+				cIPJQ(this).val(ui.item.value);
+				fillLogin(cIPJQ(this)[0], getFields(cIPJQ(this)[0], null)[1], true, false);
+				cIPJQ(this).data("fetched", true);
+			}
+		})
+		.blur(function(e) {
+			if(cIPJQ(this).data("fetched") == true) {
+				cIPJQ(this).data("fetched", false);
+			}
+			else {
+				var p = getFields(cIPJQ(this)[0], null)[1];
+				if(cIPJQ(p).data("unchanged") != true) {
+					fillLogin(cIPJQ(this)[0], p, true, true);
+				}
+			}
+		})
+		.focus(function(e) {
+			if(cIPJQ(this).val() == "") {
+				cIPJQ(this).autocomplete( "search", "" );
+				//cIPJQ(this).trigger("keydown");
+			}
+		});
+	}
+}
 
 if (passwordinputs.length == 0) {
     chrome.extension.sendRequest({
