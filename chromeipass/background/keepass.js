@@ -348,7 +348,7 @@ keepass.getIconColor = function() {
 
 keepass.keePassHttpUpdateAvailable = function() {
 	if(page.settings.checkUpdateKeePassHttp && page.settings.checkUpdateKeePassHttp > 0) {
-		var lastChecked = (keepass.latestKeePassHttp.lastChecked) ? new Date(keepass.latestKeePassHttp.lastChecked) : 0;
+		var lastChecked = (keepass.latestKeePassHttp.lastChecked) ? new Date(keepass.latestKeePassHttp.lastChecked) : new Date("11/21/1986");
 		var daysSinceLastCheck = Math.floor(((new Date()).getTime()-lastChecked.getTime())/86400000);
 		if(daysSinceLastCheck >= page.settings.checkUpdateKeePassHttp) {
 			keepass.checkForNewKeePassHttpVersion();
