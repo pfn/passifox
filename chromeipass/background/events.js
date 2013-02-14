@@ -1,7 +1,7 @@
 // since version 2.0 the extension is using a keyRing instead of a single key-name-pair
 keepass.convertKeyToKeyRing();
 page.initSettings();
-page.initBlockedTabs();
+page.initOpenedTabs();
 
 // remove tab-information when it is closed
 chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {

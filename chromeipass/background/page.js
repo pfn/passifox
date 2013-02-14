@@ -21,12 +21,19 @@ page.initSettings = function() {
 	localStorage.settings = JSON.stringify(page.settings);
 }
 
-page.initBlockedTabs = function() {
+page.initOpenedTabs = function() {
 	chrome.windows.getAll({"populate" : true}, function(windows) {
 		for(var w = 0; w < windows.length; w++) {
 			for(var t = 0; t < windows[w].tabs.length; t++) {
-				if(page.checkBlockedTab(windows[w].tabs[t].url, windows[w].tabs[t].id)) {
+				if(!windows[w].tabs[t].url || page.checkBlockedTab(windows[w].tabs[t].url, windows[w].tabs[t].id)) {
 					page.blockedTabs[windows[w].tabs[t].id] = true;
+				}
+				else {
+					page.tabs[windows[w].tabs[t].id] = {
+						stack: [],
+						errorMessage: null,
+						loginList: {}
+					};
 				}
 			}
 		}
