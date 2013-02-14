@@ -1,17 +1,18 @@
 // since version 2.0 the extension is using a keyRing instead of a single key-name-pair
 keepass.convertKeyToKeyRing();
 page.initSettings();
+page.initBlockedTabs();
 
 // remove tab-information when it is closed
 chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
 	delete page.tabs[tabId];
-	delete page.popupTabIds[tabId];
+	delete page.blockedTabs[tabId];
 });
 
 // add tab-information when tab is created
 chrome.tabs.onCreated.addListener(function(tab) {
-	if(tab.url.substring(0, 18) == "chrome-devtools://") {
-		page.popupTabIds["t"+tab.id.toString()] = true;
+	if(page.checkBlockedTab(tab.url, tab.id)) {
+		page.blockedTabs[tab.id] = true;
 	}
 	else {
 		page.tabs[tab.id] = {
@@ -24,13 +25,13 @@ chrome.tabs.onCreated.addListener(function(tab) {
 
 // set the currently active tabId
 chrome.tabs.onActivated.addListener(function(activeInfo) {
-	if(!page.popupTabIds["t"+activeInfo.tabId.toString()]) {
+	if(!page.blockedTabs[activeInfo.tabId]) {
 		page.currentTabId = activeInfo.tabId;
 	}
 });
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-	if(changeInfo.status == "complete" && !page.popupTabIds["t"+tabId.toString()]) {
+	if(changeInfo.status == "complete" && !page.blockedTabs[tabId]) {
 		page.removeRememberPageAction(tabId);
 	}
 });

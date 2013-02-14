@@ -5,7 +5,7 @@ page.tabs = {};
 
 page.currentTabId = 0;
 page.settings = (typeof(localStorage.settings) == 'undefined') ? {} : JSON.parse(localStorage.settings);
-page.popupTabIds = {};
+page.blockedTabs = {};
 
 page.initSettings = function() {
 	page.eventLoadSettings();
@@ -19,6 +19,22 @@ page.initSettings = function() {
 		page.settings.autoFillAndSend = 1;
 	}
 	localStorage.settings = JSON.stringify(page.settings);
+}
+
+page.initBlockedTabs = function() {
+	chrome.windows.getAll({"populate" : true}, function(windows) {
+		for(var w = 0; w < windows.length; w++) {
+			for(var t = 0; t < windows[w].tabs.length; t++) {
+				if(page.checkBlockedTab(windows[w].tabs[t].url, windows[w].tabs[t].id)) {
+					page.blockedTabs[windows[w].tabs[t].id] = true;
+				}
+			}
+		}
+	});
+}
+
+page.checkBlockedTab = function(url, id) {
+	return (url.indexOf(".") == -1 || url.substring(0, 18) == "chrome-devtools://"  || url.substring(0, 19) == "chrome-extension://");
 }
 
 page.onRequest = function(request, sender, callback) {
@@ -161,19 +177,12 @@ page.stackUnshift = function(data, tabId) {
 
 page.stackPop = function(tabId) {
 	var id = tabId || page.currentTabId;
-
-	if(page.tabs[id]) {
-		var stack = page.tabs[id].stack.pop();
-		if(stack.level == 10) {
-			page.clearCredentials(id);
-		}
-	}
 }
 
 page.clearCredentials = function(tabId) {
 	if(page.tabs[tabId]) {
-		delete page.tabs[tabId].credentials;
 		page.tabs[tabId].credentials = {};
+		delete page.tabs[tabId].credentials;
 	}
 }
 
@@ -183,6 +192,9 @@ page.removeRememberPageAction = function(tabId) {
 	}
 
 	if(page.tabs[tabId].stack.length == 0) {
+		if(page.tabs[tabId].credentials) {
+			page.clearCredentials(tabId);
+		}
 		return;
 	}
 
@@ -353,22 +365,7 @@ page.eventUpdateAvailableKeePassHttp = function(callback, tab) {
 page.eventRemoveCredentialsFromTabInformation = function(callback, tab) {
 	var id = tab.id || page.currentTabId;
 
-	if(page.tabs[id].credentials) {
-		page.tabs[id].credentials.password = "";
-		page.tabs[id].credentials.username = "";
-		page.tabs[id].credentials.url = "";
-		page.tabs[id].credentials.usernameExists = false;
-		page.tabs[id].credentials.list = [];
-
-		delete page.tabs[id].credentials.password;
-		delete page.tabs[id].credentials.username;
-		delete page.tabs[id].credentials.url;
-		delete page.tabs[id].credentials.usernameExists;
-		delete page.tabs[id].credentials.list;
-
-		page.tabs[id].credentials = {};
-		delete page.tabs[id].credentials;
-	}
+	page.clearCredentials(id);
 }
 
 page.eventSetRememberPopup = function(callback, tab, username, password, url, usernameExists, credentialsList) {
