@@ -3,12 +3,24 @@ var _tab;
 function _initialize(tab) {
 	_tab = tab;
 
+	// no credentials set or credentials already cleared
+	if(!_tab.credentials.username) {
+		_close();
+		return;
+	}
+
+	// no existing credentials to update --> disable update-button
 	if(_tab.credentials.list.length == 0) {
 		$("#btn-update").attr("disabled", true).removeClass("b2c-btn-warning");
 	}
 
+	var url = _tab.credentials.url;
+	url = (url.length > 50) ? url.substring(0, 50) + "..." : url;
+	$(".information-url:first em:first").text(url);
+	$(".information-username:first em:first").text(_tab.credentials.username);
+
 	$("#btn-new").click(function(e) {
-		chrome.extension.sendRequest({
+		chrome.extension.sendMessage({
 			action: 'add_credentials',
 			args: [_tab.credentials.username, _tab.credentials.password, _tab.credentials.url]
 		}, _verifyResult);
@@ -19,7 +31,7 @@ function _initialize(tab) {
 
 		// only one entry which could be updated
 		if(_tab.credentials.list.length == 1) {
-			chrome.extension.sendRequest({
+			chrome.extension.sendMessage({
 				action: 'update_credentials',
 				args: [_tab.credentials.list[0].Uuid, _tab.credentials.username, _tab.credentials.password, _tab.credentials.url]
 			}, _verifyResult);
@@ -44,7 +56,7 @@ function _initialize(tab) {
 					.data("entryId", i)
 					.click(function(e) {
 						e.preventDefault();
-						chrome.extension.sendRequest({
+						chrome.extension.sendMessage({
 							action: 'update_credentials',
 							args: [_tab.credentials.list[$(this).data("entryId")].Uuid, _tab.credentials.username, _tab.credentials.password, _tab.credentials.url]
 						}, _verifyResult);
@@ -85,32 +97,28 @@ function _verifyResult(code) {
 }
 
 function _close() {
-	chrome.extension.sendRequest({
-		action: 'remove_credentials_from_tab_information',
-		args: []
+	chrome.extension.sendMessage({
+		action: 'remove_credentials_from_tab_information'
 	});
 
-	chrome.extension.sendRequest({
-		action: 'pop_stack',
-		args: []
+	chrome.extension.sendMessage({
+		action: 'pop_stack'
 	});
 
 	close();
 }
 
 $(function() {
-	chrome.extension.sendRequest({
-		action: 'add_page_action',
-		args: ["icon_remember_red_background_16x16.png", "popup_remember.html", 10, true, 0]
+	chrome.extension.sendMessage({
+		action: 'stack_add',
+		args: ["icon_remember_red_background_19x19.png", "popup_remember.html", 10, true, 0]
 	});
 
-	chrome.extension.sendRequest({
-		action: 'get_tab_information',
-		args: []
+	chrome.extension.sendMessage({
+		action: 'get_tab_information'
 	}, _initialize);
 
-	chrome.extension.sendRequest({
-		action: 'get_connected_database',
-		args: []
+	chrome.extension.sendMessage({
+		action: 'get_connected_database'
 	}, _connected_database);
 });

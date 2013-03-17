@@ -20,8 +20,88 @@ var _credentials = {
 	"submiturl": null,
 	"logins" : []
 };
+// init() already called
+var _calledInitCredentialFields = false;
+var _calledInitDraggit = false;
+
+
+chrome.extension.onMessage.addListener(function(req, sender, callback) {
+	console.log("onMessage("+req.action+")");
+
+	// normal page
+	if ('id' in req) {
+		if (_u) {
+			_u.val(_credentials.logins[req.id].Login);
+			_u.focus();
+		}
+		if (_p) {
+			_p.val(_credentials.logins[req.id].Password);
+		}
+		// wish I could clear out _logins and _u, but a subsequent
+		// selection may be requested.
+	}
+
+	if ('action' in req) {
+		if (req.action == "fill_user_pass") {
+			fillInFromActiveElement(false);
+		}
+		else if (req.action == "fill_pass_only") {
+			fillInFromActiveElementPassOnly(false);
+		}
+		else if (req.action == "choose_credential_fields") {
+			initChooseInputFields();
+		}
+		else if (req.action == "clear_credentials") {
+			_clearCredentials();
+		}
+		else if (req.action == "activated_tab") {
+			_triggerActivatedTab();
+		}
+	}
+});
+
+// Hotkeys for every page
+// ctrl + shift + p = fill only password
+// ctrl + shift + u = fill username + password
+window.addEventListener("keydown", function(e) {
+	if (e.ctrlKey && e.shiftKey) {
+		if (e.keyCode == 80) { // P
+			e.preventDefault();
+			fillInFromActiveElementPassOnly(false);
+		} else if (e.keyCode == 85) { // U
+			e.preventDefault();
+			fillInFromActiveElement(false);
+		}
+	}
+}, false);
+
 
 (function() {
+	init();
+})();
+
+function setUniqueId(field) {
+	if(!field.attr("id")) {
+		uniqueNum += 1;
+		field.attr("id", "cIPJQ"+String(uniqueNum));
+	}
+}
+
+function init() {
+	chrome.extension.sendMessage({
+		"action": "get_settings",
+	}, function(response) {
+		_settings = response.data;
+		initCredentialFields();
+	});
+}
+
+function initDraggit() {
+	if(_calledInitDraggit) {
+		return;
+	}
+	_calledInitDraggit = true;
+
 	/* PlugTrade.com - jQuery draggit Function */
 	/* Drag A Div with jQuery */
 	cIPJQ.fn.draggit = function (el) {
@@ -84,23 +164,15 @@ var _credentials = {
 
 		return this;
 	} // end jQuery draggit function //
-
-	chrome.extension.sendRequest({
-		"action": "get_settings"
-	}, function(response) {
-		_settings = response.data;
-		init();
-	});
-})();
-
-function setUniqueId(field) {
-	if(!field.attr("id")) {
-		uniqueNum += 1;
-		field.attr("id", "cIPJQ"+String(uniqueNum));
-	}
 }
 
-function init() {
+function initCredentialFields() {
+	initDraggit();
+
+	if(_calledInitCredentialFields) {
+		return;
+	}
+
 	// get all input fields which are text, email or password and visible
 	cIPJQ("input[type='text'], input[type='email'], input[type='password'], input:not([type])").each(function() {
 		if(cIPJQ(this).is(":visible") && cIPJQ(this).css("visibility") != "hidden" && cIPJQ(this).css("visibility") != "collapsed") {
@@ -134,10 +206,7 @@ function init() {
 				}
 
 				// disable autocomplete for username field
-				//setUniqueId(u);
 				u.attr("autocomplete", "off");
-
-				//setUniqueId(inputs[i]);
 
 				cIPJQ(inputs[i]).change(function() {
 					cIPJQ(this).data("unchanged", false);
@@ -158,9 +227,9 @@ function init() {
 	}
 
 	if(credentialInputs.length == 0) {
-		chrome.extension.sendRequest({
-			'action': 'hide_action_level',
-			'args': [1] // hide all levels <= X
+		chrome.extension.sendMessage({
+			'action': 'show_default_browseraction',
+			'args': []
 		});
 	}
 	else {
@@ -178,52 +247,13 @@ function init() {
 		_credentials.url = document.location.origin;
 		_credentials.submiturl = action;
 
-		chrome.extension.sendRequest({
+		chrome.extension.sendMessage({
 			'action': 'retrieve_credentials',
 			'args': [ document.location.origin, action ]
 		}, _logins_callback);
 	}
 
-	// Hotkeys for every page
-	// ctrl + shift + p = fill only password
-	// ctrl + shift + u = fill username + password
-	window.addEventListener("keydown", function(e) {
-		if (e.ctrlKey && e.shiftKey) {
-			if (e.keyCode == 80) { // P
-				e.preventDefault();
-				fillInFromActiveElementPassOnly(false);
-			} else if (e.keyCode == 85) { // U
-				e.preventDefault();
-				fillInFromActiveElement(false);
-			}
-		}
-	}, false);
-
-	chrome.extension.onRequest.addListener(function onRequest(req) {
-		// normal page
-		if ('id' in req) {
-			if (_u) {
-				_u.val(_credentials.logins[req.id].Login);
-				_u.focus();
-			}
-			if (_p) {
-				_p.val(_credentials.logins[req.id].Password);
-			}
-		// wish I could clear out _logins and _u, but a subsequent
-		// selection may be requested.
-		}
-		if ('action' in req) {
-			if (req.action == "fill_user_pass") {
-				fillInFromActiveElement(false);
-			}
-			else if (req.action == "fill_pass_only") {
-				fillInFromActiveElementPassOnly(false);
-			}
-			else if (req.action == "choose_credential_fields") {
-				initChooseInputFields();
-			}
-		}
-	});
+	_calledInitCredentialFields = true;
 } // end function init
 
 
@@ -292,7 +322,7 @@ function formSubmit() {
 			}
 		}
 
-		chrome.extension.sendRequest({
+		chrome.extension.sendMessage({
 			'action': 'set_remember_credentials',
 			'args': [usernameValue, passwordValue, url, usernameExists, credentialsList]
 		});
@@ -348,7 +378,7 @@ function initChooserDescription() {
 				"password": _prepareId(cIPJQ("div#b2c-choose-fields").data("password"))
 			};
 
-			chrome.extension.sendRequest({
+			chrome.extension.sendMessage({
 				action: 'save_settings',
 				args: [_settings]
 			});
@@ -373,14 +403,13 @@ function initChooserDescription() {
 			.click(function(e) {
 				delete _settings["defined-credential-fields"][document.location.origin];
 
-				chrome.extension.sendRequest({
+				chrome.extension.sendMessage({
 					action: 'save_settings',
 					args: [_settings]
 				});
 
-				chrome.extension.sendRequest({
-					action: 'load_settings',
-					args: []
+				chrome.extension.sendMessage({
+					action: 'load_settings'
 				});
 
 				cIPJQ(this).parent("p").remove();
@@ -553,7 +582,7 @@ function _logins_callback(logins) {
 		_credentials.logins = logins;
 
 		// generate popup-list of usernames + descriptions
-		chrome.extension.sendRequest({
+		chrome.extension.sendMessage({
 			'action': 'popup_login',
 			'args': [[logins[0].Login + " (" + logins[0].Name + ")"]]
 		});
@@ -580,28 +609,31 @@ function _preparePageForMultipleCredentials(logins) {
 	}
 
 	// generate popup-list of usernames + descriptions
-	chrome.extension.sendRequest({
+	chrome.extension.sendMessage({
 		'action': 'popup_login',
 		'args': [usernames]
 	});
 
 	// initialize autocomplete for username fields
-	if(!preparedUsernameFields) {
-		preparedUsernameFields = true;
+	if(_settings.autoCompleteUsernames) {
 		for(var i = 0; i < credentialInputs.length; i++) {
 			if(_f(credentialInputs[i].username)) {
-				if(_settings.autoCompleteUsernames) {
-					_f(credentialInputs[i].username)
-					.autocomplete({
-						minLength: 0,
-						source: autocompleteSource,
-						select: autocompleteSelect
-					})
-					.focus(autocompleteFocus)
-					.click(function() {
-						cIPJQ(this).autocomplete( "search", cIPJQ(this).val());
-					});
+				if(_f(credentialInputs[i].username).hasClass("ui-autocomplete-input")) {
+					//_f(credentialInputs[i].username).autocomplete("source", autocompleteSource);
+					_f(credentialInputs[i].username).autocomplete("destroy");
 				}
+				_f(credentialInputs[i].username)
+				.autocomplete({
+					minLength: 0,
+					source: autocompleteSource,
+					select: autocompleteSelect,
+					open: autocompleteOpen
+				})
+				.focus(autocompleteFocus)
+				.click(function() {
+					cIPJQ(this).autocomplete( "search", cIPJQ(this).val());
+				});
+
 				_f(credentialInputs[i].username)
 				.blur(autocompleteBlur)
 				.focus(function() {
@@ -610,6 +642,13 @@ function _preparePageForMultipleCredentials(logins) {
 			}
 		}
 	}
+}
+
+function autocompleteOpen(event, ui) {
+	// NOT BEAUTIFUL!
+	// modifies ALL ui-autocomplete menus, also those which aren't from us
+	// TODO: find a way to get the corresponding dropdown menu to a login field
+	cIPJQ("ul.ui-autocomplete.ui-menu").css("z-index", 10000);
 }
 
 function autocompleteSource(request, response) {
@@ -662,27 +701,38 @@ function getCredentialFields(type, field) {
 
 	//setUniqueId(field);
 
+	var fields = {
+		"username": null,
+		"password": null
+	};
+
 	if(type == "username") {
 		var passwordField = getPasswordFieldFromUsernameField(field, true);
-		//setUniqueId(passwordField);
-		return {
+		setUniqueId(field);
+		setUniqueId(passwordField);
+		fields = {
 			"username": _prepareId(field.attr("id")),
 			"password": _prepareId(passwordField.attr("id"))
 		};
 	}
 	else if(type == "password") {
 		var usernameField = getUsernameFieldFromPasswordField(field, true);
-		//setUniqueId(usernameField);
-		return {
+		setUniqueId(field);
+		setUniqueId(usernameField);
+		fields = {
 			"username": _prepareId(usernameField.attr("id")),
 			"password": _prepareId(field.attr("id"))
 		};
 	}
 
-	return {
-		"username": null,
-		"password": null
-	};
+	if(fields.username) {
+		credentialInputs.push(fields);
+		if(_credentials.logins.length > 0) {
+			_preparePageForMultipleCredentials(_credentials.logins);
+		}
+	}
+
+	return fields;
 }
 
 
@@ -715,7 +765,7 @@ function fillInCredentials(credentialFields, onlyPassword, suppressWarnings) {
 		_credentials.url = document.location.origin;
 		_credentials.submiturl = action;
 
-		chrome.extension.sendRequest({
+		chrome.extension.sendMessage({
 			'action': 'retrieve_credentials',
 			'args': [ document.location.origin, action ]
 		}, function(logins) {
@@ -760,7 +810,7 @@ function fillInFromActiveElementPassOnly(suppressWarnings) {
 
 	if(!_f(credentialFields.password)) {
 		var message = "Unable to find a password field";
-		chrome.extension.sendRequest({
+		chrome.extension.sendMessage({
 			action: 'alert',
 			args: [message]
 		});
@@ -793,7 +843,7 @@ function _fillIn(credentialFields, onlyPassword, suppressWarnings) {
 	// no credentials available
 	if (_credentials.logins.length == 0 && !suppressWarnings) {
 		var message = "No logins found.";
-		chrome.extension.sendRequest({
+		chrome.extension.sendMessage({
 			action: 'alert',
 			args: [message]
 		});
@@ -833,6 +883,9 @@ function _fillIn(credentialFields, onlyPassword, suppressWarnings) {
 						countPasswords += 1;
 						valPassword = _credentials.logins[i].Password;
 					}
+					else if(!onlyPassword) {
+						countPasswords += 1;
+					}
 				}
 			}
 
@@ -850,7 +903,7 @@ function _fillIn(credentialFields, onlyPassword, suppressWarnings) {
 			if(!suppressWarnings) {
 				var message = "More than one login was found in KeePass, " +
 				"press the chromeIPass icon for more options";
-				chrome.extension.sendRequest({
+				chrome.extension.sendMessage({
 					action: 'alert',
 					args: [message]
 				});
@@ -859,11 +912,43 @@ function _fillIn(credentialFields, onlyPassword, suppressWarnings) {
 		else if(countPasswords < 1) {
 			if(!suppressWarnings) {
 				var message = "No logins found.";
-				chrome.extension.sendRequest({
+				chrome.extension.sendMessage({
 					action: 'alert',
 					args: [message]
 				});
 			}
 		}
+	}
+}
+
+function _clearCredentials() {
+	_credentials.logins = [];
+	autocompleteElements = [];
+
+	if(_settings.autoCompleteUsernames) {
+		for(var i = 0; i < credentialInputs.length; i++) {
+			if(_f(credentialInputs[i].username)) {
+				if(_f(credentialInputs[i].username).hasClass("ui-autocomplete-input")) {
+					//_f(credentialInputs[i].username).autocomplete("destroy");
+				}
+			}
+		}
+	}
+}
+
+function _triggerActivatedTab() {
+	// initCredentialFields calls also "retrieve_credentials", to prevent it
+	// check of init() was already called
+	var called = _calledInitCredentialFields;
+	// doesn't run a second time because of _calledInitCredentialFields set to true
+	init();
+
+	if(called && (_credentials.url || _credentials.submiturl)) {
+		chrome.extension.sendMessage({
+			'action': 'retrieve_credentials',
+			'args': [ _credentials.url, _credentials.submiturl ]
+		}, function(logins) {
+			_logins_callback(logins);
+		});
 	}
 }

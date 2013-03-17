@@ -37,9 +37,8 @@ options.initGeneralSettings = function() {
 		options.settings[$(this).attr("name")] = $(this).is(':checked');
 		localStorage.settings = JSON.stringify(options.settings);
 
-        chrome.extension.sendRequest({
-            action: 'load_settings',
-            args: []
+        chrome.extension.sendMessage({
+            action: 'load_settings'
         });
 	});
 
@@ -53,20 +52,19 @@ options.initGeneralSettings = function() {
 		options.settings[$(this).attr("name")] = $(this).val();
 		localStorage.settings = JSON.stringify(options.settings);
 
-        chrome.extension.sendRequest({
-            action: 'load_settings',
-            args: []
+        chrome.extension.sendMessage({
+            action: 'load_settings'
         });
 	});
 
-	chrome.extension.sendRequest({
+	chrome.extension.sendMessage({
 		action: "get_keepasshttp_versions"
 	}, options.showKeePassHttpVersions);
 
 	$("#tab-general-settings button.checkUpdateKeePassHttp:first").click(function(e) {
 		e.preventDefault();
 		$(this).attr("disabled", true);
-		chrome.extension.sendRequest({
+		chrome.extension.sendMessage({
 			action: "check_update_keepasshttp"
 		}, options.showKeePassHttpVersions);
 	});
@@ -105,9 +103,8 @@ options.initConnectedDatabases = function() {
 		delete options.keyRing[$hash];
 		localStorage.keyRing = JSON.stringify(options.keyRing);
 
-        chrome.extension.sendRequest({
-            action: 'load_keyring',
-            args: []
+        chrome.extension.sendMessage({
+            action: 'load_keyring'
         });
 
 		if($("#tab-connected-databases table tbody:first tr").length > 2) {
@@ -118,18 +115,19 @@ options.initConnectedDatabases = function() {
 		}
 	});
 
+	$("#tab-connected-databases tr.clone:first .dropdown-menu:first").width("230px");
+
 	$("#tab-connected-databases tr.clone:first .color.dropdown .dropdown-menu a").click(function(e) {
 		e.preventDefault();
 		var $icon = $(this).attr("href").substring(1);
 		var $hash = $(this).closest("tr").data("hash");
 
-		$(this).parent().parent().find("a.dropdown-toggle:first").find("img:first").attr("src", "/icons/icon_normal_" + $icon + "_16x16.png");
+		$(this).parent().parent().find("a.dropdown-toggle:first").find("img:first").attr("src", "/icons/19x19/icon_normal_" + $icon + "_19x19.png");
 
 		options.keyRing[$hash].icon = $icon;
 		localStorage.keyRing = JSON.stringify(options.keyRing);
-        chrome.extension.sendRequest({
-            action: 'load_keyring',
-            args: []
+        chrome.extension.sendMessage({
+            action: 'load_keyring'
         });
 	});
 
@@ -140,8 +138,8 @@ options.initConnectedDatabases = function() {
 		$tr.data("hash", hash);
 		$tr.attr("id", "tr-cd-" + hash);
 
-		var $icon = options.keyRing[hash].icon || "purple";
-		$("a.dropdown-toggle:first img:first", $tr).attr("src", "/icons/icon_normal_" + $icon + "_16x16.png");
+		var $icon = options.keyRing[hash].icon || "blue";
+		$("a.dropdown-toggle:first img:first", $tr).attr("src", "/icons/19x19/icon_normal_" + $icon + "_19x19.png");
 
 		$tr.children("td:first").text(options.keyRing[hash].id);
 		var lastUsed = (options.keyRing[hash].lastUsed) ? new Date(options.keyRing[hash].lastUsed).toLocaleString() : "unknown";
@@ -179,9 +177,8 @@ options.initSpecifiedCredentialFields = function() {
 		delete options.settings["defined-credential-fields"][$url];
 		localStorage.settings = JSON.stringify(options.settings);
 
-        chrome.extension.sendRequest({
-            action: 'load_settings',
-            args: []
+        chrome.extension.sendMessage({
+            action: 'load_settings'
         });
 
 		if($("#tab-specified-fields table tbody:first tr").length > 2) {

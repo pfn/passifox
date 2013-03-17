@@ -36,26 +36,26 @@ function status_response(r) {
 
 $(function() {
 	$("#connect-button").click(function() {
-		chrome.extension.sendRequest({
+		chrome.extension.sendMessage({
 			action: "associate"
 		});
 		close();
 	});
 
 	$("#reconnect-button").click(function() {
-		chrome.extension.sendRequest({
+		chrome.extension.sendMessage({
 			action: "associate"
 		});
 		close();
 	});
 
 	$("#reload-status-button").click(function() {
-		chrome.extension.sendRequest({
+		chrome.extension.sendMessage({
 			action: "get_status"
 		}, status_response);
 	});
 
-	chrome.extension.sendRequest({
+	chrome.extension.sendMessage({
 		action: "get_status"
 	}, status_response);
 });

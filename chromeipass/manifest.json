@@ -1,16 +1,23 @@
 {
 	"name": "chromeIPass",
-	"version": "2.0.3",
+	"version": "2.1.0",
 	"manifest_version": 2,
 	"description": "KeePass integration for browser Chrome using KeePassHttp",
 	"icons": {
-		"16": "icons/icon_normal_purple_16x16.png",
-		"48": "icons/keepass_49x49.png"
+		"16": "icons/keepass_16x16.png",
+		"48": "icons/keepass_48x48.png",
+		"128": "icons/keepass_128x128.png"
 	},
-	"page_action": {
-		"default_icon": "icons/icon_normal_purple_16x16.png",
-		"popup": "popup.html"
+
+	"browser_action": {
+		"default_icon": {
+		  "19": "icons/19x19/icon_normal_blue_19x19.png",
+		  "38": "icons/keepass_38x38.png"
+		},
+		"default_title": "chromeIPass",
+		"default_popup": "popups/popup.html"
 	},
+
 	"options_page": "options/options.html",
 	"update_url": "https://raw.github.com/lspcity/passifox/master/chromeipass_update.xml",
 	"background": {
@@ -19,8 +26,10 @@
 			"background/utf8.js",
 			"background/keepass.js",
 			"background/httpauth.js",
+			"background/browserAction.js",
 			"background/page.js",
-			"background/events.js"]
+			"background/event.js",
+			"background/init.js"]
 		},
 	"content_scripts": [
 	{

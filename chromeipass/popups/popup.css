@@ -48,6 +48,12 @@ body {
 	font-size: 80%;
 	color: #787878;
 }
+.small {
+	margin-top: 3px;
+	margin-left: 12px;
+	font-size: 80%;
+	color: #787878;
+}
 #update-available {
 	display: none;
 	font-size: 90%;

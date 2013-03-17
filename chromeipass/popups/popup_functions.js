@@ -21,7 +21,7 @@ function initSettings() {
 
 	$("#settings #btn-choose-credential-fields").click(function() {
 		var global = chrome.extension.getBackgroundPage();
-		chrome.tabs.sendRequest(global.page.currentTabId, {
+		chrome.tabs.sendMessage(global.page.currentTabId, {
 			action: "choose_credential_fields"
 		});
 		close();
@@ -32,7 +32,7 @@ function initSettings() {
 $(function() {
 	initSettings();
 
-	chrome.extension.sendRequest({
+	chrome.extension.sendMessage({
 		action: "update_available_keepasshttp"
 	}, updateAvailableResponse);
 });

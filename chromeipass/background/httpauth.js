@@ -8,7 +8,7 @@ httpAuth.url = null;
 
 
 httpAuth.handleRequest = function (details, callback) {
-	if(httpAuth.requestId == details.requestId) {
+	if(httpAuth.requestId == details.requestId || !page.tabs[details.tabId]) {
 		callback({});
 	}
 	else {
@@ -33,7 +33,7 @@ httpAuth.processPendingCallbacks = function(details) {
 httpAuth.loginOrShowCredentials = function(logins) {
 	// at least one login found --> use first to login
 	if (logins.length > 0) {
-		page.eventHTTPAuthPopup(null, {"id": httpAuth.tabId}, {"logins": logins, "url": httpAuth.url});
+		event.onHTTPAuthPopup(null, {"id": httpAuth.tabId}, {"logins": logins, "url": httpAuth.url});
 		//generate popup-list for HTTP Auth usernames + descriptions
 
 		if(page.settings.autoFillAndSend) {
