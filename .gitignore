@@ -1,1 +1,12 @@
 *.swp
+BUGS.txt
+chromeipass.pem
+chrome.manifest
+install.rdf
+passifox.xpi
+update.rdf
+/nbproject/
+/chrome/
+/components/
+/modules/
+/backup-for-crx-generation/
