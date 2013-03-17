@@ -461,7 +461,7 @@ keepass.getDatabaseHash = function (tab) {
 	}
 
 	if(oldDatabaseHash && oldDatabaseHash != keepass.databaseHash) {
-		console.log("clear association (old db hash != new db hash ==> " + oldDatabaseHash + " != " + keepass.databaseHash);
+		//console.log("clear association (old db hash != new db hash ==> " + oldDatabaseHash + " != " + keepass.databaseHash);
 		keepass.associated.value = false;
 		keepass.associated.hash = null;
 	}

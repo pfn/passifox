@@ -26,7 +26,7 @@ var _calledInitDraggit = false;
 
 
 chrome.extension.onMessage.addListener(function(req, sender, callback) {
-	console.log("onMessage("+req.action+")");
+	//console.log("onMessage("+req.action+")");
 
 	// normal page
 	if ('id' in req) {

@@ -51,7 +51,7 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 	browserAction.removeRememberPopup(page.currentTabId, true);
 
 	chrome.tabs.get(activeInfo.tabId, function(info) {
-		console.log(info.id + ": " + info.url);
+		//console.log(info.id + ": " + info.url);
 		if(info.status == "complete") {
 			event.invoke(page.switchTab, null, info.id, []);
 		}
