@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Settings | chromeIPass</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link href="/options/bootstrap.min.css" rel="stylesheet" />
+		<link href="/options/bootstrap-responsive.min.css" rel="stylesheet" />
+		<script type="text/javascript" src="/jquery-1.9.0.min.js"></script>
+		<script type="text/javascript" src="/options/bootstrap.min.js"></script>
+		<script type="text/javascript" src="/options/options.js"></script>
+		<style type="text/css">
+			body {
+				padding-top: 20px;
+				padding-bottom: 60px;
+			}
+
+			/* Custom container */
+			.container {
+				margin: 0 auto;
+				max-width: 1000px;
+			}
+			.container > hr {
+				margin: 30px 0;
+			}
+
+
+			/* Customize the navbar links to be fill the entire space of the .navbar */
+			.navbar .navbar-inner {
+				padding: 0;
+				margin-bottom: 40px;
+			}
+			.navbar .nav {
+				margin: 0;
+				display: table;
+				width: 100%;
+			}
+			.navbar .nav li {
+				display: table-cell;
+				width: 1%;
+				float: none;
+			}
+			.navbar .nav li a {
+				font-weight: bold;
+				text-align: center;
+				border-left: 1px solid rgba(255,255,255,.75);
+				border-right: 1px solid rgba(0,0,0,.1);
+			}
+			.navbar .nav li:first-child a {
+				border-left: 0;
+				border-radius: 3px 0 0 3px;
+			}
+			.navbar .nav li:last-child a {
+				border-right: 0;
+				border-radius: 0 3px 3px 0;
+			}
+			.tab {
+				display: none;
+			}
+			h2+hr {
+				margin-top: 0;
+			}
+
+			#tab-connected-databases .color.dropdown .dropdown-menu {
+				width: 180px;
+				padding: 7px 10px;
+				line-height: 175%;
+			}
+			#tab-connected-databases .color.dropdown .dropdown-menu a {
+				margin-right: 3px;
+			}
+			#tab-connected-databases .color.dropdown a.dropdown-toggle img {
+				margin-right: 5px;
+			}
+			tr.clone {
+				display: none;
+			}
+			td.last-used,
+			td.created {
+				white-space: nowrap;
+			}
+			.bold {
+				font-weight: bold;
+			}
+			.radio.inline,
+			.checkbox.inline {
+				display: inline-block;
+				white-space: nowrap;
+			}
+			.radio.inline + .radio.inline,
+			.checkbox.inline + .checkbox.inline {
+				margin-left: 40px;
+			}
+
+			.checkUpdateKeePassHttp {
+				margin-left: 40px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+
+			<div class="masthead">
+				<h3 class="muted"><img src="/icons/keepass_48x48.png" alt="logo" /> chromeIPass</h3>
+				<div class="navbar">
+					<div class="navbar-inner">
+						<div class="container">
+							<ul class="nav">
+								<li class="active"><a href="#general-settings">General</a></li>
+								<li><a href="#connected-databases">Connected Databases</a></li>
+								<li><a href="#specified-fields">Specified credential fields</a></li>
+								<li><a href="#about">About</a></li>
+							</ul>
+						</div>
+					</div>
+				</div><!-- /.navbar -->
+			</div>
+
+			<!-- General Settings -->
+			<div class="tab" id="tab-general-settings">
+				<h2>General Settings</h2>
+				<hr />
+				<p>
+					If you just want to insert username + password into the fields where your focus is, press Ctrl + Shift + U.
+					<br />
+					If you only want to insert the password, just press Ctrl + Shift + P.
+				</p>
+				<hr />
+				<p>
+					<label class="checkbox">
+						<input type="checkbox" name="autoCompleteUsernames" value="1" /> Activate autocomplete for username fields.
+					</label>
+					<span class="help-block">For all username fields on a page a dropdown list appears which contains all available credentials.</span>
+				</p>
+				<hr />
+				<p>
+					Check for updates of KeePassHttp:
+					<br />
+					<label class="radio inline"><input type="radio" name="checkUpdateKeePassHttp" value="3" /> every 3 days</label>
+					<label class="radio inline"><input type="radio" name="checkUpdateKeePassHttp" value="7" /> every week</label>
+					<label class="radio inline"><input type="radio" name="checkUpdateKeePassHttp" value="30" /> every month</label>
+					<label class="radio inline"><input type="radio" name="checkUpdateKeePassHttp" value="0" /> never</label>
+				</p>
+				<div class="help-block kphVersion">
+					chromeIPass needs the plugin KeePassHttp to retrieve credentials from and send them to KeePass.
+					<br />
+					You can download the latest stable version from here: <a target="_blank" href="https://github.com/pfn/keepasshttp">https://github.com/pfn/keepasshttp</a>
+					<br />
+					<br />
+					<div class="row">
+						<div class="span3">Your running version of KeePassHttp:</div>
+						<div class="span6"><em class="yourVersion"></em></div>
+					</div>
+					<div class="row">
+						<div class="span3">Latest available version of KeePassHttp:</div>
+						<div class="span6"><em class="latestVersion"></em><button class="btn btn-mini checkUpdateKeePassHttp">Check for updates</button></div>
+					</div>
+				</div>
+				<hr />
+				<p>
+
+					<label class="checkbox">
+						<input type="checkbox" name="autoFillAndSend" value="1" /> Auto fill HTTP Auth dialogs and send them.
+					</label>
+					<span class="help-block">
+						If credentials are found for a page and the login-type is an HTTP Auth request, chromeIPass tries to login with the first given credentials.
+						<br />
+						An HTTP Auth dialog looks like this:
+					</span>
+					<img src="/options/http-auth-dialog.png" alt="http-auth-dialog" />
+				</p>
+			</div>
+
+			<!-- Connected Databases -->
+			<div class="tab" id="tab-connected-databases">
+				<h2>Connected Databases</h2>
+				<hr />
+				<p>
+					If you are using several KeePass databases you can define a specific icon-color to each of them.
+					<br />
+					This will help you to easily determine from which database the credentials are retrieved.
+				</p>
+				<table class="table table-striped table-bordered table-hover">
+					<thead>
+						<tr>
+							<th class="span5">Identifier</th>
+							<th class="span2">Icon</th>
+							<th class="span2">Last used</th>
+							<th class="span2">Created</th>
+							<th class="span1">Delete</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="empty">
+							<td colspan="5">No connected databases found.</td>
+						</tr>
+						<tr class="clone">
+							<td></td>
+							<td>
+								<div class="dropdown color">
+									<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+										<img src="/icons/19x19/icon_normal_blue_19x19.png" alt="" />
+										<span class="caret"></span>
+									</a>
+									<div class="dropdown-menu">
+										<a href="#blue"><img src="/icons/19x19/icon_normal_blue_19x19.png" alt="" /></a>
+										<a href="#purple"><img src="/icons/19x19/icon_normal_purple_19x19.png" alt="" /></a>
+										<a href="#green"><img src="/icons/19x19/icon_normal_green_19x19.png" alt="" /></a>
+										<a href="#red"><img src="/icons/19x19/icon_normal_red_19x19.png" alt="" /></a>
+										<a href="#yellow"><img src="/icons/19x19/icon_normal_yellow_19x19.png" alt="" /></a>
+										<a href="#aqua"><img src="/icons/19x19/icon_normal_aqua_19x19.png" alt="" /></a>
+										<a href="#orange"><img src="/icons/19x19/icon_normal_orange_19x19.png" alt="" /></a>
+										<a href="#pink"><img src="/icons/19x19/icon_normal_pink_19x19.png" alt="" /></a>
+										<a href="#grey"><img src="/icons/19x19/icon_normal_grey_19x19.png" alt="" /></a>
+										<a href="#blue-inverse"><img src="/icons/19x19/icon_normal_blue-inverse_19x19.png" alt="" /></a>
+										<a href="#purple-inverse"><img src="/icons/19x19/icon_normal_purple-inverse_19x19.png" alt="" /></a>
+										<a href="#green-inverse"><img src="/icons/19x19/icon_normal_green-inverse_19x19.png" alt="" /></a>
+										<a href="#red-inverse"><img src="/icons/19x19/icon_normal_red-inverse_19x19.png" alt="" /></a>
+										<a href="#yellow-inverse"><img src="/icons/19x19/icon_normal_yellow-inverse_19x19.png" alt="" /></a>
+										<a href="#aqua-inverse"><img src="/icons/19x19/icon_normal_aqua-inverse_19x19.png" alt="" /></a>
+										<a href="#orange-inverse"><img src="/icons/19x19/icon_normal_orange-inverse_19x19.png" alt="" /></a>
+										<a href="#pink-inverse"><img src="/icons/19x19/icon_normal_pink-inverse_19x19.png" alt="" /></a>
+										<a href="#grey-inverse"><img src="/icons/19x19/icon_normal_grey-inverse_19x19.png" alt="" /></a>
+									</div>
+								</div>
+							</td>
+							<td class="last-used"></td>
+							<td class="created"></td>
+							<td><button class="btn delete btn-danger">Remove</button></td>
+						</tr>
+					</tbody>
+				</table>
+
+				<div id="dialogDeleteConnectedDatabase" class="modal hide" tabindex="-1" role="dialog">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h3 id="myModalLabel">Remove identifier from Chrome?</h3>
+					</div>
+					<div class="modal-body">
+						<p>Do you really want to remove the identifier <span class="bold"></span> from Chrome?</p>
+						<p class="help-block">You can reconnect your database at any time.</p>
+					</div>
+					<div class="modal-footer">
+						<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+						<button class="btn yes btn-primary">Yes, remove now</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Specified credential fields -->
+			<div class="tab" id="tab-specified-fields">
+				<h2>Specified credential fields</h2>
+				<hr />
+				<p>
+					If chromeIPass detects the wrong credential fields, you are able to specify the correct fields by yourself.
+					<br />
+					Just go to the page and click on the chromeIPass-Icon, now select <em>Choose own credential fields for this page</em>.
+					<br />
+					On this page you can manage theses specified credential fields.
+				</p>
+				<table class="table table-striped table-bordered table-hover">
+					<thead>
+						<tr>
+							<th class="span10">Page URL</th>
+							<th class="span2">Delete</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="empty">
+							<td colspan="2">No specified credential fields found.</td>
+						</tr>
+						<tr class="clone">
+							<td></td>
+							<td><button class="btn delete btn-danger btn">Remove</button></td>
+						</tr>
+					</tbody>
+				</table>
+
+				<div id="dialogDeleteSpecifiedCredentialFields" class="modal hide" tabindex="-1" role="dialog">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h3 id="myModalLabel">Remove specified credential fields?</h3>
+					</div>
+					<div class="modal-body">
+						<p>Do you really want to remove the specified credential fields on the page <strong></strong>?</p>
+						<p class="help-block">chromeIPass will automatically detect the credential fields the next time you visit this page.</p>
+					</div>
+					<div class="modal-footer">
+						<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+						<button class="btn yes btn-primary">Yes, remove now</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- About -->
+			<div class="tab" id="tab-about">
+				<h2>About</h2>
+				<hr />
+				<p>
+					Developed by <a target="_blank" href="https://github.com/pfn/">Perry Nguyen</a> and <a target="_blank" href="http://lukas-schulze.de">Lukas Schulze</a>.
+				</p>
+				<p>
+					To visit the plugin page, just go to <a target="_blank" href="https://github.com/pfn/passifox">https://github.com/pfn/passifox</a>.
+				</p>
+				<hr />
+				<div class="row">
+					<div class="span2">chromeIPass Version:</div>
+					<div class="span6"><em class="versionCIP"></em></div>
+				</div>
+				<div class="row">
+					<div class="span2">KeePassHttp Version:</div>
+					<div class="span6"><em class="versionKPH"></em></div>
+				</div>
+			</div>
+
+			<hr>
+
+			<div class="footer">
+				<p>2013 - Perry Nguyen, Lukas Schulze</p>
+			</div>
+
+		</div> <!-- /container -->
+	</body>
+</html>
