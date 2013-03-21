@@ -299,7 +299,7 @@ keepass.checkStatus = function (status, tab) {
 
 keepass.convertKeyToKeyRing = function() {
 	if(keepass.keyId in localStorage && keepass.keyBody in localStorage && !("keyRing" in localStorage)) {
-		var hash = keepass.getDatabaseHash(tab);
+		var hash = keepass.getDatabaseHash(null);
 		keepass.saveKey(hash, localStorage[keepass.keyId], localStorage[keepass.keyBody]);
 	}
 
