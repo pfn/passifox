@@ -1,4 +1,4 @@
-var keepass = keepass || {};
+var keepass = {};
 
 keepass.associated = {"value": false, "hash": null};
 keepass.isDatabaseClosed = false;
@@ -9,7 +9,7 @@ keepass.latestKeePassHttp = (typeof(localStorage.latestKeePassHttp) == 'undefine
 keepass.keySize = 8; // wtf? stupid cryptoHelpers
 keepass.pluginUrl = "http://localhost:19455/";
 keepass.cacheTimeout = 30 * 1000; // milliseconds
-keepass.databaseHash = null; //0 = keepasshttp is too old and does not return a hash value
+keepass.databaseHash = "no-hash"; //no-hash = keepasshttp is too old and does not return a hash value
 keepass.keyRing = (typeof(localStorage.keyRing) == 'undefined') ? {} : JSON.parse(localStorage.keyRing);
 keepass.keyId = "chromeipass-cryptokey-name";
 keepass.keyBody = "chromeipass-key";
@@ -298,9 +298,12 @@ keepass.checkStatus = function (status, tab) {
 }
 
 keepass.convertKeyToKeyRing = function() {
-	if(keepass.keyId in localStorage && keepass.keyBody in localStorage) {
+	if(keepass.keyId in localStorage && keepass.keyBody in localStorage && !("keyRing" in localStorage)) {
 		var hash = keepass.getDatabaseHash(tab);
 		keepass.saveKey(hash, localStorage[keepass.keyId], localStorage[keepass.keyBody]);
+	}
+
+	if("keyRing" in localStorage) {
 		delete localStorage[keepass.keyId];
 		delete localStorage[keepass.keyBody];
 	}
@@ -361,7 +364,7 @@ keepass.keePassHttpUpdateAvailable = function() {
 
 keepass.checkForNewKeePassHttpVersion = function() {
 	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "https://raw.github.com/lspcity/keepasshttp/master/update-version.txt", false);
+	xhr.open("GET", "https://raw.github.com/pfn/keepasshttp/master/update-version.txt", false);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	try {
 		xhr.send();
@@ -454,10 +457,10 @@ keepass.getDatabaseHash = function (tab) {
 	if(keepass.checkStatus(result[0], tab)) {
 		var response = JSON.parse(result[1]);
 		keepass.setCurrentKeePassHttpVersion(response.Version);
-		keepass.databaseHash = response.Hash || 0;
+		keepass.databaseHash = response.Hash || "no-hash";
 	}
 	else {
-		keepass.databaseHash = 0;
+		keepass.databaseHash = "no-hash";
 	}
 
 	if(oldDatabaseHash && oldDatabaseHash != keepass.databaseHash) {

@@ -1,6 +1,6 @@
 {
 	"name": "chromeIPass",
-	"version": "2.1.1",
+	"version": "2.2.0",
 	"manifest_version": 2,
 	"description": "KeePass integration for browser Chrome using KeePassHttp",
 	"icons": {
@@ -19,7 +19,7 @@
 	},
 
 	"options_page": "options/options.html",
-	"update_url": "https://raw.github.com/lspcity/passifox/master/chromeipass_update.xml",
+	"update_url": "https://raw.github.com/pfn/passifox/master/chromeipass_update.xml",
 	"background": {
 		"scripts": ["background/aes.js",
 			"background/cryptoHelpers.js",
@@ -32,13 +32,23 @@
 			"background/init.js"]
 		},
 	"content_scripts": [
-	{
-		"matches": ["http://*/*", "https://*/*"],
-		"js": ["jquery-1.9.0.min.js", "jquery-ui-1.10.0.custom.min.js", "chromeipass.js"],
-		"css": ["jquery-ui-1.10.0.custom.min.css", "chromeipass.css", "bootstrap-btn.css"],
-		"run_at": "document_idle",
-		"all_frames": true
-	}
+		{
+			"matches": ["http://*/*", "https://*/*"],
+			"js": ["jquery-1.9.0.min.js", "jquery-ui-1.10.0.custom.min.js", "chromeipass.js"],
+			"css": ["jquery-ui-1.10.0.custom.min.css", "chromeipass.css", "bootstrap-btn.css"],
+			"run_at": "document_idle",
+			"all_frames": true
+		}
+	],
+	"web_accessible_resources": [
+		"images/ui-bg_flat_0_aaaaaa_40x100.png",
+		"images/ui-bg_flat_75_ffffff_40x100.png",
+		"images/ui-bg_glass_55_fbf9ee_1x400.png",
+		"images/ui-bg_glass_65_ffffff_1x400.png",
+		"images/ui-bg_glass_75_dadada_1x400.png",
+		"images/ui-bg_glass_75_e6e6e6_1x400.png",
+		"images/ui-bg_glass_95_fef1ec_1x400.png",
+		"images/ui-bg_highlight-soft_75_cccccc_1x100.png"
 	],
 	"permissions": [
 		"contextMenus",

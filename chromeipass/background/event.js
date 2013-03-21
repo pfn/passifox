@@ -22,6 +22,10 @@ event.invoke = function(handler, callback, senderTabId, args, secondTime) {
 		//	return; // For example: only the background devtools or a popup are opened
 		//var tab = tabs[0];
 
+		if(!tab) {
+			return;
+		}
+
 		if (!tab.url) {
 			// Issue 6877: tab URL is not set directly after you opened a window
 			// using window.open()

@@ -150,22 +150,22 @@ browserAction.stackUnshift = function(data, tabId) {
 }
 
 
-browserAction.removeRememberPopup = function(tabId, immediately) {
-	if(!page.tabs[tabId]) {
+browserAction.removeRememberPopup = function(callback, tab, immediately) {
+	if(!page.tabs[tab.id]) {
 		return;
 	}
 
-	if(page.tabs[tabId].stack.length == 0) {
-		page.clearCredentials(tabId);
+	if(page.tabs[tab.id].stack.length == 0) {
+		page.clearCredentials(tab.id);
 		return;
 	}
 
-	var data = page.tabs[tabId].stack[page.tabs[tabId].stack.length - 1];
+	var data = page.tabs[tab.id].stack[page.tabs[tab.id].stack.length - 1];
 	if(typeof data.visibleForPageUpdates != "undefined") {
 		if(data.visibleForPageUpdates <= 0 || immediately) {
-			browserAction.stackPop(tabId);
-			browserAction.show(null, {"id": tabId});
-			page.clearCredentials(tabId);
+			browserAction.stackPop(tab.id);
+			browserAction.show(null, {"id": tab.id});
+			page.clearCredentials(tab.id);
 			return;
 		}
 		data.visibleForPageUpdates -= 1;

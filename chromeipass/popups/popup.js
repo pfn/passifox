@@ -55,6 +55,19 @@ $(function() {
 		}, status_response);
 	});
 
+	$("#redetect-fields-button").click(function() {
+		chrome.tabs.query({"active": true, "windowId": chrome.windows.WINDOW_ID_CURRENT}, function(tabs) {
+			if (tabs.length === 0)
+				return; // For example: only the background devtools or a popup are opened
+			var tab = tabs[0];
+
+			chrome.tabs.sendMessage(tab.id, {
+				action: "redetect_fields"
+			});
+			close();
+		});
+	});
+
 	chrome.extension.sendMessage({
 		action: "get_status"
 	}, status_response);

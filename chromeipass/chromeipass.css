@@ -25,10 +25,10 @@
 	opacity: 0.8;
 	filter: alpha(opacity=80);
 }
-#b2c-choose-fields {
+#b2c-cipDefine-fields {
 	z-index: 1050;
 }
-#b2c-choose-description {
+#b2c-cipDefine-description {
 	z-index: 1050;
 	color: #efefef;
 	border: 2px solid #555555;
@@ -41,7 +41,7 @@
 	background-color:rgba(255,255,255,0.3);
 	font-size: 15px;
 }
-#b2c-choose-description div:first-of-type {
+#b2c-cipDefine-description div:first-of-type {
 	margin-top: 0;
 	padding-top: 0;
 	text-align: left;
@@ -50,9 +50,10 @@
 	font-weight: bold;
 	font-size: 160%;
 }
-#b2c-choose-description p {
+#b2c-cipDefine-description p {
 	margin-top: 10px;
 	padding-top: 10px;
+	color: #efefef;
 	border-top: 2px solid #666666;
 	line-height: 110%;
 }
