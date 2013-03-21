@@ -5,7 +5,7 @@ $(function() {
 		if (tabs.length === 0)
 			return; // For example: only the background devtools or a popup are opened
 		var tab = tabs[0];
-		
+
 		var logins = global.page.tabs[tab.id].loginList;
 		var ul = document.getElementById("login-list");
 		for (var i = 0; i < logins.length; i++) {
