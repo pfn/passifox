@@ -1,6 +1,6 @@
 {
 	"name": "chromeIPass",
-	"version": "2.2.2",
+	"version": "2.2.3",
 	"manifest_version": 2,
 	"description": "KeePass integration for browser Chrome using KeePassHttp",
 	"icons": {
@@ -34,8 +34,8 @@
 	"content_scripts": [
 		{
 			"matches": ["http://*/*", "https://*/*"],
-			"js": ["jquery-1.9.0.min.js", "jquery-ui-1.10.0.custom.min.js", "chromeipass.js"],
-			"css": ["jquery-ui-1.10.0.custom.min.css", "chromeipass.css", "bootstrap-btn.css"],
+			"js": ["jquery-1.9.1.min.js", "jquery-ui-1.10.2.custom.min.js", "chromeipass.js"],
+			"css": ["jquery-ui-1.10.2.custom.min.css", "chromeipass.css", "bootstrap-btn.css"],
 			"run_at": "document_idle",
 			"all_frames": true
 		}
