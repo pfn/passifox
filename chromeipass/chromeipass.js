@@ -70,7 +70,7 @@ var cipAutocomplete = {};
 cipAutocomplete.elements = [];
 
 cipAutocomplete.init = function(field) {
-	if(field.hasClass("ui-autocomplete-input")) {
+	if(field.hasClass("cip-ui-autocomplete-input")) {
 		//_f(credentialInputs[i].username).autocomplete("source", autocompleteSource);
 		field.autocomplete("destroy");
 	}
@@ -95,7 +95,7 @@ cipAutocomplete.onOpen = function(event, ui) {
 	// NOT BEAUTIFUL!
 	// modifies ALL ui-autocomplete menus, also those which aren't from us
 	// TODO: find a way to get the corresponding dropdown menu to a login field
-	cIPJQ("ul.ui-autocomplete.ui-menu").css("z-index", 10000);
+	cIPJQ("ul.cip-ui-autocomplete.cip-ui-menu").css("z-index", 10000);
 }
 
 cipAutocomplete.onSource = function (request, callback) {
@@ -1096,7 +1096,7 @@ cipEvents.clearCredentials = function() {
 		for(var i = 0; i < cipFields.combinations.length; i++) {
 			var uField = _f(cipFields.combinations[i].username);
 			if(uField) {
-				if(uField.hasClass("ui-autocomplete-input")) {
+				if(uField.hasClass("cip-ui-autocomplete-input")) {
 					uField.autocomplete("destroy");
 				}
 			}
