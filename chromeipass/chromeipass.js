@@ -520,87 +520,10 @@ cipDefine.init = function () {
 	var $description = cIPJQ("<div>").attr("id", "b2c-cipDefine-description");
 	$backdrop.append($description);
 
-	cipDefine.initDraggit();
 	cipDefine.initDescription();
 
 	cipDefine.prepareStep1();
 	cipDefine.markAllUsernameFields($chooser);
-}
-
-/**
- * Move an element with the mouse.
- * Needed for choosing credentials.
- * @returns null
- */
-cipDefine.initDraggit = function () {
-	if("initDraggit" in _called) {
-		return;
-	}
-
-	_called.initDraggit = true;
-
-	/* PlugTrade.com - jQuery draggit Function */
-	/* Drag A Div with jQuery */
-	cIPJQ.fn.draggit = function (el) {
-		var thisdiv = this;
-		var thistarget = cIPJQ(el);
-		var relX;
-		var relY;
-		var targetw = thistarget.width();
-		var targeth = thistarget.height();
-		var docw;
-		var doch;
-		var ismousedown;
-
-		thistarget.css('position','absolute');
-
-
-		thisdiv.bind('mousedown', function(e){
-			var pos = cIPJQ(el).offset();
-			var srcX = pos.left;
-			var srcY = pos.top;
-
-			docw = cIPJQ('body').width();
-			doch = cIPJQ('body').height();
-
-			relX = e.pageX - srcX;
-			relY = e.pageY - srcY;
-
-			ismousedown = true;
-		});
-
-		cIPJQ(document).bind('mousemove',function(e){
-			if(ismousedown)
-			{
-				targetw = thistarget.width();
-				targeth = thistarget.height();
-
-				var maxX = docw - targetw - 10;
-				var maxY = doch - targeth - 10;
-
-				var mouseX = e.pageX;
-				var mouseY = e.pageY;
-
-				var diffX = mouseX - relX;
-				var diffY = mouseY - relY;
-
-				// check if we are beyond document bounds ...
-				if(diffX < 0)   diffX = 0;
-				if(diffY < 0)   diffY = 0;
-				if(diffX > maxX) diffX = maxX;
-				if(diffY > maxY) diffY = maxY;
-
-				cIPJQ(el).css('top', (diffY)+'px');
-				cIPJQ(el).css('left', (diffX)+'px');
-			}
-		});
-
-		cIPJQ(window).bind('mouseup', function(e){
-			ismousedown = false;
-		});
-
-		return this;
-	} // end jQuery draggit function //
 }
 
 cipDefine.initDescription = function() {
@@ -700,7 +623,7 @@ cipDefine.initDescription = function() {
 		$description.append($p);
 	}
 
-	cIPJQ("div#b2c-backdrop").draggit("div#b2c-cipDefine-description");
+	cIPJQ("div#b2c-cipDefine-description").draggable();
 }
 
 cipDefine.markAllUsernameFields = function ($chooser) {
