@@ -229,5 +229,7 @@ event.messageHandlers = {
 	'save_settings': event.onSaveSettings,
 	'set_remember_credentials': event.onSetRememberPopup,
 	'stack_add': browserAction.stackAdd,
-	'update_available_keepasshttp': event.onUpdateAvailableKeePassHttp
+	'update_available_keepasshttp': event.onUpdateAvailableKeePassHttp,
+	'generate_password': keepass.generatePassword,
+	'copy_password': keepass.copyPassword
 };

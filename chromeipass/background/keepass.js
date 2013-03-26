@@ -188,6 +188,84 @@ keepass.retrieveCredentials = function (callback, tab, url, submiturl, forceCall
 	callback(entries);
 }
 
+keepass.generatePassword = function (callback, tab, forceCallback) {
+	// is browser associated to keepass?
+	if(!keepass.testAssociation(tab)) {
+		browserAction.showDefault(null, tab);
+		if(forceCallback) {
+			callback([]);
+		}
+		return;
+	}
+
+	if(keepass.currentKeePassHttp.versionParsed < 1400) {
+		callback([]);
+		return;
+	}
+
+	// build request
+	var request = {
+		RequestType: "generate-password"
+	};
+	var verifier = keepass.setVerifier(request);
+	var id = verifier[0];
+	var key = verifier[1];
+
+	// send request
+	var result = keepass.send(request);
+	var status = result[0];
+	var response = result[1];
+	var passwords = [];
+
+	// verify response
+	if(keepass.checkStatus(status, tab)) {
+		var r = JSON.parse(response);
+
+		keepass.setCurrentKeePassHttpVersion(r.Version);
+
+		if (keepass.verifyResponse(r, key, id)) {
+			var rIv = r.Nonce;
+
+			if(r.Entries) {
+				for (var i = 0; i < r.Entries.length; i++) {
+					keepass.decryptEntry(r.Entries[i], key, rIv);
+				}
+				passwords = r.Entries;
+				keepass.updateLastUsed(keepass.databaseHash);
+			}
+			else {
+				console.log("No entries returned. Is KeePassHttp up-to-date?");
+			}
+		}
+		else {
+			console.log("GeneratePassword rejected");
+		}
+	}
+	else {
+		browserAction.showDefault(null, tab);
+	}
+
+	callback(passwords);
+}
+
+keepass.copyPassword = function(callback, tab, password) {
+	var bg = chrome.extension.getBackgroundPage();
+	var c2c = bg.document.getElementById("copy2clipboard");
+	if(!c2c) {
+		var input = document.createElement('input');
+		input.type = "text";
+		input.id = "copy2clipboard";
+		bg.document.getElementsByTagName('body')[0].appendChild(input);
+		c2c = bg.document.getElementById("copy2clipboard");
+	}
+
+	c2c.value = password;
+	c2c.select();
+	document.execCommand("copy");
+	c2c.value = "";
+	callback(true);
+}
+
 keepass.associate = function(callback, tab) {
 	if(keepass.isAssociated()) {
 		return;

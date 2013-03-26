@@ -1,4 +1,4 @@
-.ui-autocomplete li {
+.cip-ui-autocomplete li.cip-ui-menu-item {
 	text-align: left;
 	font-size: 12px;
 	font-weight: normal;
@@ -6,13 +6,64 @@
 	font-family: Verdana, Arial, sans-serif;
 	color: #222222;
 }
+.cip-ui-dialog-titlebar-close {
+	visibility: hidden !important;
+}
+.cip-ui-widget-overlay {
+	background: none !important;
+	z-index: 2147483601 !important;
+}
+.cip-ui-dialog {
+	z-index: 2147483602 !important;
+}
+.cip-ui-dialog .cip-ui-dialog-title {
+	font-size:.9em !important;
+}
+.cip-ui-dialog .cip-ui-dialog-titlebar {
+	padding:.1em .5em !important;
+}
+.cip-ui-dialog-content {
+	font-size: .9em !important;
+}
+
+
+.cip-genpw-icon {
+	position: absolute;
+	cursor: pointer;
+}
+.cip-genpw-icon.cip-icon-key-small {
+	width: 16px;
+	height: 16px;
+	background-image: url(chrome-extension://__MSG_@@extension_id__/icons/key_16x16.png);
+}
+.cip-genpw-icon.cip-icon-key-big {
+	width: 24px;
+	height: 24px;
+	background-image: url(chrome-extension://__MSG_@@extension_id__/icons/key_24x24.png);
+}
+.cip-genpw-textfield {
+	display: block;
+	margin: 5px 0;
+	width: 98%;
+}
+.cip-genpw-label {
+	display: block;
+	margin: 5px 0;
+}
+.cip-genpw-checkbox {
+	vertical-align: middle;
+}
+#cip-genpw-btn-fillin {
+	margin-right: 5px;
+}
+
 .b2c-modal-backdrop {
 	position: fixed;
 	top: 0;
 	right: 0;
 	bottom: 0;
 	left: 0;
-	z-index: 1040;
+	z-index: 2147483645;
 }
 .b2c-modal-backdrop:after {
 	content:'';
@@ -26,10 +77,10 @@
 	filter: alpha(opacity=80);
 }
 #b2c-cipDefine-fields {
-	z-index: 1050;
+	z-index: 2147483646;
 }
 #b2c-cipDefine-description {
-	z-index: 1050;
+	z-index: 2147483646;
 	color: #efefef;
 	border: 2px solid #555555;
 	padding: 7px 5px;
@@ -61,7 +112,7 @@
 	position: absolute;
 	border: 2px solid #efefef;
 	cursor: pointer;
-	z-index: 1050;
+	z-index: 2147483646;
 	text-align: left;
 	font-weight: bold;
 	background-color:rgba(239,239,239,0.4);

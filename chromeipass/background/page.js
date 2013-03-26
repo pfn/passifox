@@ -36,7 +36,6 @@ page.isValidProtocol = function(url) {
 }
 
 page.switchTab = function(callback, tab) {
-	page.currentTabId = tab.id;
 	browserAction.showDefault(null, tab);
 
 	chrome.tabs.sendMessage(tab.id, {action: "activated_tab"});

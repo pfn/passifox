@@ -23,6 +23,7 @@ chrome.tabs.onCreated.addListener(function(tab) {
 	if(tab.id > 0) {
 		page.createTabEntry(tab.id);
 		if(tab.selected) {
+			page.currentTabId = tab.id;
 			event.invoke(page.switchTab, null, tab.id, []);
 		}
 	}
@@ -52,8 +53,11 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 
 	chrome.tabs.get(activeInfo.tabId, function(info) {
 		//console.log(info.id + ": " + info.url);
-		if(info.status == "complete") {
-			event.invoke(page.switchTab, null, info.id, []);
+		if(info && info.id) {
+			page.currentTabId = info.id;
+			if(info.status == "complete") {
+				event.invoke(page.switchTab, null, info.id, []);
+			}
 		}
 	});
 });
@@ -105,6 +109,19 @@ chrome.contextMenus.create({
 	"onclick": function(info, tab) {
 		chrome.tabs.sendMessage(tab.id, {
 			action: "fill_pass_only"
+		});
+	}
+});
+
+/**
+ * Add context menu entry for filling in only password which matches for given username
+ */
+chrome.contextMenus.create({
+	"title": "Activate Password Generator",
+	"contexts": [ "editable" ],
+	"onclick": function(info, tab) {
+		chrome.tabs.sendMessage(tab.id, {
+			action: "activate_password_generator"
 		});
 	}
 });
