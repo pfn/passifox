@@ -175,12 +175,14 @@ cipPassword.initField = function(field, inputs, pos) {
 	cipPassword.createDialog();
 
 	var $found = false;
-	for(var i = pos + 1; i < inputs.length; i++) {
-		if(inputs[i] && inputs[i].attr("type") && inputs[i].attr("type").toLowerCase() == "password") {
-			field.data("cip-genpw-next-field-id", inputs[i].data("cip-id"));
-			field.data("cip-genpw-next-is-password-field", (i == 0));
-			$found = true;
-			break;
+	if(inputs) {
+		for(var i = pos + 1; i < inputs.length; i++) {
+			if(inputs[i] && inputs[i].attr("type") && inputs[i].attr("type").toLowerCase() == "password") {
+				field.data("cip-genpw-next-field-id", inputs[i].data("cip-id"));
+				field.data("cip-genpw-next-is-password-field", (i == 0));
+				$found = true;
+				break;
+			}
 		}
 	}
 
@@ -914,21 +916,23 @@ cipFields.getPasswordField = function(usernameId, checkDisabled) {
 		if(passwordField.length < 1) {
 			passwordField = null;
 		}
+
+		if(cip.settings.usePasswordGenerator) {
+			cipPassword.init();
+			cipPassword.initField(passwordField);
+		}
 	}
 	// search all inputs on page
 	else {
 		var inputs = cipFields.getAllFields();
 		cip.initPasswordGenerator(inputs);
+
 		var active = false;
 		for(var i = 0; i < inputs.length; i++) {
 			if(inputs[i].attr("data-cip-id") == usernameId) {
 				active = true;
 			}
-			if(cIPJQ(inputs[i]).attr("type") && cIPJQ(inputs[i]).attr("type").toLowerCase() != "password") {
-				continue;
-			}
-
-			if(active) {
+			if(active && cIPJQ(inputs[i]).attr("type") && cIPJQ(inputs[i]).attr("type").toLowerCase() == "password") {
 				passwordField = inputs[i];
 				break;
 			}
@@ -1067,31 +1071,36 @@ cip.initPasswordGenerator = function(inputs) {
 	}
 }
 
-cip.retrieveCredentialsCallback = function (credentials) {
+cip.retrieveCredentialsCallback = function (credentials, dontAutoFillIn) {
 	if (cipFields.combinations.length > 0) {
 		cip.u = _f(cipFields.combinations[0].username);
 		cip.p = _f(cipFields.combinations[0].password);
 	}
 
+	if (credentials.length > 0) {
+		cip.credentials = credentials;
+		cip.prepareFieldsForCredentials(!Boolean(dontAutoFillIn));
+	}
+}
+
+cip.prepareFieldsForCredentials = function(autoFillInForSingle) {
 	// only one login for this site
-	if (credentials.length == 1) {
+	if (autoFillInForSingle && cip.credentials.length == 1) {
 		if(cip.u) {
-			cip.u.val(credentials[0].Login);
+			cip.u.val(cip.credentials[0].Login);
 		}
 		if(cip.p) {
-			cip.p.val(credentials[0].Password);
+			cip.p.val(cip.credentials[0].Password);
 		}
-		cip.credentials = credentials;
 
 		// generate popup-list of usernames + descriptions
 		chrome.extension.sendMessage({
 			'action': 'popup_login',
-			'args': [[credentials[0].Login + " (" + credentials[0].Name + ")"]]
+			'args': [[cip.credentials[0].Login + " (" + cip.credentials[0].Name + ")"]]
 		});
 	}
 	//multiple logins for this site
-	else if (credentials.length > 1) {
-		cip.credentials = credentials;
+	else if (cip.credentials.length > 1 || (!autoFillInForSingle && cip.credentials.length > 0)) {
 		cip.preparePageForMultipleCredentials(cip.credentials);
 	}
 }
@@ -1166,7 +1175,7 @@ cip.fillInCredentials = function(combination, onlyPassword, suppressWarnings) {
 			'action': 'retrieve_credentials',
 			'args': [ cip.url, cip.submitUrl ]
 		}, function(credentials) {
-			cip.retrieveCredentialsCallback(credentials);
+			cip.retrieveCredentialsCallback(credentials, true);
 			cip.fillIn(combination, onlyPassword, suppressWarnings);
 		});
 	}
@@ -1262,7 +1271,7 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 					valPassword = cip.credentials[combination.loginId].Password;
 				}
 			}
-			// find passwords to given username
+			// find passwords to given username (even those with empty username)
 			else {
 				for (var i = 0; i < cip.credentials.length; i++) {
 					if(cip.credentials[i].Login == valUsername) {
@@ -1271,7 +1280,7 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 					}
 				}
 
-				if(countPasswords == 0 && !onlyPassword) {
+				if(countPasswords == 0) {
 					countPasswords = cip.credentials.length;
 				}
 			}
