@@ -1,10 +1,10 @@
 .cip-ui-autocomplete li.cip-ui-menu-item {
-	text-align: left;
-	font-size: 12px;
-	font-weight: normal;
-	font-style: normal;
-	font-family: Verdana, Arial, sans-serif;
-	color: #222222;
+	text-align: left !important;
+	font-size: 12px !important;
+	font-weight: normal !important;
+	font-style: normal !important;
+	font-family: Verdana, Arial, sans-serif !important;
+	color: #222222 !important;
 }
 .cip-ui-dialog-titlebar-close {
 	visibility: hidden !important;
@@ -27,6 +27,12 @@
 }
 
 
+.cip-genpw-clearfix:after {
+	clear: both;
+	line-height: 0;
+	content: "";
+	display: table;
+}
 .cip-genpw-icon {
 	position: absolute;
 	cursor: pointer;
@@ -42,16 +48,19 @@
 	background-image: url(chrome-extension://__MSG_@@extension_id__/icons/key_24x24.png);
 }
 .cip-genpw-textfield {
-	display: block;
-	margin: 5px 0;
-	width: 98%;
+	display: block !important;
+	margin: 5px 0 !important;
+	width: 98% !important;
+	max-width: none !important;
+	min-width: none !important;
+	font-size: 1em !important;
 }
 .cip-genpw-label {
-	display: block;
-	margin: 5px 0;
+	display: block !important;
+	margin: 5px 0 !important;
 }
 .cip-genpw-checkbox {
-	vertical-align: middle;
+	vertical-align: middle !important;
 }
 #cip-genpw-btn-fillin {
 	margin-right: 5px;
