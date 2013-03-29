@@ -91,7 +91,7 @@ chrome.extension.onMessage.addListener(event.onMessage);
  * Add context menu entry for filling in username + password
  */
 chrome.contextMenus.create({
-	"title": "Fill User + Pass",
+	"title": "Fill &User + Pass",
 	"contexts": [ "editable" ],
 	"onclick": function(info, tab) {
 		chrome.tabs.sendMessage(tab.id, {
@@ -104,7 +104,7 @@ chrome.contextMenus.create({
  * Add context menu entry for filling in only password which matches for given username
  */
 chrome.contextMenus.create({
-	"title": "Fill Pass Only",
+	"title": "Fill &Pass Only",
 	"contexts": [ "editable" ],
 	"onclick": function(info, tab) {
 		chrome.tabs.sendMessage(tab.id, {
@@ -114,10 +114,10 @@ chrome.contextMenus.create({
 });
 
 /**
- * Add context menu entry for filling in only password which matches for given username
+ * Add context menu entry for creating icon for generate-password dialog
  */
 chrome.contextMenus.create({
-	"title": "Activate Password Generator",
+	"title": "Show Password &Generator Icons",
 	"contexts": [ "editable" ],
 	"onclick": function(info, tab) {
 		chrome.tabs.sendMessage(tab.id, {
@@ -132,4 +132,4 @@ chrome.contextMenus.create({
  */
 window.setInterval(function() {
 	browserAction.update();
-}, 100);
+}, 250);
