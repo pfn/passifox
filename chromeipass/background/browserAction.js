@@ -181,7 +181,7 @@ browserAction.setRememberPopup = function(tabId, username, password, url, userna
 		intervalIcon: {
 			index: 0,
 			counter: 0,
-			max: 5,
+			max: 2,
 			icons: ["icon_remember_red_background_19x19.png", "icon_remember_red_lock_19x19.png"]
 		},
 		icon: "icon_remember_red_background_19x19.png",
