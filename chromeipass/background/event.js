@@ -1,4 +1,23 @@
-var event = event || {};
+var event = {};
+
+
+event.onMessage = function(request, sender, callback) {
+	if (request.action in event.messageHandlers) {
+		//console.log("onMessage(" + request.action + ") for #" + sender.tab.id);
+
+		if(sender.tab.id < 1) {
+			sender.tab.id = page.currentTabId;
+		}
+
+		event.invoke(event.messageHandlers[request.action], callback, sender.tab.id, request.args);
+
+		// onMessage closes channel for callback automatically
+		// if this method does not return true
+		if(callback) {
+			return true;
+		}
+	}
+}
 
 /**
  * Get interesting information about the given tab.
@@ -53,24 +72,6 @@ event.invoke = function(handler, callback, senderTabId, args, secondTime) {
 			console.log("undefined handler for tab " + tab.id);
 		}
 	});
-}
-
-event.onMessage = function(request, sender, callback) {
-	if (request.action in event.messageHandlers) {
-		//console.log("onMessage(" + request.action + ") for #" + sender.tab.id);
-
-		if(sender.tab.id < 1) {
-			sender.tab.id = page.currentTabId;
-		}
-
-		event.invoke(event.messageHandlers[request.action], callback, sender.tab.id, request.args);
-
-		// onMessage closes channel for callback automatically
-		// if this method does not return true
-		if(callback) {
-			return true;
-		}
-	}
 }
 
 

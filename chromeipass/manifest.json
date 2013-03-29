@@ -1,6 +1,6 @@
 {
 	"name": "chromeIPass",
-	"version": "2.3.1",
+	"version": "2.3.2",
 	"manifest_version": 2,
 	"description": "KeePass integration for browser Chrome using KeePassHttp",
 	"icons": {
@@ -60,6 +60,9 @@
 		"webRequest",
 		"webRequestBlocking",
 		"https://*/*",
-		"http://*/*"
+		"http://*/*",
+		"http://localhost:19455/",
+		"http://localhost/",
+		"https://raw.github.com/"
 	]
 }
