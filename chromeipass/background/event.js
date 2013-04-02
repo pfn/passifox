@@ -31,9 +31,16 @@ event.onMessage = function(request, sender, callback) {
  * @returns null (asynchronous)
  */
 event.invoke = function(handler, callback, senderTabId, args, secondTime) {
-	if(senderTabId < 1 || !page.tabs[senderTabId]) {
+	if(senderTabId < 1) {
 		return;
 	}
+
+	if(!page.tabs[senderTabId]) {
+		page.createTabEntry(senderTabId);
+	}
+
+	// remove information from no longer existing tabs
+	page.removePageInformationFromNotExistingTabs();
 
 	chrome.tabs.get(senderTabId, function(tab) {
 	//chrome.tabs.query({"active": true, "windowId": chrome.windows.WINDOW_ID_CURRENT}, function(tabs) {

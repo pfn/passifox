@@ -441,8 +441,6 @@ keepass.keePassHttpUpdateAvailable = function() {
 }
 
 keepass.checkForNewKeePassHttpVersion = function() {
-	return;
-	
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", "https://raw.github.com/pfn/keepasshttp/master/update-version.txt", false);
 	xhr.setRequestHeader("Content-Type", "application/json");

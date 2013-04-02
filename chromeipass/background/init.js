@@ -21,7 +21,7 @@ chrome.tabs.query({"active": true, "windowId": chrome.windows.WINDOW_ID_CURRENT}
  */
 chrome.tabs.onCreated.addListener(function(tab) {
 	if(tab.id > 0) {
-		page.createTabEntry(tab.id);
+		//console.log("chrome.tabs.onCreated(" + tab.id+ ")");
 		if(tab.selected) {
 			page.currentTabId = tab.id;
 			event.invoke(page.switchTab, null, tab.id, []);
@@ -50,12 +50,13 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 	// remove possible credentials from old tab information
 	page.clearCredentials(page.currentTabId);
 	browserAction.removeRememberPopup(null, {"id": page.currentTabId}, true);
-
+	
 	chrome.tabs.get(activeInfo.tabId, function(info) {
 		//console.log(info.id + ": " + info.url);
 		if(info && info.id) {
 			page.currentTabId = info.id;
 			if(info.status == "complete") {
+				//console.log("event.invoke(page.switchTab, null, "+info.id + ", []);");
 				event.invoke(page.switchTab, null, info.id, []);
 			}
 		}

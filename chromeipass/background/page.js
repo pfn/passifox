@@ -1,4 +1,4 @@
-var page = page || {};
+var page = {};
 
 // special information for every tab
 page.tabs = {};
@@ -56,9 +56,30 @@ page.clearCredentials = function(tabId) {
 }
 
 page.createTabEntry = function(tabId) {
+	//console.log("page.createTabEntry("+tabId+")");
 	page.tabs[tabId] = {
 		"stack": [],
 		"errorMessage": null,
 		"loginList": {}
 	};
 }
+
+page.removePageInformationFromNotExistingTabs = function() {
+	var rand = Math.floor(Math.random()*1001);
+	if(rand == 28) {
+		chrome.tabs.query({}, function(tabs) {
+			var $tabIds = {};
+			var $infoIds = Object.keys(page.tabs);
+
+			for(var i = 0; i < tabs.length; i++) {
+				$tabIds[tabs[i].id] = true;
+			}
+
+			for(var i = 0; i < $infoIds.length; i++) {
+				if(!($infoIds[i] in $tabIds)) {
+					delete page.tabs[$infoIds[i]];
+				}
+			}
+		});
+	}
+};
