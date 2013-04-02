@@ -92,14 +92,13 @@ cipAutocomplete.init = function(field) {
 }
 
 cipAutocomplete.onClick = function() {
-	cIPJQ(this).autocomplete( "search", cIPJQ(this).val());
+	cIPJQ(this).autocomplete("search", cIPJQ(this).val());
 }
 
 cipAutocomplete.onOpen = function(event, ui) {
 	// NOT BEAUTIFUL!
-	// modifies ALL ui-autocomplete menus, also those which aren't from us
-	// TODO: find a way to get the corresponding dropdown menu to a login field
-	cIPJQ("ul.cip-ui-autocomplete.cip-ui-menu").css("z-index", 2147483646);
+	// modifies ALL ui-autocomplete menus of class .cip-ui-menu
+	cIPJQ("ul.cip-ui-autocomplete.cip-ui-menu").css("z-index", 2147483636);
 }
 
 cipAutocomplete.onSource = function (request, callback) {
@@ -128,7 +127,8 @@ cipAutocomplete.onBlur = function() {
 	else {
 		var fieldId = cipFields.prepareId(cIPJQ(this).attr("data-cip-id"));
 		var fields = cipFields.getCombination("username", fieldId);
-		if(_f(fields.password) && _f(fields.password).data("unchanged") != true) {
+		if(_f(fields.password) && _f(fields.password).data("unchanged") != true && cIPJQ(this).val() != "") {
+			console.log("auto fill-in");
 			cip.fillInCredentials(fields, true, true);
 		}
 	}
@@ -1119,7 +1119,7 @@ cip.retrieveCredentialsCallback = function (credentials, dontAutoFillIn) {
 
 cip.prepareFieldsForCredentials = function(autoFillInForSingle) {
 	// only one login for this site
-	if (autoFillInForSingle && cip.credentials.length == 1) {
+	if (autoFillInForSingle && cip.settings.autoFillSingleEntry && cip.credentials.length == 1) {
 		if(cip.u) {
 			cip.u.val(cip.credentials[0].Login);
 		}
@@ -1134,7 +1134,7 @@ cip.prepareFieldsForCredentials = function(autoFillInForSingle) {
 		});
 	}
 	//multiple logins for this site
-	else if (cip.credentials.length > 1 || (!autoFillInForSingle && cip.credentials.length > 0)) {
+	else if (cip.credentials.length > 1 || (cip.credentials.length > 0 && (!cip.settings.autoFillSingleEntry || !autoFillInForSingle))) {
 		cip.preparePageForMultipleCredentials(cip.credentials);
 	}
 }
@@ -1143,10 +1143,12 @@ cip.preparePageForMultipleCredentials = function(credentials) {
 	// add usernames + descriptions to autocomplete-list and popup-list
 	var usernames = [];
 	cipAutocomplete.elements = [];
+	var visibleLogin;
 	for(var i = 0; i < credentials.length; i++) {
-		usernames.push(credentials[i].Login + " (" + credentials[i].Name + ")");
+		visibleLogin = (credentials[i].Login.length > 0) ? credentials[i].Login : "- no username -";
+		usernames.push(visibleLogin + " (" + credentials[i].Name + ")");
 		var item = {
-			"label": credentials[i].Login + " (" + credentials[i].Name + ")",
+			"label": visibleLogin + " (" + credentials[i].Name + ")",
 			"value": credentials[i].Login,
 			"loginId": i
 		};
@@ -1277,15 +1279,30 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 		return;
 	}
 
+	var uField = _f(combination.username);
+	var pField = _f(combination.password);
+
 	// exactly one pair of credentials available
 	if (cip.credentials.length == 1) {
-		if(_f(combination.username) && _f(combination.username).length > 0 && !onlyPassword) {
-			_f(combination.username).val(cip.credentials[0].Login);
+		var filledIn = false;
+		if(uField && !onlyPassword) {
+			uField.val(cip.credentials[0].Login);
 		}
-		if(_f(combination.password) && _f(combination.password).length > 0) {
-			_f(combination.password).attr("type", "password");
-			_f(combination.password).val(cip.credentials[0].Password);
-			_f(combination.password).data("unchanged", true);
+		if(pField) {
+			pField.attr("type", "password");
+			pField.val(cip.credentials[0].Password);
+			pField.data("unchanged", true);
+			filledIn = true;
+		}
+
+		if(!filledIn) {
+			if(!suppressWarnings) {
+				var message = "No credentials found.";
+				chrome.extension.sendMessage({
+					action: 'alert',
+					args: [message]
+				});
+			}
 		}
 	}
 	// multiple credentials available
@@ -1293,27 +1310,30 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 		// check if only one password for given username exists
 		var countPasswords = 0;
 
-		var uField = _f(combination.username);
 		if(uField) {
 			var valPassword = "";
-			var valUsername = uField.val();
+			var valUsername = "";
+			var valQueryUsername = uField.val().toLowerCase();
 
 			// specific login id given
 			if(combination.loginId != undefined && cip.credentials[combination.loginId]) {
-				if(cip.credentials[combination.loginId].Login == valUsername) {
+				if(cip.credentials[combination.loginId].Login.toLowerCase() == valQueryUsername) {
 					countPasswords += 1;
 					valPassword = cip.credentials[combination.loginId].Password;
+					valUsername = cip.credentials[combination.loginId].Login;
 				}
 			}
 			// find passwords to given username (even those with empty username)
 			else {
 				for (var i = 0; i < cip.credentials.length; i++) {
-					if(cip.credentials[i].Login == valUsername) {
+					if(cip.credentials[i].Login.toLowerCase() == valQueryUsername) {
 						countPasswords += 1;
 						valPassword = cip.credentials[i].Password;
+						valUsername = cip.credentials[i].Login;
 					}
 				}
 
+				// for the correct alert message: 0 = no logins, X > 1 = too many logins
 				if(countPasswords == 0) {
 					countPasswords = cip.credentials.length;
 				}
@@ -1321,9 +1341,12 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 
 			// only one mapping username found
 			if(countPasswords == 1) {
-				if(_f(combination.password)) {
-					_f(combination.password).val(valPassword);
-					_f(combination.password).data("unchanged", true);
+				if(!onlyPassword) {
+					uField.val(valUsername);
+				}
+				if(pField) {
+					pField.val(valPassword);
+					pField.data("unchanged", true);
 				}
 			}
 		}
@@ -1332,8 +1355,10 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 
 			// specific login id given
 			if(combination.loginId != undefined && cip.credentials[combination.loginId]) {
-				_f(combination.password).val(cip.credentials[combination.loginId].Password);
-				_f(combination.password).data("unchanged", true);
+				if(pField) {
+					pField.val(cip.credentials[combination.loginId].Password);
+					pField.data("unchanged", true);
+				}
 				countPasswords += 1;
 			}
 		}
@@ -1351,7 +1376,7 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 		}
 		else if(countPasswords < 1) {
 			if(!suppressWarnings) {
-				var message = "No logins found.";
+				var message = "No credentials found.";
 				chrome.extension.sendMessage({
 					action: 'alert',
 					args: [message]

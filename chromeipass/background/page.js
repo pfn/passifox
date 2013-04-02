@@ -18,6 +18,12 @@ page.initSettings = function() {
 	if(!("autoFillAndSend" in page.settings)) {
 		page.settings.autoFillAndSend = 1;
 	}
+	if(!("usePasswordGenerator" in page.settings)) {
+		page.settings.usePasswordGenerator = 1;
+	}
+	if(!("autoFillSingleEntry" in page.settings)) {
+		page.settings.autoFillSingleEntry = 1;
+	}
 	localStorage.settings = JSON.stringify(page.settings);
 }
 
