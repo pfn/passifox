@@ -1,3 +1,4 @@
 *.swp
 /nbproject/
 chromeipass.pem
+/chromeipass-data/
