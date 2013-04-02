@@ -26,7 +26,9 @@
 	font-size: .9em !important;
 }
 
-
+#cip-genpw-dialog button {
+	height: 26px !important;
+}
 .cip-genpw-clearfix:after {
 	clear: both;
 	line-height: 0;
@@ -48,7 +50,12 @@
 	background-image: url(chrome-extension://__MSG_@@extension_id__/icons/key_24x24.png);
 }
 .cip-genpw-textfield {
+	background: none !important;
+	height: 20px !important;
+	font-size: 11px !important;
 	display: block !important;
+	border: 1px solid rgb(170, 170, 170) !important;
+	padding: 1px 2px !important;
 	margin: 5px 0 !important;
 	width: 98% !important;
 	max-width: none !important;
