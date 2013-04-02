@@ -531,6 +531,8 @@ cipDefine.init = function () {
 	var $description = cIPJQ("<div>").attr("id", "b2c-cipDefine-description");
 	$backdrop.append($description);
 
+	cipFields.getAllFields();
+
 	cipDefine.initDescription();
 
 	cipDefine.prepareStep1();
@@ -555,6 +557,7 @@ cipDefine.initDescription = function() {
 			if(!cIPJQ("div#b2c-cipDefine-fields").data("username")) {
 				cIPJQ("div#b2c-cipDefine-fields").data("username", null);
 				cipDefine.prepareStep2();
+				cipDefine.markAllPasswordFields(cIPJQ("#b2c-cipDefine-fields"));
 			}
 			else {
 				cIPJQ("div#b2c-cipDefine-fields").data("password", null);
@@ -638,6 +641,7 @@ cipDefine.initDescription = function() {
 }
 
 cipDefine.markAllUsernameFields = function ($chooser) {
+	//var $found = false;
 	cIPJQ("input[type='text'], input[type='email'], input:not([type])").each(function() {
 		if(cIPJQ(this).is(":visible") && cIPJQ(this).css("visibility") != "hidden" && cIPJQ(this).css("visibility") != "collapsed") {
 			var $field = cIPJQ("<div>").addClass("b2c-fixed-field")
@@ -650,14 +654,24 @@ cipDefine.markAllUsernameFields = function ($chooser) {
 					cIPJQ("div#b2c-cipDefine-fields").data("username", cIPJQ(this).data("cip-id"));
 					cIPJQ(this).addClass("b2c-fixed-username-field").text("Username").unbind("click");
 					cipDefine.prepareStep2();
+					cipDefine.markAllPasswordFields(cIPJQ("#b2c-cipDefine-fields"));
 				})
 				.hover(function() {cIPJQ(this).addClass("b2c-fixed-hover-field");}, function() {cIPJQ(this).removeClass("b2c-fixed-hover-field");});
 			$chooser.append($field);
+			//$found = true;
 		}
 	});
+
+	/* skip step if no entry was found
+	if(!$found) {
+		alert("No username field found.\nContinue with choosing a password field.");
+		cIPJQ("button#b2c-btn-skip").click();
+	}
+	*/
 }
 
 cipDefine.markAllPasswordFields = function ($chooser) {
+	//var $found = false;
 	cIPJQ("input[type='password']").each(function() {
 		if(cIPJQ(this).is(":visible") && cIPJQ(this).css("visibility") != "hidden" && cIPJQ(this).css("visibility") != "collapsed") {
 			var $field = cIPJQ("<div>").addClass("b2c-fixed-field")
@@ -673,8 +687,21 @@ cipDefine.markAllPasswordFields = function ($chooser) {
 				})
 				.hover(function() {cIPJQ(this).addClass("b2c-fixed-hover-field");}, function() {cIPJQ(this).removeClass("b2c-fixed-hover-field");});
 			$chooser.append($field);
+			//$found = true;
 		}
 	});
+
+	/* skip step if no entry was found
+	if(!$found) {
+		alert("No password field found.\nContinue with confirmation dialog.");
+		if(cIPJQ("div#b2c-cipDefine-fields").data("username")) {
+			cIPJQ("button#b2c-btn-skip").click();
+		}
+		else {
+			cipDefine.prepareStep3();
+		}
+	}
+	*/
 }
 
 cipDefine.prepareStep1 = function() {
@@ -691,10 +718,17 @@ cipDefine.prepareStep2 = function() {
 	cIPJQ("div.b2c-fixed-field:not(.b2c-fixed-username-field)", cIPJQ("div#b2c-cipDefine-fields")).remove();
 	cIPJQ("div:first", cIPJQ("div#b2c-cipDefine-description")).text("2. Now choose a password field");
 	cIPJQ("button#b2c-btn-again").show();
-	cipDefine.markAllPasswordFields(cIPJQ("#b2c-cipDefine-fields"));
 }
 
 cipDefine.prepareStep3 = function() {
+	/* skip step if no entry was found
+	if(!cIPJQ("div#b2c-cipDefine-fields").data("username") && !cIPJQ("div#b2c-cipDefine-fields").data("password")) {
+		alert("Neither an username field nor a password field were selected.\nNothing will be changed and chooser will be closed now.");
+		cIPJQ("button#b2c-btn-dismiss").click();
+		return;
+	}
+	*/
+
 	cIPJQ("div.b2c-fixed-field:not(.b2c-fixed-password-field,.b2c-fixed-username-field)", cIPJQ("div#b2c-cipDefine-fields")).remove();
 	cIPJQ("button#b2c-btn-confirm").show();
 	cIPJQ("button#b2c-btn-skip").hide();
