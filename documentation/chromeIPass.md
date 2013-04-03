@@ -177,7 +177,7 @@ Go to Keepass > Tools > Generate Password... and this dialog opens:<br />
 
 The auto detection of credential fields is called only one time, after loading of the page finished.
 
-There are known limitations when the auto detection cannot detect a username + password combination. Please go to [Known limitations > Auto detection of input fields](#72-auto-detection-of-input-fields) to read more about it.
+There are known limitations when the auto detection cannot detect a username + password combination. Please go to [Limitations and known problems > Auto detection of input fields](#72-auto-detection-of-input-fields) to read more about it.
 
 When it did not detect a username + password field combination you can click on the browser icon of chromeIPass and press the button "Redetect credential fields".
 
