@@ -1,0 +1,8 @@
+2.3.4: Lukas Schulze: fix "checking status" bug
+2.3.3: Lukas Schulze: added permissions for update-function for KeePassHttp; added keyboard support for context-menu;  fixed escaping identifiers;  fixed detection of field combinations when pressing Ctrl+Shift+U; redesigned dialog of password-generator
+2.3.1: Lukas Schulze: added password-generator (only works with the latest version of KeePassHttp, disabled for older versions); changed the way of identifying and accessing credential fields (no longer uses only the ID of an field, because several sites don't use unique IDs); improved feature choose-own-credential-fields
+2.2.3: Lukas Schulze: fix jQuery css styling issues (chromeipass no longer override web-site appearance). Fix jquery date pickers.
+2.2.1: Update to webstore manifest version2. Completely re-worked for the updated Chrome extension APIs, supports updating and saving new KeePass entries, supports HTTP authentication (Basic and Digest auth). Many more new features. All new enhancements are courtesy of Lukas Schulze, thank you!
+1.0.7: fix forms that use HTML5's type="email" for username (e.g. amazon)
+1.0.4: minor bugfix in getFields, filter user fields to only be text
+1.0.6: utf8 support for login and password fields, thanks DeniSix
