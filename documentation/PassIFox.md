@@ -9,10 +9,12 @@ This extension is for use with [KeePassHttp](https://github.com/pfn/keepasshttp)
 The XPI can be installed using the link: https://passifox.appspot.com/passifox.xpi
 
 ### Prereqs
+
 1. [KeePass](http://keepass.info/)
 2. [KeePassHttp](https://github.com/pfn/keepasshttp/)
 
 ### Configuration
+
 There is no explicit configuration necessary. PassIFox and KeePassHttp
 will communicate with each other on http://localhost:19455/
 
