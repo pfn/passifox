@@ -3,16 +3,349 @@
 is an extension for the browser Google Chrome to send and receive credentials from KeePass through the plugin [KeePassHttp](https://github.com/pfn/keepasshttp).
 It can be downloaded from [Chrome Web Store](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae).
 
-## Features
+Please read at least the section [Important information](#important-information).
 
-## Installation
+Table of content:
+- [Features](#features-overview)
+- [Installation](#installation)
+- [Functionality](#functionality)
+	- [Password generator](#password-generator)
+	- [Choose own credential fields for a page](#choose-own-credential-fields-for-a-page)
+	- [Remember passwords](#remember-passwords)
+- [Configuration and options](#configuration-and-options)
+- [Tips and tricks](#tips-and-tricks)
+- [Important information](#important-information)
+- [Known problems](#known-problems)
+- [Troubleshooting](#troubleshooting)
+- [Security](#security)
 
-## Configuration and Options
+## 1. Features
 
-## Important information
+- secure integration with KeePass using the KeePassHttp plugin
+- receive credentials from KeePass
+- send new and updated entries to KeePass
+- support multiple KeePass databases
+	- select a unique icon for every database
+- contains a [password generator](#password-generator) which works together with KeePass
+- support multiple credentials for one page
+	- select from popup
+	- select from autocomplete
+- support autocomplete for username fields
+- support HTTP Auth requests (also known as htaccess-login)
+- accessible via context-menu of input fields
+- accessible via [shortcuts](#shortcuts) (Ctrl+Shift+U and Ctrl+Shift+P)
+- automatically detect field combinations of username + password
+- automated password form fill if only one login combination is available
+- choose own credential fields for every page
+- checks for update of KeePassHttp
 
-## Troubleshooting
+## 2. Installation
 
-## Security
+### 2.1 Requirements
+- [KeePass](http://keepass.info) v2.17 or higher
+- [KeePassHttp](https://github.com/pfn/keepasshttp) v1.0.7 or higher (recommended v1.4 or higher)
+- it is recommended to disable the built-in Chrome password management when using this extension
 
-## 
+### 2.2 Installation
+1. Your database in KeePass has to be unlocked.
+2. Go to the [Chrome Web Store](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae) and install the extension chromeIPass.
+3. Now there is a new browser icon available:
+![browser-icon](https://raw.github.com/pfn/passifox/master/documentation/images/cip-browser-icon.png)
+
+4. Click on the icon and press the button to connect to KeePassHttp:
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-connect.png" alt="popup-connect" width="200px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-connect.png)
+
+5. KeePassHttp shows you an dialog to give the pairing request a name. You could call it "Chrome on my main computer".
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/keepass-association-key.png" alt="keepass-association-key" width="200px" />](https://raw.github.com/pfn/passifox/master/documentation/images/keepass-association-key.png)
+
+6. If you click on the browser icon again it should show you the following information:
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-normal.png" alt="popup-normal" width="200px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-normal.png)
+
+7. Reload the current page.
+8. Open the settings to adjust chromeIPass for your needs.
+
+## 3. Functionality
+
+### 3.1 Access the credentials
+
+If chromeIPass detected a combination of username + password fields it requests all credentials for the current page from KeePassHttp.
+The received credentials are accessible via multiple ways which are described in the following sections.
+
+#### 3.1.1 Popup
+
+The icon of chromeIPass gets a question mark.
+Clicking on the icon opens a popup on which you can choose the credentials which should be filled in.
+
+If there are several username + password combinations on the page the credentials are filled into the focused combination (focus on username or password field) or into the first combination.
+
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-choose-credentials.png" alt="popup choose credentials" width="300px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-choose-credentials.png)
+
+
+#### 3.1.2 Autocomplete
+
+For all combinations of username + password fields the username field supports autocomplete for the received credentials.
+
+By clicking on an entry of the list or when the username field loose the focus it checks whether the username belongs to one of the received credentials and fills-in the password field.
+
+This feature is activated by default and can be disabled on the settings page of chromeIPass.
+
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-autocomplete.png" alt="autocomplete" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-autocomplete.png)
+
+#### 3.1.3 Context-menu
+
+On every textfield chromeIPass adds 3 entries to the context-menu.
+Even if the field was not detected as a username or password field by chromeIPass these entries are available.
+
+If you click on _Fill User + Pass_ or _Fill Pass Only_ chromeIPass checks whether the focused field belongs to a detected combination of username + password field. If this check fails it starts a redetection for only the focused field.
+If you focus an unrecognized password field and select _Fill User + Pass_ it will automatically detect the username field and fills-in the credentials.
+
+__Fill User + Pass__ of the context-menu will only work if chromeIPass received only one pair of credentials. Otherwise it shows you an error message and you should use the autocomplete or popup.
+
+__Fill Pass Only__ does work either chromeIPass received only one pair of credentials or the associated username field contains a username which belongs to one pair of the received credentials.
+
+__Show Password Generator Icons__ restarts the detection of _visible_ password fields on the page and adds the key-icon for the password generator to each of them.
+
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-context-menu.png" alt="context-menu" width="300px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-context-menu.png)
+
+#### 3.1.4 Shortcuts
+
+chromeIPass supports 2 page-wide shortcuts:
+
+__Ctrl+Shift+U__ is the shortcut for __Fill User + Pass__ of the context-menu which is described in [3.1.3](#XXX).
+
+__Ctrl+Shift+P__ is the shortcut for __Fill Pass Only__ of the context-menu which is also described in [3.1.3](#XXX).
+
+
+### 3.2 Password generator
+
+chromeIPass offers a password generator which receives the password from KeePass itself.
+This function has to be enabled on the settings-page of chromeIPass.
+
+This feature is only available with the KeePassHttp v1.4 or higher.
+
+If it is enabled every password field contains a key icon on the right side. Click on it to open the password generator:
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-password-generator.png" alt="password-generator" width="300px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-password-generator.png)
+
+If the key-icon does not appear, right-click on the input-field and select _chromeIPass > Show Password Generator icons_ in the context-menu.
+
+Once opened the generated password is stored in the field till you reload or submit the page or till you press the generate button. Even if you close the dialog and click on another key-icon the displayed password does not change.
+
+Does a page contain more than one password field and you opened the dialog on the first password field, the option to fill-in the next field is enabled. If the two password fields are successive on the page, this option is also checked. Otherwise it is unchecked.
+
+If the password field has a limited length for inputted text chromeIPass will detect it and automatically cut the generated password. It will inform you about this change and copy the cutted password to your clipboard.
+
+__Because chromeIPass has some [limitations](#XXX) to remember credentials the password should always be copied to your clipboard.__
+
+
+#### 3.2.1 How is the password generated?
+
+chromeIPass sends a request to KeePass which generates a password with the settings of the built-in profile for auto-generated passwords.
+To change the length and composition of generated passwords, please open the KeePass Password Generation Options.
+Go to Keepass > Tools > Generate Password... and this dialog opens:
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/keepass-password-generation-options.png" alt="keepass-password-generation-options" width="300px" />](https://raw.github.com/pfn/passifox/master/documentation/images/keepass-password-generation-options.png)
+1. Select the built-in profile _(Automatically generated passwords for new entries)_ and change the composition of the generated passwords.
+2. Now click the _save_ button
+3. A second dialog appears. Click on the down-arrow on the right side and select again the name of the built-in profile _(Automatically generated passwords for new entries)_.
+4. Press OK and your changes are saved to the profile.
+
+
+### 3.3 Detection of credential fields
+
+1. After the page was loaded chromeIPass starts to search for all __visible__ input fields.
+2. For every found input field of the type _password_ it checks whether the previous input field is a normal textfield.
+	- if there is no previous field or the previous field is a password field --> don't add this fields as a detected username + password field combination.
+	- if the previous field is a textfield --> add both fields as combination of username + password field.
+
+The auto detection of credential fields is called only one time, after loading of the page finished.
+
+There are known limitations when the auto detection cannot detect a username + password combination. Please go to [Known limitations > Auto detection of input fields](#auto-detection-of-input-fields) to read more about it.
+
+When it did not detect a username + password field combination you can click on the browser icon of chromeIPass and press the button "Redetect credential fields".
+
+You can also use the shortcuts or context-menu as described in [3.1](#XXX) to start the redetection for the focused field.
+
+
+### 3.4 Choose own credential fields for a page
+
+Sometimes there are other input fields between the username field and the password field.
+In this cases chromeIPass cannot detect the correct combination of username + password fields.
+
+But you can define the combination by yourself for every page.
+Just click on the browser-icon of chromeIPass and press "Choose own credential fields for this page":
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-normal.png" alt="popup-normal" width="200px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-normal.png)
+
+First there are all normal textfields highlighted. Click on the field you want to use as username field or skip this step if no username field is required.
+
+Now choose a password field and in the last step confirm your selection.
+
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-choose-credential-fields.png" alt="popup-normal" width="200px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-choose-credential-fields.png)
+
+The next time you open this page chromeIPass will use the defined combination of username + password field and does no longer auto detect combinations.
+
+Certainly you can focus another field and use the context-menu ([3.1.3](#XXX)) or shortcuts ([3.1.4](#XXX)) to start the detection for the focused field.
+
+
+### 3.5 Remember passwords
+
+Because Google Chrome does not offer an API for their built-in password manager chromeIPass implements it own way of detecting new or updated credentials.
+
+If chromeIPass finds a combination of username + password fields it tries to get the corresponding form for them.
+For this form it registers a submit event which is called when the form is send.
+
+__There are known limitations for this workflow which are described in [Limitations and known problems](#XXX).__
+
+If chromeIPass detects unsaved credentials the browser icon of chromeIPass starts blinking red.
+The icon will remain blinking till you click on it or you ignore it for 2 further page visits (loading other sites).
+
+If you click on it, it remains completely red till you add, update or dismiss the detected changes.
+It shows you the corresponding URL and username and the database in which the changes will be saved.
+
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-remember.png" alt="popup-normal" width="200px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-remember.png)
+
+If you have multiple credentials for a page and want to update one entry you can press _Update_.
+Now a list of all available entries appears on which you can select the outdated entry. If the username matchs with one username of the available credentials this entry will be marked bold:
+
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-remember-update.png" alt="popup-normal" width="200px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-remember-update.png)
+
+New entries are stored in a separate group in KeePass which will be added by KeePassHttp.
+
+### 3.6 Auto fill-in for HTTP Auth requests
+
+KeePassHttp returns the found credentials sorted by best matching URL to chromeIPass.
+chromeIPass can try to automatically login with the first provided credentials on HTTP Auth requests.
+If this login attempt fails the login dialog is shown as normal.
+
+The dialog of an HTTP Auth request is shown in the following screenshot:
+
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/http-auth-request.png" alt="http auth request" width="200px" />](https://raw.github.com/pfn/passifox/master/documentation/images/http-auth-request.png)
+
+This feature is activated by default and can be disabled in settings.
+
+
+## 4. Configuration and settings
+
+You don't need to configure chromeIPass.
+If chromeIPass does not have an authenticated connection to KeePassHttp it displays a red cross in the browser icon and requests you to establish a new connection.
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-connect.png" alt="popup-connect" width="200px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-connect.png)
+
+For further configurations you can open the settings which are accessible via the settings button in the popups, the context-menu of the browser icon (entry is called _Options_) or the tab _chrome://extensions_ on the chromeIPass-entry there is also a link called _Options_. 
+
+### 4.1 Settings: General
+
+On the _General Settings_ you can enable and disable key features like autocomplete, password generator or auto fill for HTTP Auth requests.
+
+The changes are saved immediately.
+
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-settings-general.png" alt="settings general" width="300px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-settings-general.png)
+
+### 4.2 Settings: Connected Databases
+
+On the tab _Connected Databases_ chromeIPass shows you which databases are currently paired with KeePassHttp. You can also define a special icon for every database and see when it was last accessed.
+
+The displayed icon depends on the database which is currently activated and unlocked in KeePass.
+
+Removing an entry from chromeIPass __does not__ remove the key from KeePassHttp! But KeePassHttp is no longer able to send credentials to or receive data from chromeIPass for the currently activated database in KeePass.
+
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-settings-connected-databases.png" alt="settings general" width="300px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-settings-connected-databases.png)
+
+
+### 4.3 Settings: Specified credential fields
+
+In [section 3.4](#XXX) the function of _Choose own credential fields for this page_ is described.
+All credential fields which are defined with this function are listed on this tab.
+You can only remove them because it's not useful to define the fields manually.
+
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-settings-specified-credential-fields.png" alt="settings general" width="300px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-settings-specified-credential-fields.png)
+
+## 5. Tips and tricks
+
+If the credential fields are not detected automatically you can focus one of the fields and press __Ctrl+Shift+U__ or __Ctrl+Shift+P__ to trigger redetecting the fields and filling-in the credentials. Also you can click on the browser icon and press the button _Redetect credential fields_.
+
+If chromeIPass detects wrong credential fields choose them by yourself with the button _Choose own credential fields for this page_ which is available in every popup.
+
+## 6. Important information
+
+- because Google Chrome does not offer an API to communicate with the built-in password manager chromeIPass needs to implement its own kind of password manager. [Please read the known limitations which belongs to that](#XXX).
+
+- for security reasons chromeIPass wipes out the temporarily stored credentials from cache every time you switch the tabs. Therefor it requests credentials for the current tab every time you switch on it.
+
+## 7. Limitations and known problems
+
+### 7.1 Remember credentials
+
+Google Chrome does not offer an API to communicate with the password manager. Therefor chromeIPass implements its own way of checking for changed credentials.
+
+On the form in which a combination of username + password fields is detected, chromeIPass registers an event which will be called when the form is submitted.
+
+This event checks whether the submitted username and password have changed and shows the remember dialog.
+
+But there exist several problems which we currently cannot overcome and which lead to not recognize the changes:
+1. If the password field is cleared by some JavaScript code which hashes the value for example, chromeIPass can no longer access the value of the password and therefor no remember dialog is shown.
+2. If there are page internal submit events registered on the form which will be triggered before our submit-request (for example: ajax calls), our request is possibly not triggered and no remember dialog will be shown.
+
+Another problem is that chromeIPass cannot clearly differentiate between a successful and failed login attempt.
+The remember dialog will also be shown for failed login attempts.
+
+### 7.2 Auto detection of input fields
+
+#### 7.2.1 Problem
+The detection does only detect fields which are __visible__ when this function is called.
+It is only one time called automatically: After loading of the page finished.
+
+New input fields which are created with JavaScript or with an AJAX-call cannot be detected, because they get visible __after__ the auto detection was called.
+
+For example an overlay for signin or signup could possibly not auto detected by chromeIPass because either the input fields are created just-in-time or they are hidden to the user while auto detection is running.
+
+#### 7.2.2 Solution
+When it did not detect any username + password field combination you can click on the browser icon of chromeIPass and press the button "Redetect credential fields".
+
+You can also focus the visible username field or password field and press __Ctrl+Shift+U__. This will start a redetection for the focused field, too.
+
+## 8. Troubleshooting
+
+If you [open an issue](https://github.com/pfn/passifox/issues/) always give us at least the following information:
+1. chromeIPass version
+2. Google Chrome version
+2. KeePassHttp version
+3. KeePass version
+4. Pages on which the error occur
+
+### 8.1 Wrong credentials are filled-in
+1. Search in KeePass for the URL of the page on which the wrong credentials are filled-in.
+2. Check the found entries for the credentials and confirm that the entries are up-to-date.
+
+If this does not solve your problem, please [open an issue](https://github.com/pfn/passifox/issues/).
+
+### 8.2 chromeIPass stopped working
+
+#### 8.2.1 First check the running versions of your software
+1. Check if you are using the [latest version of chromeIPass](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae).
+2. Check if your browser Google chrome is up-to-date
+3. Check if your version [KeePassHttp](https://github.com/pfn/keepasshttp) and [KeePass](http://www.keepass.info) are up-to-date
+
+#### 8.2.2 Check the background page console for error messages
+1. Open a tab with URL _chrome://extensions_ and activate the _Developer mode_ to be able to generate the background page:
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-extensions-developer-mode.png" alt="extensions developer mode" width="300px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-extensions-developer-mode.png)
+
+2. In the opened window choose the tab _Console_:
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-console-background.png" alt="background page console" width="300px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-console-background.png)
+
+#### 8.2.3 Check the inline page console for error messages
+
+In the page on which chromeIPass stopped working please press _F12_ or do a right-click and choose _Inspect Element_ from the context-menu. Now choose the tab _Console_ to open the console for the inline scripts:
+
+[<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-console-inline.png" alt="inline page console" width="300px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-console-inline.png)
+
+## 9. Security
+
+- every communication with KeePass and KeePassHttp is encrypted with the symmetric version of AES in CBC-mode.
+- the messages are crypted with a key of the length of 256bit.
+- the communication happens via http://localhost on port 19455 on which KeePassHttp is listening.
+
+The system is only in the moment of connecting a database to chromeIPass vulnerable. At this point KeePassHttp has to transmit the key to chromeIPass which will store it in the secured space of the extension. If someone records this traffic it could be possible to extract the key from it.
+
+Any further communication is encrypted with this key and no longer vulnerable!
+
+## Information
+
+This readme was created by Lukas Schulze and last updated in April 2013.
