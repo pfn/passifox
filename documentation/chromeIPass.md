@@ -344,7 +344,7 @@ If this does not solve your problem, please [open an issue](https://github.com/p
 
 1. Check if you are using the [latest version of chromeIPass](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae).
 2. Check if your browser Google chrome is up-to-date
-3. Check if your version [KeePassHttp](https://github.com/pfn/keepasshttp) and [KeePass](http://www.keepass.info) are up-to-date
+3. Check if your version of [KeePassHttp](https://github.com/pfn/keepasshttp) and [KeePass](http://www.keepass.info) are up-to-date
 
 #### 8.2.2 Check the background page console for error messages
 1. Open a tab with URL _chrome://extensions_ and activate the _Developer mode_ to be able to generate the background page:<br />

@@ -4,17 +4,15 @@ are extensions for the browsers Mozilla Firefox and Google Chrome to integrate K
 
 They require [KeePassHttp](https://github.com/pfn/keepasshttp/), a plugin for KeePass which implements the communication for KeePass.
 
-## Download
+## chromeIPass for Google Chrome
 
-- [Download the extension for Mozilla Firefox](https://passifox.appspot.com/passifox.xpi)
-- [Download the extension for Google Chrome from Chrome Web Store](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae)
+- [Download](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae)
+- [Documentation](https://github.com/pfn/passifox/blob/master/documentation/chromeIPass.md) (installation guide, troubleshooting, functionality, ...)
 
-## Installation and documentation
+## PassIFox for Mozilla Firefox
 
-Installation guide, requirements, troubleshooting, functionality, screenshots...
-
-- [Documentation for chromeIPass](https://github.com/pfn/passifox/blob/master/documentation/chromeIPass.md)
-- [Documentation for PassIFox](https://github.com/pfn/passifox/blob/master/documentation/PassIFox.md)
+- [Download](https://passifox.appspot.com/passifox.xpi)
+- [Documentation](https://github.com/pfn/passifox/blob/master/documentation/PassIFox.md)
 
 Currently the documentation of PassIFox is not up-to-date!
 Support is always welcome.
