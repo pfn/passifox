@@ -42,52 +42,14 @@ keepass.updateCredentials = function(callback, tab, entryId, username, password,
 	var iv = request.Nonce;
 
 
-	request.Login = keepass.b64e(
-		slowAES.encrypt(
-			keepass.to_b(username),
-			slowAES.modeOfOperation.CBC,
-			keepass.b64d(key),
-			keepass.b64d(iv)
-		)
-	);
-
-	request.Password = keepass.b64e(
-		slowAES.encrypt(
-			keepass.to_b(password),
-			slowAES.modeOfOperation.CBC,
-			keepass.b64d(key),
-			keepass.b64d(iv)
-		)
-	);
+	request.Login = keepass.encrypt(username, key, iv);
+	request.Password = keepass.encrypt(password, key, iv);
+	request.Url = keepass.encrypt(url, key, iv);
+	request.SubmitUrl = keepass.encrypt(url, key, iv);
 
 	if(entryId) {
-		request.Uuid = keepass.b64e(
-			slowAES.encrypt(
-				keepass.to_b(entryId),
-				slowAES.modeOfOperation.CBC,
-				keepass.b64d(key),
-				keepass.b64d(iv)
-			)
-		);
+		request.Uuid = keepass.encrypt(entryId, key, iv);
 	}
-
-	request.Url = keepass.b64e(
-		slowAES.encrypt(
-			keepass.to_b(url),
-			slowAES.modeOfOperation.CBC,
-			keepass.b64d(key),
-			keepass.b64d(iv)
-		)
-	);
-
-	request.SubmitUrl = keepass.b64e(
-		slowAES.encrypt(
-			keepass.to_b(url),
-			slowAES.modeOfOperation.CBC,
-			keepass.b64d(key),
-			keepass.b64d(iv)
-		)
-	);
 
 	// send request
 	var result = keepass.send(request);
@@ -133,24 +95,10 @@ keepass.retrieveCredentials = function (callback, tab, url, submiturl, forceCall
 	var id = verifier[0];
 	var key = verifier[1];
 	var iv = request.Nonce;
-	request.Url = keepass.b64e(
-		slowAES.encrypt(
-			keepass.to_b(url),
-			slowAES.modeOfOperation.CBC,
-			keepass.b64d(key),
-			keepass.b64d(iv)
-		)
-	);
+	request.Url = keepass.encrypt(url, key, iv);
 
 	if(submiturl) {
-		request.SubmitUrl = keepass.b64e(
-			slowAES.encrypt(
-				keepass.to_b(submiturl),
-				slowAES.modeOfOperation.CBC,
-				keepass.b64d(key),
-				keepass.b64d(iv)
-			)
-		);
+		request.SubmitUrl = keepass.encrypt(submiturl, key, iv);
 	}
 
 	// send request
@@ -437,7 +385,8 @@ keepass.keePassHttpUpdateAvailable = function() {
 			keepass.checkForNewKeePassHttpVersion();
 		}
 	}
-	return (keepass.currentKeePassHttp.versionParsed > 0 && keepass.currentKeePassHttp.versioParsed < keepass.latestKeePassHttp.versionParsed);
+
+	return (keepass.currentKeePassHttp.versionParsed > 0 && keepass.currentKeePassHttp.versionParsed < keepass.latestKeePassHttp.versionParsed);
 }
 
 keepass.checkForNewKeePassHttpVersion = function() {
@@ -571,14 +520,7 @@ keepass.setVerifier = function(request, inputKey) {
 	request.Nonce = keepass.b64e(iv);
 
 	//var decodedKey = keepass.b64d(key);
-	request.Verifier = keepass.b64e(
-		slowAES.encrypt(
-			keepass.to_b(request.Nonce),
-			slowAES.modeOfOperation.CBC,
-			keepass.b64d(key),
-			iv
-		)
-	);
+	request.Verifier = keepass.encrypt(request.Nonce, key, request.Nonce);
 
 	return [id, key];
 }
@@ -593,15 +535,7 @@ keepass.verifyResponse = function(response, key, id) {
 	keepass.associated.hash = keepass.databaseHash;
 
 	var iv = response.Nonce;
-	var crypted = response.Verifier;
-	var value = slowAES.decrypt(
-		keepass.b64d(crypted),
-		slowAES.modeOfOperation.CBC,
-		keepass.b64d(key),
-		keepass.b64d(iv)
-	);
-
-	value = keepass.to_s(value);
+	var value = keepass.decrypt(response.Verifier, key, iv, true);
 
 	keepass.associated.value = (value == iv);
 
@@ -642,20 +576,38 @@ keepass.setCryptoKey = function(id, key) {
 	keepass.saveKey(keepass.databaseHash, id, key);
 }
 
-keepass.decryptEntry = function (e, key, iv) {
-	function internalDecrypt(input) {
-		return keepass.to_s(
-			slowAES.decrypt(
-				keepass.b64d(input),
-				slowAES.modeOfOperation.CBC,
-				keepass.b64d(key),
-				keepass.b64d(iv)
-			)
-		);
-	}
+keepass.encrypt = function(input, key, iv) {
+	return keepass.b64e(
+		slowAES.encrypt(
+			keepass.to_b(input),
+			slowAES.modeOfOperation.CBC,
+			keepass.b64d(key),
+			keepass.b64d(iv)
+		)
+	);
+}
 
-	e.Login = UTF8.decode(internalDecrypt(e.Login));
-	e.Uuid = internalDecrypt(e.Uuid);
-	e.Name = UTF8.decode(internalDecrypt(e.Name));
-	e.Password = UTF8.decode(internalDecrypt(e.Password));
+keepass.decrypt = function(input, key, iv, toStr) {
+	var output = slowAES.decrypt(
+			keepass.b64d(input),
+			slowAES.modeOfOperation.CBC,
+			keepass.b64d(key),
+			keepass.b64d(iv)
+		);
+
+	return toStr ? keepass.to_s(output) : output;
+}
+
+keepass.decryptEntry = function (e, key, iv) {
+	e.Uuid = keepass.decrypt(e.Uuid, key, iv, true);
+	e.Name = UTF8.decode(keepass.decrypt(e.Name, key, iv, true));
+	e.Login = UTF8.decode(keepass.decrypt(e.Login, key, iv, true));
+	e.Password = UTF8.decode(keepass.decrypt(e.Password, key, iv, true));
+
+	if(e.StringFields) {
+		for(var i = 0; i < e.StringFields.length; i++) {
+			e.StringFields[i].Key = UTF8.decode(keepass.decrypt(e.StringFields[i].Key, key, iv, true))
+			e.StringFields[i].Value = UTF8.decode(keepass.decrypt(e.StringFields[i].Value, key, iv, true))
+		}
+	}
 }
