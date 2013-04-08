@@ -5,13 +5,18 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 	if ('action' in req) {
 		if(req.action == "fill_user_pass_with_specific_login") {
 			if(cip.credentials[req.id]) {
+				var combination = null;
 				if (cip.u) {
 					cip.u.val(cip.credentials[req.id].Login);
+					combination = cipFields.getCombination("username", cip.u);
 					cip.u.focus();
 				}
 				if (cip.p) {
 					cip.p.val(cip.credentials[req.id].Password);
+					combination = cipFields.getCombination("password", cip.p);
 				}
+
+				cip.fillInStringFields(combination.fields, cip.credentials[req.id].StringFields);
 			}
 			// wish I could clear out _logins and _u, but a subsequent
 			// selection may be requested.
@@ -128,7 +133,6 @@ cipAutocomplete.onBlur = function() {
 		var fieldId = cipFields.prepareId(cIPJQ(this).attr("data-cip-id"));
 		var fields = cipFields.getCombination("username", fieldId);
 		if(_f(fields.password) && _f(fields.password).data("unchanged") != true && cIPJQ(this).val() != "") {
-			console.log("auto fill-in");
 			cip.fillInCredentials(fields, true, true);
 		}
 	}
@@ -302,7 +306,7 @@ cipPassword.createDialog = function() {
 		modal: true,
 		resizable: false,
 		minWidth: 340,
-		title: "Generate new password",
+		title: "Password Generator",
 		open: function(event, ui) {
 			cIPJQ(".cip-ui-widget-overlay").click(function() {
 				cIPJQ("#cip-genpw-dialog:first").dialog("close");
@@ -521,6 +525,13 @@ cipForm.onSubmit = function() {
 
 var cipDefine = {};
 
+cipDefine.selection = {
+	"username": null,
+	"password": null,
+	"fields": {}
+};
+cipDefine.eventFieldClick = null;
+
 cipDefine.init = function () {
 	var $backdrop = cIPJQ("<div>").attr("id", "b2c-backdrop").addClass("b2c-modal-backdrop");
 	cIPJQ("body").append($backdrop);
@@ -535,6 +546,7 @@ cipDefine.init = function () {
 
 	cipDefine.initDescription();
 
+	cipDefine.resetSelection();
 	cipDefine.prepareStep1();
 	cipDefine.markAllUsernameFields($chooser);
 }
@@ -543,6 +555,8 @@ cipDefine.initDescription = function() {
 	var $description = cIPJQ("div#b2c-cipDefine-description");
 	var $h1 = cIPJQ("<div>").addClass("b2c-chooser-headline");
 	$description.append($h1);
+	var $help = cIPJQ("<div>").addClass("b2c-chooser-help").attr("id", "b2c-help");
+	$description.append($help);
 
 	var $btnDismiss = cIPJQ("<button>").text("Dismiss").attr("id", "b2c-btn-dismiss")
 		.addClass("b2c-btn").addClass("b2c-btn-danger")
@@ -554,21 +568,23 @@ cipDefine.initDescription = function() {
 		.addClass("b2c-btn").addClass("b2c-btn-info")
 		.css("margin-right", "5px")
 		.click(function() {
-			if(!cIPJQ("div#b2c-cipDefine-fields").data("username")) {
-				cIPJQ("div#b2c-cipDefine-fields").data("username", null);
+			if(cIPJQ(this).data("step") == 1) {
+				cipDefine.selection.username = null;
 				cipDefine.prepareStep2();
 				cipDefine.markAllPasswordFields(cIPJQ("#b2c-cipDefine-fields"));
 			}
-			else {
-				cIPJQ("div#b2c-cipDefine-fields").data("password", null);
+			else if(cIPJQ(this).data("step") == 2) {
+				cipDefine.selection.password = null;
 				cipDefine.prepareStep3();
+				cipDefine.markAllStringFields(cIPJQ("#b2c-cipDefine-fields"));
 			}
-			cIPJQ(this).hide();
 		});
 	var $btnAgain = cIPJQ("<button>").text("Again").attr("id", "b2c-btn-again")
 		.addClass("b2c-btn").addClass("b2c-btn-warning")
 		.css("margin-right", "5px")
 		.click(function(e) {
+			console.log("btnAgain clicked");
+			cipDefine.resetSelection();
 			cipDefine.prepareStep1();
 			cipDefine.markAllUsernameFields(cIPJQ("#b2c-cipDefine-fields"));
 		})
@@ -581,19 +597,25 @@ cipDefine.initDescription = function() {
 				cip.settings["defined-credential-fields"] = {};
 			}
 
-			var usernameId = cIPJQ("div#b2c-cipDefine-fields").data("username");
-			if(usernameId) {
-				usernameId = cipFields.prepareId(usernameId);
+			if(cipDefine.selection.username) {
+				cipDefine.selection.username = cipFields.prepareId(cipDefine.selection.username);
 			}
 
 			var passwordId = cIPJQ("div#b2c-cipDefine-fields").data("password");
-			if(passwordId) {
-				passwordId = cipFields.prepareId(passwordId);
+			if(cipDefine.selection.password) {
+				cipDefine.selection.password = cipFields.prepareId(cipDefine.selection.password);
+			}
+
+			var fieldIds = [];
+			var fieldKeys = Object.keys(cipDefine.selection.fields);
+			for(var i = 0; i < fieldKeys.length; i++) {
+				fieldIds.push(cipFields.prepareId(fieldKeys[i]));
 			}
 
 			cip.settings["defined-credential-fields"][document.location.origin] = {
-				"username": usernameId,
-				"password": passwordId
+				"username": cipDefine.selection.username,
+				"password": cipDefine.selection.password,
+				"fields": fieldIds
 			};
 
 			chrome.extension.sendMessage({
@@ -640,9 +662,62 @@ cipDefine.initDescription = function() {
 	cIPJQ("div#b2c-cipDefine-description").draggable();
 }
 
-cipDefine.markAllUsernameFields = function ($chooser) {
+cipDefine.resetSelection = function() {
+	console.log("resetSelection()");
+	cipDefine.selection = {
+		username: null,
+		password: null,
+		fields: {}
+	};
+}
+
+cipDefine.isFieldSelected = function($cipId) {
+	return (
+		$cipId == cipDefine.selection.username ||
+		$cipId == cipDefine.selection.password ||
+		$cipId in cipDefine.selection.fields
+	);
+}
+
+cipDefine.markAllUsernameFields = function($chooser) {
+	cipDefine.eventFieldClick = function(e) {
+		cipDefine.selection.username = cIPJQ(this).data("cip-id");
+		cIPJQ(this).addClass("b2c-fixed-username-field").text("Username").unbind("click");
+		cipDefine.prepareStep2();
+		cipDefine.markAllPasswordFields(cIPJQ("#b2c-cipDefine-fields"));
+	};
+	cipDefine.markFields($chooser, cipFields.inputQueryPattern);
+}
+
+cipDefine.markAllPasswordFields = function($chooser) {
+	cipDefine.eventFieldClick = function(e) {
+		cipDefine.selection.password = cIPJQ(this).data("cip-id");
+		cIPJQ(this).addClass("b2c-fixed-password-field").text("Password").unbind("click");
+		cipDefine.prepareStep3();
+		cipDefine.markAllStringFields(cIPJQ("#b2c-cipDefine-fields"));
+	};
+	cipDefine.markFields($chooser, "input[type='password']");
+}
+
+cipDefine.markAllStringFields = function($chooser) {
+	cipDefine.eventFieldClick = function(e) {
+		cipDefine.selection.fields[cIPJQ(this).data("cip-id")] = true;
+		var count = Object.keys(cipDefine.selection.fields).length;
+		cIPJQ(this).addClass("b2c-fixed-string-field").text("String field #"+count.toString()).unbind("click");
+
+		cIPJQ("button#b2c-btn-confirm:first").addClass("b2c-btn-primary").attr("disabled", false);
+	};
+	cipDefine.markFields($chooser, cipFields.inputQueryPattern);
+}
+
+cipDefine.markFields = function ($chooser, $pattern) {
 	//var $found = false;
-	cIPJQ("input[type='text'], input[type='email'], input:not([type])").each(function() {
+	cIPJQ($pattern).each(function() {
+		if(cipDefine.isFieldSelected(cIPJQ(this).data("cip-id"))) {
+			//continue
+			return true;
+		}
+
 		if(cIPJQ(this).is(":visible") && cIPJQ(this).css("visibility") != "hidden" && cIPJQ(this).css("visibility") != "collapsed") {
 			var $field = cIPJQ("<div>").addClass("b2c-fixed-field")
 				.css("top", cIPJQ(this).offset().top)
@@ -650,12 +725,7 @@ cipDefine.markAllUsernameFields = function ($chooser) {
 				.css("width", cIPJQ(this).outerWidth())
 				.css("height", cIPJQ(this).outerHeight())
 				.attr("data-cip-id", cIPJQ(this).attr("data-cip-id"))
-				.click(function(e) {
-					cIPJQ("div#b2c-cipDefine-fields").data("username", cIPJQ(this).data("cip-id"));
-					cIPJQ(this).addClass("b2c-fixed-username-field").text("Username").unbind("click");
-					cipDefine.prepareStep2();
-					cipDefine.markAllPasswordFields(cIPJQ("#b2c-cipDefine-fields"));
-				})
+				.click(cipDefine.eventFieldClick)
 				.hover(function() {cIPJQ(this).addClass("b2c-fixed-hover-field");}, function() {cIPJQ(this).removeClass("b2c-fixed-hover-field");});
 			$chooser.append($field);
 			//$found = true;
@@ -670,54 +740,23 @@ cipDefine.markAllUsernameFields = function ($chooser) {
 	*/
 }
 
-cipDefine.markAllPasswordFields = function ($chooser) {
-	//var $found = false;
-	cIPJQ("input[type='password']").each(function() {
-		if(cIPJQ(this).is(":visible") && cIPJQ(this).css("visibility") != "hidden" && cIPJQ(this).css("visibility") != "collapsed") {
-			var $field = cIPJQ("<div>").addClass("b2c-fixed-field")
-				.css("top", cIPJQ(this).offset().top)
-				.css("left", cIPJQ(this).offset().left)
-				.css("width", cIPJQ(this).outerWidth())
-				.css("height", cIPJQ(this).outerHeight())
-				.attr("data-cip-id", cIPJQ(this).attr("data-cip-id"))
-				.click(function(e) {
-					cIPJQ("div#b2c-cipDefine-fields").data("password", cIPJQ(this).data("cip-id"));
-					cIPJQ(this).addClass("b2c-fixed-password-field").text("Password").unbind("click");
-					cipDefine.prepareStep3();
-				})
-				.hover(function() {cIPJQ(this).addClass("b2c-fixed-hover-field");}, function() {cIPJQ(this).removeClass("b2c-fixed-hover-field");});
-			$chooser.append($field);
-			//$found = true;
-		}
-	});
-
-	/* skip step if no entry was found
-	if(!$found) {
-		alert("No password field found.\nContinue with confirmation dialog.");
-		if(cIPJQ("div#b2c-cipDefine-fields").data("username")) {
-			cIPJQ("button#b2c-btn-skip").click();
-		}
-		else {
-			cipDefine.prepareStep3();
-		}
-	}
-	*/
-}
-
 cipDefine.prepareStep1 = function() {
+	cIPJQ("div#b2c-help").text("").css("margin-bottom", 0);
 	cIPJQ("div#b2c-cipDefine-fields").removeData("username");
 	cIPJQ("div#b2c-cipDefine-fields").removeData("password");
 	cIPJQ("div.b2c-fixed-field", cIPJQ("div#b2c-cipDefine-fields")).remove();
 	cIPJQ("div:first", cIPJQ("div#b2c-cipDefine-description")).text("1. Choose a username field");
-	cIPJQ("button#b2c-btn-skip").show();
-	cIPJQ("button#b2c-btn-confirm").hide();
-	cIPJQ("button#b2c-btn-again").hide();
+	cIPJQ("button#b2c-btn-skip:first").data("step", "1").show();
+	cIPJQ("button#b2c-btn-confirm:first").hide();
+	cIPJQ("button#b2c-btn-again:first").hide();
 }
 
 cipDefine.prepareStep2 = function() {
+	cIPJQ("div#b2c-help").text("").css("margin-bottom", 0);
 	cIPJQ("div.b2c-fixed-field:not(.b2c-fixed-username-field)", cIPJQ("div#b2c-cipDefine-fields")).remove();
 	cIPJQ("div:first", cIPJQ("div#b2c-cipDefine-description")).text("2. Now choose a password field");
-	cIPJQ("button#b2c-btn-again").show();
+	cIPJQ("button#b2c-btn-skip:first").data("step", "2");
+	cIPJQ("button#b2c-btn-again:first").show();
 }
 
 cipDefine.prepareStep3 = function() {
@@ -727,11 +766,16 @@ cipDefine.prepareStep3 = function() {
 		cIPJQ("button#b2c-btn-dismiss").click();
 		return;
 	}
-	*/
+	 */
 
+	if(!cipDefine.selection.username && !cipDefine.selection.password) {
+		cIPJQ("button#b2c-btn-confirm:first").removeClass("b2c-btn-primary").attr("disabled", true);
+	}
+
+	cIPJQ("div#b2c-help").html("Please confirm your selection or choose more fields as <em>String fields</em>.").css("margin-bottom", "5px");
 	cIPJQ("div.b2c-fixed-field:not(.b2c-fixed-password-field,.b2c-fixed-username-field)", cIPJQ("div#b2c-cipDefine-fields")).remove();
-	cIPJQ("button#b2c-btn-confirm").show();
-	cIPJQ("button#b2c-btn-skip").hide();
+	cIPJQ("button#b2c-btn-confirm:first").show();
+	cIPJQ("button#b2c-btn-skip:first").data("step", "3").hide();
 	cIPJQ("div:first", cIPJQ("div#b2c-cipDefine-description")).text("3. Confirm selection");
 }
 
@@ -822,6 +866,16 @@ cipFields.getAllCombinations = function(inputs) {
 }
 
 cipFields.getCombination = function(givenType, fieldId) {
+	if(cipFields.combinations.length == 0) {
+		if(cipFields.useDefinedCredentialFields()) {
+			return cipFields.combinations[0];
+		}
+	}
+	// use defined credential fields (already loaded into combinations)
+	if(cip.settings["defined-credential-fields"] && cip.settings["defined-credential-fields"][document.location.origin]) {
+		return cipFields.combinations[0];
+	}
+
 	for(var i = 0; i < cipFields.combinations.length; i++) {
 		if(cipFields.combinations[i][givenType] == fieldId) {
 			return cipFields.combinations[i];
@@ -1017,10 +1071,20 @@ cipFields.prepareCombinations = function(combinations) {
 cipFields.useDefinedCredentialFields = function() {
 	if(cip.settings["defined-credential-fields"] && cip.settings["defined-credential-fields"][document.location.origin]) {
 		var creds = cip.settings["defined-credential-fields"][document.location.origin];
-		if(_f(creds.username) || _f(creds.password)) {
+
+		var $found = _f(creds.username) || _f(creds.password);
+		for(var i = 0; i < creds.fields.length; i++) {
+			if(_f(creds.fields[i])) {
+				$found = true;
+				break;
+			}
+		}
+
+		if($found) {
 			var fields = {
 				"username": creds.username,
-				"password": creds.password
+				"password": creds.password,
+				"fields": creds.fields
 			};
 			cipFields.combinations = [];
 			cipFields.combinations.push(fields);
@@ -1120,12 +1184,16 @@ cip.retrieveCredentialsCallback = function (credentials, dontAutoFillIn) {
 cip.prepareFieldsForCredentials = function(autoFillInForSingle) {
 	// only one login for this site
 	if (autoFillInForSingle && cip.settings.autoFillSingleEntry && cip.credentials.length == 1) {
-		if(cip.u) {
+		if (cip.u) {
 			cip.u.val(cip.credentials[0].Login);
+			combination = cipFields.getCombination("username", cip.u);
 		}
-		if(cip.p) {
+		if (cip.p) {
 			cip.p.val(cip.credentials[0].Password);
+			combination = cipFields.getCombination("password", cip.p);
 		}
+
+		cip.fillInStringFields(combination.fields, cip.credentials[0].StringFields);
 
 		// generate popup-list of usernames + descriptions
 		chrome.extension.sendMessage({
@@ -1232,6 +1300,7 @@ cip.fillInFromActiveElement = function(suppressWarnings) {
 	else {
 		combination = cipFields.getCombination("username", fieldId);
 	}
+	console.log(combination);
 
 	delete combination.loginId;
 
@@ -1268,6 +1337,22 @@ cip.fillInFromActiveElementPassOnly = function(suppressWarnings) {
 	cip.fillInCredentials(combination, true, suppressWarnings);
 }
 
+cip.fillInStringFields = function(fields, StringFields) {
+	var $filledIn = false;
+
+	if(fields && StringFields && fields.length > 0 && StringFields.length > 0) {
+		for(var i = 0; i < fields.length; i++) {
+			var $sf = _f(fields[i]);
+			if($sf && StringFields[i]) {
+				$sf.val(StringFields[i].Value);
+				$filledIn = true;
+			}
+		}
+	}
+
+	return $filledIn;
+}
+
 cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 	// no credentials available
 	if (cip.credentials.length == 0 && !suppressWarnings) {
@@ -1287,6 +1372,7 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 		var filledIn = false;
 		if(uField && !onlyPassword) {
 			uField.val(cip.credentials[0].Login);
+			filledIn = true;
 		}
 		if(pField) {
 			pField.attr("type", "password");
@@ -1295,9 +1381,37 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 			filledIn = true;
 		}
 
+		filledIn = filledIn || cip.fillInStringFields(combination.fields, cip.credentials[0].StringFields);
+
 		if(!filledIn) {
 			if(!suppressWarnings) {
-				var message = "No credentials found.";
+				var message = "Error #101\nCannot find fields to fill in.";
+				chrome.extension.sendMessage({
+					action: 'alert',
+					args: [message]
+				});
+			}
+		}
+	}
+	// specific login id given
+	else if(combination.loginId != undefined && cip.credentials[combination.loginId]) {
+		var filledIn = false;
+		if(uField) {
+			uField.val(cip.credentials[combination.loginId].Login);
+			filledIn = true;
+		}
+
+		if(pField) {
+			pField.val(cip.credentials[combination.loginId].Password);
+			pField.data("unchanged", true);
+			filledIn = true;
+		}
+
+		filledIn = filledIn || cip.fillInStringFields(combination.fields, cip.credentials[combination.loginId].StringFields);
+
+		if(!filledIn) {
+			if(!suppressWarnings) {
+				var message = "Error #102\nCannot find fields to fill in.";
 				chrome.extension.sendMessage({
 					action: 'alert',
 					args: [message]
@@ -1313,30 +1427,22 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 		if(uField) {
 			var valPassword = "";
 			var valUsername = "";
+			var valStringFields = [];
 			var valQueryUsername = uField.val().toLowerCase();
 
-			// specific login id given
-			if(combination.loginId != undefined && cip.credentials[combination.loginId]) {
-				if(cip.credentials[combination.loginId].Login.toLowerCase() == valQueryUsername) {
+			// find passwords to given username (even those with empty username)
+			for (var i = 0; i < cip.credentials.length; i++) {
+				if(cip.credentials[i].Login.toLowerCase() == valQueryUsername) {
 					countPasswords += 1;
-					valPassword = cip.credentials[combination.loginId].Password;
-					valUsername = cip.credentials[combination.loginId].Login;
+					valPassword = cip.credentials[i].Password;
+					valUsername = cip.credentials[i].Login;
+					valStringFields = cip.credentials[i].StringFields;
 				}
 			}
-			// find passwords to given username (even those with empty username)
-			else {
-				for (var i = 0; i < cip.credentials.length; i++) {
-					if(cip.credentials[i].Login.toLowerCase() == valQueryUsername) {
-						countPasswords += 1;
-						valPassword = cip.credentials[i].Password;
-						valUsername = cip.credentials[i].Login;
-					}
-				}
 
-				// for the correct alert message: 0 = no logins, X > 1 = too many logins
-				if(countPasswords == 0) {
-					countPasswords = cip.credentials.length;
-				}
+			// for the correct alert message: 0 = no logins, X > 1 = too many logins
+			if(countPasswords == 0) {
+				countPasswords = cip.credentials.length;
 			}
 
 			// only one mapping username found
@@ -1348,35 +1454,35 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 					pField.val(valPassword);
 					pField.data("unchanged", true);
 				}
+
+				cip.fillInStringFields(combination.fields, valStringFields);
+			}
+
+			// user has to select correct credentials by himself
+			if(countPasswords > 1) {
+				if(!suppressWarnings) {
+					var message = "Error #105\nMore than one login was found in KeePass!\n" +
+					"Press the chromeIPass icon for more options.";
+					chrome.extension.sendMessage({
+						action: 'alert',
+						args: [message]
+					});
+				}
+			}
+			else if(countPasswords < 1) {
+				if(!suppressWarnings) {
+					var message = "Error #103\nNo credentials for given username found.";
+					chrome.extension.sendMessage({
+						action: 'alert',
+						args: [message]
+					});
+				}
 			}
 		}
 		else {
-			var valPassword = "";
-
-			// specific login id given
-			if(combination.loginId != undefined && cip.credentials[combination.loginId]) {
-				if(pField) {
-					pField.val(cip.credentials[combination.loginId].Password);
-					pField.data("unchanged", true);
-				}
-				countPasswords += 1;
-			}
-		}
-
-		// user has to select correct credentials by himself
-		if(countPasswords > 1) {
 			if(!suppressWarnings) {
-				var message = "More than one login was found in KeePass!\n" +
-				"Press the chromeIPass icon for more options.";
-				chrome.extension.sendMessage({
-					action: 'alert',
-					args: [message]
-				});
-			}
-		}
-		else if(countPasswords < 1) {
-			if(!suppressWarnings) {
-				var message = "No credentials found.";
+					var message = "Error #104\nMore than one login was found in KeePass!\n" +
+					"Press the chromeIPass icon for more options.";
 				chrome.extension.sendMessage({
 					action: 'alert',
 					args: [message]
