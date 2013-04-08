@@ -1,4 +1,4 @@
-var browserAction = browserAction || {};
+var browserAction = {};
 
 browserAction.show = function(callback, tab) {
 	var data = {};
