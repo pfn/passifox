@@ -282,6 +282,20 @@ If the credential fields are not detected automatically you can focus one of the
 
 If chromeIPass detects wrong credential fields choose them by yourself with the button _Choose own credential fields for this page_ which is available in every popup.
 
+If chomeIPass always asks to unlock the database and this is annoying you, you can simply disable this feature in the [options of KeePassHttp](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options).
+
+__It's always a good idea to have a look into the options of KeePassHttp. Maybe your feature request or problem is still implemented and can be solved by changing the options.__  
+[Go to the illustrated readme for the KeePassHttp options](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options)
+
+#### Support multiple URLs for one username + password combination
+This is natively supported by KeePass with the references feature. You can find an illustrated description in the [readme of KeePassHttp](https://github.com/pfn/keepasshttp#support-multiple-urls-for-one-username--password).
+
+#### Disable the system tray notifications for found entries
+Open the [options of KeePassHttp](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options) and disable the first feature.
+
+#### Change the sort order of entries chromeIPass is displaying
+Open the [options of KeePassHttp](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options) and switch the fifth feature.
+
 ## 6. Important information
 
 - because Google Chrome does not offer an API to communicate with the built-in password manager chromeIPass needs to implement its own kind of password manager. [Please read the known limitations which belongs to that](#7-limitations-and-known-problems).
@@ -322,6 +336,9 @@ When it did not detect any username + password field combination you can click o
 You can also focus the visible username field or password field and press __Ctrl+Shift+U__. This will start a redetection for the focused field, too.
 
 ## 8. Troubleshooting
+
+__First:__ Did you read the section [5. Tips and tricks](#5-tips-and-tricks)?  
+__Second:__ Did you checked your [KeePassHttp options](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options)? Maybe you only have to change the options...
 
 If you [open an issue](https://github.com/pfn/passifox/issues/) always give us at least the following information:
 
