@@ -70,6 +70,11 @@ function _f(fieldId) {
 	return (field.length > 0) ? field : null;
 }
 
+function _fs(fieldId) {
+	var field = (fieldId) ? cIPJQ("input[data-cip-id='"+fieldId+"']:first,select[data-cip-id='"+fieldId+"']:first").first() : [];
+	return (field.length > 0) ? field : null;
+}
+
 
 
 var cipAutocomplete = {};
@@ -543,6 +548,7 @@ cipDefine.init = function () {
 	$backdrop.append($description);
 
 	cipFields.getAllFields();
+	cipFields.prepareVisibleFieldsWithID("select");
 
 	cipDefine.initDescription();
 
@@ -583,7 +589,6 @@ cipDefine.initDescription = function() {
 		.addClass("b2c-btn").addClass("b2c-btn-warning")
 		.css("margin-right", "5px")
 		.click(function(e) {
-			console.log("btnAgain clicked");
 			cipDefine.resetSelection();
 			cipDefine.prepareStep1();
 			cipDefine.markAllUsernameFields(cIPJQ("#b2c-cipDefine-fields"));
@@ -663,7 +668,6 @@ cipDefine.initDescription = function() {
 }
 
 cipDefine.resetSelection = function() {
-	console.log("resetSelection()");
 	cipDefine.selection = {
 		username: null,
 		password: null,
@@ -707,7 +711,7 @@ cipDefine.markAllStringFields = function($chooser) {
 
 		cIPJQ("button#b2c-btn-confirm:first").addClass("b2c-btn-primary").attr("disabled", false);
 	};
-	cipDefine.markFields($chooser, cipFields.inputQueryPattern);
+	cipDefine.markFields($chooser, cipFields.inputQueryPattern + ", select");
 }
 
 cipDefine.markFields = function ($chooser, $pattern) {
@@ -834,6 +838,14 @@ cipFields.getAllFields = function() {
 	});
 
 	return fields;
+}
+
+cipFields.prepareVisibleFieldsWithID = function($pattern) {
+	cIPJQ($pattern).each(function() {
+		if(cIPJQ(this).is(":visible") && cIPJQ(this).css("visibility") != "hidden" && cIPJQ(this).css("visibility") != "collapsed") {
+			cipFields.setUniqueId(cIPJQ(this));
+		}
+	});
 }
 
 cipFields.getAllCombinations = function(inputs) {
@@ -1046,7 +1058,7 @@ cipFields.getPasswordField = function(usernameId, checkDisabled) {
 cipFields.prepareCombinations = function(combinations) {
 	for(var i = 0; i < combinations.length; i++) {
 		// disable autocomplete for username field
-		if(combinations[i].username) {
+		if(_f(combinations[i].username)) {
 			_f(combinations[i].username).attr("autocomplete", "off");
 		}
 
@@ -1074,7 +1086,7 @@ cipFields.useDefinedCredentialFields = function() {
 
 		var $found = _f(creds.username) || _f(creds.password);
 		for(var i = 0; i < creds.fields.length; i++) {
-			if(_f(creds.fields[i])) {
+			if(_fs(creds.fields[i])) {
 				$found = true;
 				break;
 			}
@@ -1133,6 +1145,7 @@ cip.initCredentialFields = function(forceCall) {
 	_called.initCredentialFields = true;
 
 	var inputs = cipFields.getAllFields();
+	cipFields.prepareVisibleFieldsWithID("select");
 	cip.initPasswordGenerator(inputs);
 
 	if(!cipFields.useDefinedCredentialFields()) {
@@ -1300,8 +1313,6 @@ cip.fillInFromActiveElement = function(suppressWarnings) {
 	else {
 		combination = cipFields.getCombination("username", fieldId);
 	}
-	console.log(combination);
-
 	delete combination.loginId;
 
 	cip.fillInCredentials(combination, false, suppressWarnings);
@@ -1337,14 +1348,30 @@ cip.fillInFromActiveElementPassOnly = function(suppressWarnings) {
 	cip.fillInCredentials(combination, true, suppressWarnings);
 }
 
+cip.setValue = function(field, value) {
+	if(field.is("select")) {
+		value = value.toLowerCase().trim();
+		cIPJQ("option", field).each(function() {
+			if(cIPJQ(this).text().toLowerCase().trim() == value) {
+				field.val(cIPJQ(this).text());
+				return false;
+			}
+		});
+	}
+	else {
+		field.val(value);
+	}
+}
+
 cip.fillInStringFields = function(fields, StringFields) {
 	var $filledIn = false;
 
 	if(fields && StringFields && fields.length > 0 && StringFields.length > 0) {
 		for(var i = 0; i < fields.length; i++) {
-			var $sf = _f(fields[i]);
+			var $sf = _fs(fields[i]);
 			if($sf && StringFields[i]) {
-				$sf.val(StringFields[i].Value);
+				//$sf.val(StringFields[i].Value);
+				cip.setValue($sf, StringFields[i].Value);
 				$filledIn = true;
 			}
 		}
