@@ -23,6 +23,7 @@ Table of content:
 	- [3.4 Choose own credential fields for a page](#34-choose-own-credential-fields-for-a-page)
 	- [3.5 Remember passwords](#35-remember-passwords)
 	- [3.6 Auto fill-in for HTTP Auth requests](#36-auto-fill-in-for-http-auth-requests)
+	- [3.7 Fill-in additional values via String Fields](#37-fill-in-additional-values-via-string-fields)
 - [4. Configuration and settings](#4-configuration-and-settings)
 	- [4.1 Settings: General](#41-settings-general)
 	- [4.2 Settings: Connected Databases](#42-settings-connected-databases)
@@ -50,6 +51,8 @@ Table of content:
 	- select from autocomplete
 - support autocomplete for username fields
 - support HTTP Auth requests (also known as htaccess-login)
+- support additional field values via String Fields in KeePass
+- support fill-in for dropdown menus (only for String Field values)
 - accessible via context-menu of input fields
 - accessible via [shortcuts](#314-shortcuts) (Ctrl+Shift+U and Ctrl+Shift+P)
 - automatically detect field combinations of username + password
@@ -199,6 +202,8 @@ Now choose a password field and in the last step confirm your selection.
 
 [<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-choose-credential-fields.png" alt="popup-normal" width="200px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-choose-credential-fields.png)
 
+You can also choose additional fields, the so-called _String Fields_. Their functionality is described in [section 3.7](#37-fill-in-additional-values-via-string-fields).
+
 The next time you open this page chromeIPass will use the defined combination of username + password field and does no longer auto detect combinations.
 
 Certainly you can focus another field and use the context-menu ([3.1.3](#313-context-menu)) or shortcuts ([3.1.4](#314-shortcuts)) to start the detection for the focused field.
@@ -240,6 +245,17 @@ The dialog of an HTTP Auth request is shown in the following screenshot:
 
 This feature is activated by default and can be disabled in settings.
 
+### 3.7 Fill-in additional values via String Fields
+
+You can fill-in additional information by defining string fields.
+
+1. Choose your own credential fields for the page like explained in [section 3.4](#34-choose-own-credential-fields-for-a-page). You can also skip both, username and password.
+2. Now you can choose additional fields which are named _String Fields_. You can even choose dropdown elements.  
+The order you choose these string fields is important for the fill-in method!
+3. Activate the _String Fields_ setting in KeePassHttp like explained in the [KeePassHttp-documentation](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options).  
+The alphanumeric ordered entries are mapped with the order you chose the String Fields.
+
+Dropdown elements are filled in by the visible value. If you open a dropdown element you can see all available values. This visible value has to match with one String Field value from KeePass.
 
 ## 4. Configuration and settings
 
