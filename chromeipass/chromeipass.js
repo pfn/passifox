@@ -1353,7 +1353,7 @@ cip.setValue = function(field, value) {
 		value = value.toLowerCase().trim();
 		cIPJQ("option", field).each(function() {
 			if(cIPJQ(this).text().toLowerCase().trim() == value) {
-				field.val(cIPJQ(this).text());
+				field.val(cIPJQ(this).val());
 				return false;
 			}
 		});
