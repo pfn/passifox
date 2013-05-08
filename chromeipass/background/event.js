@@ -5,7 +5,8 @@ event.onMessage = function(request, sender, callback) {
 	if (request.action in event.messageHandlers) {
 		//console.log("onMessage(" + request.action + ") for #" + sender.tab.id);
 
-		if(sender.tab.id < 1) {
+		if(!sender.hasOwnProperty('tab') || sender.tab.id < 1) {
+			sender.tab = {};
 			sender.tab.id = page.currentTabId;
 		}
 
