@@ -252,7 +252,7 @@ You can fill-in additional information by defining string fields.
 1. Choose your own credential fields for the page like explained in [section 3.4](#34-choose-own-credential-fields-for-a-page). You can also skip both, username and password.
 2. Now you can choose additional fields which are named _String Fields_. You can even choose dropdown elements.  
 The order you choose these string fields is important for the fill-in method!
-3. Activate the _String Fields_ setting in KeePassHttp like explained in the [KeePassHttp-documentation](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options).  
+3. Activate the _String Fields_ setting in KeePassHttp like explained in the [KeePassHttp-documentation (setting no. 11)](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options).  
 The alphanumeric ordered entries are mapped with the order you chose the String Fields.
 
 Dropdown elements are filled in by the visible value. If you open a dropdown element you can see all available values. This visible value has to match with one String Field value from KeePass.
