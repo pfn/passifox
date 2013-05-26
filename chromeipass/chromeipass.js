@@ -16,7 +16,10 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 					combination = cipFields.getCombination("password", cip.p);
 				}
 
-				cip.fillInStringFields(combination.fields, cip.credentials[req.id].StringFields);
+                var list = {};
+				if(cip.fillInStringFields(combination.fields, cip.credentials[req.id].StringFields, list)) {
+                    cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+                }
 			}
 			// wish I could clear out _logins and _u, but a subsequent
 			// selection may be requested.
@@ -449,6 +452,17 @@ cipForm.init = function(form, credentialFields) {
 		cipForm.setInputFields(form, credentialFields);
 		form.submit(cipForm.onSubmit);
 	}
+}
+
+cipForm.destroy = function(form, credentialFields) {
+    if(form === false && credentialFields) {
+        var field = _f(credentialFields.password) || _f(credentialFields.username);
+        form = field.closest("form");
+    }
+
+    if(form && cIPJQ(form).length > 0) {
+        cIPJQ(form).unbind('submit', cipForm.onSubmit);
+    }
 }
 
 cipForm.setInputFields = function(form, credentialFields) {
@@ -900,6 +914,7 @@ cipFields.getCombination = function(givenType, fieldId) {
 		"password": null
 	};
 
+    var newCombi = false;
 	if(givenType == "username") {
 		var passwordField = cipFields.getPasswordField(fieldId, true);
 		var passwordId = null;
@@ -910,6 +925,7 @@ cipFields.getCombination = function(givenType, fieldId) {
 			"username": fieldId,
 			"password": passwordId
 		};
+        newCombi = true;
 	}
 	else if(givenType == "password") {
 		var usernameField = cipFields.getUsernameField(fieldId, true);
@@ -921,6 +937,7 @@ cipFields.getCombination = function(givenType, fieldId) {
 			"username": usernameId,
 			"password": fieldId
 		};
+        newCombi = true;
 	}
 
 	if(combination.username || combination.password) {
@@ -933,6 +950,9 @@ cipFields.getCombination = function(givenType, fieldId) {
 		}
 	}
 
+    if(newCombi) {
+        combination.isNew = true;
+    }
 	return combination;
 }
 
@@ -1206,7 +1226,10 @@ cip.prepareFieldsForCredentials = function(autoFillInForSingle) {
 			combination = cipFields.getCombination("password", cip.p);
 		}
 
-		cip.fillInStringFields(combination.fields, cip.credentials[0].StringFields);
+        var list = {};
+		if(cip.fillInStringFields(combination.fields, cip.credentials[0].StringFields, list)) {
+            cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+        }
 
 		// generate popup-list of usernames + descriptions
 		chrome.extension.sendMessage({
@@ -1253,8 +1276,13 @@ cip.preparePageForMultipleCredentials = function(credentials) {
 }
 
 cip.getFormActionUrl = function(combination) {
-	var field = combination.password || combination.username;
-	var form = _f(field).closest("form");
+	var field = _f(combination.password) || _f(combination.username);
+
+    if(field == null) {
+        return null;
+    }
+
+	var form = field.closest("form");
 	var action = null;
 
 	if(form && form.length > 0) {
@@ -1273,6 +1301,13 @@ cip.fillInCredentials = function(combination, onlyPassword, suppressWarnings) {
 
 	var u = _f(combination.username);
 	var p = _f(combination.password);
+
+    if(combination.isNew) {
+        var form2 = cip.getFormActionUrl(combination);
+        if(action) {
+            cipForm.init(form2, combination);
+        }
+    }
 
 	if(u) {
 		cip.u = u;
@@ -1363,15 +1398,17 @@ cip.setValue = function(field, value) {
 	}
 }
 
-cip.fillInStringFields = function(fields, StringFields) {
+cip.fillInStringFields = function(fields, StringFields, filledInFields) {
 	var $filledIn = false;
 
+    filledInFields.list = [];
 	if(fields && StringFields && fields.length > 0 && StringFields.length > 0) {
-		for(var i = 0; i < fields.length; i++) {
+        for(var i = 0; i < fields.length; i++) {
 			var $sf = _fs(fields[i]);
 			if($sf && StringFields[i]) {
 				//$sf.val(StringFields[i].Value);
 				cip.setValue($sf, StringFields[i].Value);
+                filledInFields.list.push(fields[i]);
 				$filledIn = true;
 			}
 		}
@@ -1408,7 +1445,11 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 			filledIn = true;
 		}
 
-		filledIn = filledIn || cip.fillInStringFields(combination.fields, cip.credentials[0].StringFields);
+        var list = {};
+		if(cip.fillInStringFields(combination.fields, cip.credentials[0].StringFields, list)) {
+            cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+            filledIn = true;
+        }
 
 		if(!filledIn) {
 			if(!suppressWarnings) {
@@ -1434,7 +1475,11 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 			filledIn = true;
 		}
 
-		filledIn = filledIn || cip.fillInStringFields(combination.fields, cip.credentials[combination.loginId].StringFields);
+        var list = {};
+		if(cip.fillInStringFields(combination.fields, cip.credentials[combination.loginId].StringFields, list)) {
+            cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+            filledIn = true;
+        }
 
 		if(!filledIn) {
 			if(!suppressWarnings) {
@@ -1482,7 +1527,10 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 					pField.data("unchanged", true);
 				}
 
-				cip.fillInStringFields(combination.fields, valStringFields);
+                var list = {};
+				if(cip.fillInStringFields(combination.fields, valStringFields, list)) {
+                    cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+                }
 			}
 
 			// user has to select correct credentials by himself
