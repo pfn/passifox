@@ -1325,7 +1325,7 @@ cip.fillInCredentials = function(combination, onlyPassword, suppressWarnings) {
 
 		chrome.extension.sendMessage({
 			'action': 'retrieve_credentials',
-			'args': [ cip.url, cip.submitUrl ]
+			'args': [ cip.url, cip.submitUrl, false, true ]
 		}, function(credentials) {
 			cip.retrieveCredentialsCallback(credentials, true);
 			cip.fillIn(combination, onlyPassword, suppressWarnings);

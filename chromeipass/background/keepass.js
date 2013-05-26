@@ -45,6 +45,7 @@ keepass.updateCredentials = function(callback, tab, entryId, username, password,
 
 
 	request.Login = keepass.encrypt(username, key, iv);
+
 	request.Password = keepass.encrypt(password, key, iv);
 	request.Url = keepass.encrypt(url, key, iv);
 	request.SubmitUrl = keepass.encrypt(url, key, iv);
@@ -73,7 +74,7 @@ keepass.updateCredentials = function(callback, tab, entryId, username, password,
 	callback(code);
 }
 
-keepass.retrieveCredentials = function (callback, tab, url, submiturl, forceCallback) {
+keepass.retrieveCredentials = function (callback, tab, url, submiturl, forceCallback, triggerUnlock) {
 	page.debug("keepass.retrieveCredentials(callback, {1}, {2}, {3}, {4})", tab.id, url, submiturl, forceCallback);
 
 	// unset error message
@@ -91,7 +92,8 @@ keepass.retrieveCredentials = function (callback, tab, url, submiturl, forceCall
 	// build request
 	var request = {
 		RequestType: "get-logins",
-		SortSelection: "true"
+		SortSelection: "true",
+		triggerUnlock: triggerUnlock === true
 	};
 	var verifier = keepass.setVerifier(request);
 	var id = verifier[0];
