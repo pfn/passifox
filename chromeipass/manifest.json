@@ -1,6 +1,6 @@
 {
 	"name": "chromeIPass",
-	"version": "2.5.1.1",
+	"version": "2.5.2",
 	"manifest_version": 2,
 	"description": "KeePass integration for browser Chrome using KeePassHttp",
 	"icons": {
@@ -20,7 +20,8 @@
 
 	"options_page": "options/options.html",
 	"background": {
-		"scripts": ["background/aes.js",
+		"scripts": [
+			"background/aes.js",
 			"background/cryptoHelpers.js",
 			"background/utf8.js",
 			"background/keepass.js",
@@ -28,7 +29,8 @@
 			"background/browserAction.js",
 			"background/page.js",
 			"background/event.js",
-			"background/init.js"]
+			"background/init.js"
+			]
 		},
 	"content_scripts": [
 		{

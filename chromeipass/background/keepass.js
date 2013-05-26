@@ -81,7 +81,7 @@ keepass.retrieveCredentials = function (callback, tab, url, submiturl, forceCall
 	page.tabs[tab.id].errorMessage = null;
 
 	// is browser associated to keepass?
-	if(!keepass.testAssociation(tab)) {
+	if(!keepass.testAssociation(tab, triggerUnlock)) {
 		browserAction.showDefault(null, tab);
 		if(forceCallback) {
 			callback([]);
@@ -91,9 +91,9 @@ keepass.retrieveCredentials = function (callback, tab, url, submiturl, forceCall
 
 	// build request
 	var request = {
-		RequestType: "get-logins",
-		SortSelection: "true",
-		triggerUnlock: triggerUnlock === true
+		"RequestType": "get-logins",
+		"SortSelection": "true",
+		"TriggerUnlock": (triggerUnlock === true) ? "true" : "false"
 	};
 	var verifier = keepass.setVerifier(request);
 	var id = verifier[0];
@@ -425,8 +425,8 @@ keepass.checkForNewKeePassHttpVersion = function() {
 	}
 }
 
-keepass.testAssociation = function (tab) {
-	keepass.getDatabaseHash(tab);
+keepass.testAssociation = function (tab, triggerUnlock) {
+	keepass.getDatabaseHash(tab, triggerUnlock);
 
 	if(keepass.isDatabaseClosed || !keepass.isKeePassHttpAvailable) {
 		return false;
@@ -437,7 +437,8 @@ keepass.testAssociation = function (tab) {
 	}
 
 	var request = {
-		"RequestType": "test-associate"
+		"RequestType": "test-associate",
+		"TriggerUnlock": (triggerUnlock === true) ? "true" : false
 	};
 	var verifier = keepass.setVerifier(request);
 
@@ -482,9 +483,10 @@ keepass.testAssociation = function (tab) {
 	return keepass.isAssociated();
 }
 
-keepass.getDatabaseHash = function (tab) {
+keepass.getDatabaseHash = function (tab, triggerUnlock) {
 	var request = {
-		"RequestType": "test-associate"
+		"RequestType": "test-associate",
+		"TriggerUnlock": (triggerUnlock === true) ? "true" : false
 	};
 
 	var oldDatabaseHash = keepass.databaseHash;
