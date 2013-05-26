@@ -47,18 +47,21 @@ page.switchTab = function(callback, tab) {
 	chrome.tabs.sendMessage(tab.id, {action: "activated_tab"});
 }
 
-page.clearCredentials = function(tabId) {
-	if(!page.tabs[tabId] || page.tabs[tabId].loginList.length == 0) {
+page.clearCredentials = function(tabId, complete) {
+	if(!page.tabs[tabId]) {
 		return;
 	}
 
-	page.tabs[tabId].loginList = [];
 	page.tabs[tabId].credentials = {};
 	delete page.tabs[tabId].credentials;
 
-	chrome.tabs.sendMessage(tabId, {
-		action: "clear_credentials"
-	});
+    if(complete) {
+        page.tabs[tabId].loginList = [];
+
+        chrome.tabs.sendMessage(tabId, {
+            action: "clear_credentials"
+        });
+    }
 }
 
 page.createTabEntry = function(tabId) {
@@ -87,5 +90,38 @@ page.removePageInformationFromNotExistingTabs = function() {
 				}
 			}
 		});
+	}
+};
+
+page.debugConsole = function() {
+	if(arguments.length > 1) {
+		console.log(page.sprintf(arguments[0], arguments));
+	}
+	else {
+		console.log(arguments[0]);
+	}
+};
+
+page.sprintf = function(input, args) {
+	return input.replace(/{(\d+)}/g, function(match, number) {
+      return typeof args[number] != 'undefined'
+        ? (typeof args[number] == 'object' ? JSON.stringify(args[number]) : args[number])
+        : match
+      ;
+    });
+}
+
+page.debugDummy = function() {};
+
+page.debug = page.debugDummy;
+
+page.setDebug = function(bool) {
+	if(bool) {
+		page.debug = page.debugConsole;
+		return "Debug mode enabled";
+	}
+	else {
+		page.debug = page.debugDummy;
+		return "Debug mode disabled";
 	}
 };

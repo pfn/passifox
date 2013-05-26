@@ -22,6 +22,8 @@ keepass.addCredentials = function(callback, tab, username, password, url) {
 }
 
 keepass.updateCredentials = function(callback, tab, entryId, username, password, url) {
+	page.debug("keepass.updateCredentials(callback, {1}, {2}, {3}, [password], {4})", tab.id, entryId, username, url);
+
 	// unset error message
 	page.tabs[tab.id].errorMessage = null;
 
@@ -72,10 +74,10 @@ keepass.updateCredentials = function(callback, tab, entryId, username, password,
 }
 
 keepass.retrieveCredentials = function (callback, tab, url, submiturl, forceCallback) {
+	page.debug("keepass.retrieveCredentials(callback, {1}, {2}, {3}, {4})", tab.id, url, submiturl, forceCallback);
+
 	// unset error message
 	page.tabs[tab.id].errorMessage = null;
-
-	console.log("url + submiturl: [" + url + "] => [" + submiturl + "]");
 
 	// is browser associated to keepass?
 	if(!keepass.testAssociation(tab)) {
@@ -132,6 +134,8 @@ keepass.retrieveCredentials = function (callback, tab, url, submiturl, forceCall
 	else {
 		browserAction.showDefault(null, tab);
 	}
+
+	page.debug("keepass.retrieveCredentials() => entries.length = {1}", entries.length);
 
 	callback(entries);
 }
@@ -280,13 +284,13 @@ keepass.send = function(request) {
 	xhr.setRequestHeader("Content-Type", "application/json");
 	try {
 		var r = JSON.stringify(request);
-		//console.log("Request: " + r);
+		page.debug("Request: {1}", r);
 		xhr.send(r);
 	}
 	catch (e) {
 		console.log("KeePassHttp: " + e);
 	}
-	//console.log("Response: " + xhr.status + " => " + xhr.responseText);
+	page.debug("Response: {1} => {2}", xhr.status, xhr.responseText);
 	return [xhr.status, xhr.responseText];
 }
 
@@ -320,6 +324,9 @@ keepass.checkStatus = function (status, tab) {
 			}
 		}
 	}
+
+	page.debug("keepass.checkStatus({1}, [tabID]) => {2}", status, success);
+
 	return success;
 }
 

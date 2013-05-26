@@ -12,6 +12,8 @@ chrome.tabs.query({"active": true, "windowId": chrome.windows.WINDOW_ID_CURRENT}
 		return; // For example: only the background devtools or a popup are opened
 	page.currentTabId = tabs[0].id;
 });
+// Milliseconds for intervall (e.g. to update browserAction)
+var _interval = 250;
 
 
 /**
@@ -48,9 +50,9 @@ chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
  */
 chrome.tabs.onActivated.addListener(function(activeInfo) {
 	// remove possible credentials from old tab information
-	page.clearCredentials(page.currentTabId);
+    page.clearCredentials(page.currentTabId, true);
 	browserAction.removeRememberPopup(null, {"id": page.currentTabId}, true);
-	
+
 	chrome.tabs.get(activeInfo.tabId, function(info) {
 		//console.log(info.id + ": " + info.url);
 		if(info && info.id) {
@@ -132,5 +134,5 @@ chrome.contextMenus.create({
  * Interval which updates the browserAction (e.g. blinking icon)
  */
 window.setInterval(function() {
-	browserAction.update();
-}, 250);
+	browserAction.update(_interval);
+}, _interval);

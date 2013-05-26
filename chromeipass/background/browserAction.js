@@ -23,12 +23,22 @@ browserAction.show = function(callback, tab) {
 	}
 }
 
-browserAction.update = function() {
+browserAction.update = function(interval) {
 	if(!page.tabs[page.currentTabId] || page.tabs[page.currentTabId].stack.length == 0) {
 		return;
 	}
 
 	var data = page.tabs[page.currentTabId].stack[page.tabs[page.currentTabId].stack.length - 1];
+
+    if(typeof data.visibleForMilliSeconds != "undefined") {
+		if(data.visibleForMilliSeconds <= 0) {
+			browserAction.stackPop(page.currentTabId);
+			browserAction.show(null, {"id": page.currentTabId});
+			page.clearCredentials(page.currentTabId);
+            return;
+		}
+		data.visibleForMilliSeconds -= interval;
+	}
 
 	if(data.intervalIcon) {
 		data.intervalIcon.counter += 1;
@@ -60,12 +70,17 @@ browserAction.showDefault = function(callback, tab) {
 		stackData.iconType = "cross";
 	}
 
+    if(page.tabs[tab.id].loginList.length > 0) {
+        stackData.iconType = "questionmark";
+        stackData.popup = "popup_login.html";
+    }
+
 	browserAction.stackUnshift(stackData, tab.id);
 
 	browserAction.show(null, tab);
 }
 
-browserAction.stackAdd = function(callback, tab, icon, popup, level, push, visibleForPageUpdates, dontShow) {
+browserAction.stackAdd = function(callback, tab, icon, popup, level, push, visibleForMilliSeconds, dontShow) {
 	var id = tab.id || page.currentTabId;
 
 	if(!level) {
@@ -81,8 +96,8 @@ browserAction.stackAdd = function(callback, tab, icon, popup, level, push, visib
 		stackData.popup = popup;
 	}
 
-	if(visibleForPageUpdates) {
-		stackData.visibleForPageUpdates = visibleForPageUpdates;
+	if(visibleForMilliSeconds) {
+		stackData.visibleForMilliSeconds = visibleForMilliSeconds;
 	}
 
 	if(push) {
@@ -133,50 +148,46 @@ browserAction.stackPop = function(tabId) {
 	var id = tabId || page.currentTabId;
 
 	page.tabs[id].stack.pop();
-}
+};
 
 browserAction.stackPush = function(data, tabId) {
 	var id = tabId || page.currentTabId;
 
 	browserAction.removeLevelFromStack(null, {"id": id}, data.level, "<=", true);
 	page.tabs[id].stack.push(data);
-}
+};
 
 browserAction.stackUnshift = function(data, tabId) {
 	var id = tabId || page.currentTabId;
 
 	browserAction.removeLevelFromStack(null, {"id": id}, data.level, "<=", true);
 	page.tabs[id].stack.unshift(data);
-}
+};
 
 
-browserAction.removeRememberPopup = function(callback, tab, immediately) {
+browserAction.removeRememberPopup = function(callback, tab, removeImmediately) {
 	if(!page.tabs[tab.id]) {
 		return;
 	}
 
 	if(page.tabs[tab.id].stack.length == 0) {
-		page.clearCredentials(tab.id);
+        page.clearCredentials(tab.id);
 		return;
 	}
 
-	var data = page.tabs[tab.id].stack[page.tabs[tab.id].stack.length - 1];
-	if(typeof data.visibleForPageUpdates != "undefined") {
-		if(data.visibleForPageUpdates <= 0 || immediately) {
-			browserAction.stackPop(tab.id);
-			browserAction.show(null, {"id": tab.id});
-			page.clearCredentials(tab.id);
-			return;
-		}
-		data.visibleForPageUpdates -= 1;
-	}
-}
+    if(removeImmediately) {
+        browserAction.stackPop(tab.id);
+        browserAction.show(null, {"id": tab.id});
+        page.clearCredentials(tab.id);
+        return;
+    }
+};
 
 browserAction.setRememberPopup = function(tabId, username, password, url, usernameExists, credentialsList) {
 	var id = tabId || page.currentTabId;
 
 	var stackData = {
-		visibleForPageUpdates: 2,
+        visibleForMilliSeconds: 7500,
 		level: 10,
 		intervalIcon: {
 			index: 0,
