@@ -16,8 +16,8 @@ function _initialize(tab) {
 
 	var url = _tab.credentials.url;
 	url = (url.length > 50) ? url.substring(0, 50) + "..." : url;
-	$(".information-url:first em:first").text(url);
-	$(".information-username:first em:first").text(_tab.credentials.username);
+	$(".information-url:first span:first").text(url);
+	$(".information-username:first span:first").text(_tab.credentials.username);
 
 	$("#btn-new").click(function(e) {
 		chrome.extension.sendMessage({
@@ -37,8 +37,8 @@ function _initialize(tab) {
 			}, _verifyResult);
 		}
 		else {
-			$(".credentials:first .username-new:first em:first").text(_tab.credentials.username);
-			$(".credentials:first .username-exists:first em:first").text(_tab.credentials.username);
+			$(".credentials:first .username-new:first strong:first").text(_tab.credentials.username);
+			$(".credentials:first .username-exists:first strong:first").text(_tab.credentials.username);
 
 			if(_tab.credentials.usernameExists) {
 				$(".credentials:first .username-new:first").hide();
