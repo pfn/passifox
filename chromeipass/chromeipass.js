@@ -1093,9 +1093,12 @@ cipFields.prepareCombinations = function(combinations) {
 
 		// initialize form-submit for remembering credentials
 		var fieldId = combinations[i].password || combinations[i].username;
-		var form = _f(fieldId).closest("form");
-		if(form && form.length > 0) {
-			cipForm.init(form, combinations[i]);
+		var field = _f(fieldId);
+		if(field) {
+			var form = field.closest("form");
+			if(form && form.length > 0) {
+				cipForm.init(form, combinations[i]);
+			}
 		}
 	}
 }
@@ -1302,12 +1305,17 @@ cip.fillInCredentials = function(combination, onlyPassword, suppressWarnings) {
 	var u = _f(combination.username);
 	var p = _f(combination.password);
 
-    if(combination.isNew) {
-        var form2 = cip.getFormActionUrl(combination);
-        if(action) {
-            cipForm.init(form2, combination);
-        }
-    }
+	if(combination.isNew) {
+		// initialize form-submit for remembering credentials
+		var fieldId = combination.password || combination.username;
+		var field = _f(fieldId);
+		if(field) {
+			var form2 = field.closest("form");
+			if(form2 && form2.length > 0) {
+				cipForm.init(form2, combination);
+			}
+		}
+	}
 
 	if(u) {
 		cip.u = u;
