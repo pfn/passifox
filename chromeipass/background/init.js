@@ -129,6 +129,19 @@ chrome.contextMenus.create({
 	}
 });
 
+/**
+ * Add context menu entry for creating icon for generate-password dialog
+ */
+chrome.contextMenus.create({
+	"title": "&Save credentials",
+	"contexts": [ "editable" ],
+	"onclick": function(info, tab) {
+		chrome.tabs.sendMessage(tab.id, {
+			action: "remember_credentials"
+		});
+	}
+});
+
 
 /**
  * Interval which updates the browserAction (e.g. blinking icon)

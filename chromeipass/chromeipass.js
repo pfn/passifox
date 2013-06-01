@@ -33,6 +33,9 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 		else if (req.action == "activate_password_generator") {
 			cip.initPasswordGenerator(cipFields.getAllFields());
 		}
+		else if(req.action == "remember_credentials") {
+			cip.contextMenuRememberCredentials();
+		}
 		else if (req.action == "choose_credential_fields") {
 			cipDefine.init();
 		}
@@ -477,68 +480,18 @@ cipForm.onSubmit = function() {
 	var usernameValue = "";
 	var passwordValue = "";
 
-	if(_f(usernameId)) {
-		usernameValue = _f(usernameId).val();
-	}
-	if(_f(passwordId)) {
-		passwordValue = _f(passwordId).val();
-	}
+	var usernameField = _f(usernameId);
+	var passwordField = _f(passwordId);
 
-	// no password given or field cleaned by a site-running script
-	// --> no password to save
-	if(passwordValue == "") {
-		return true;
+	if(usernameField) {
+		usernameValue = usernameField.val();
+	}
+	if(passwordField) {
+		passwordValue = passwordField.val();
 	}
 
-	var usernameExists = false;
-
-	var nothingChanged = false;
-	for(var i = 0; i < cip.credentials.length; i++) {
-		if(cip.credentials[i].Login == usernameValue && cip.credentials[i].Password == passwordValue) {
-			nothingChanged = true;
-			break;
-		}
-
-		if(cip.credentials[i].Login == usernameValue) {
-			usernameExists = true;
-		}
-	}
-
-	if(!nothingChanged) {
-		if(!usernameExists) {
-			for(var i = 0; i < cip.credentials.length; i++) {
-				if(cip.credentials[i].Login == usernameValue) {
-					usernameExists = true;
-					break;
-				}
-			}
-		}
-		var credentialsList = [];
-		for(var i = 0; i < cip.credentials.length; i++) {
-			credentialsList.push({
-				"Login": cip.credentials[i].Login,
-				"Name": cip.credentials[i].Name,
-				"Uuid": cip.credentials[i].Uuid
-			});
-		}
-
-		var url = cIPJQ(this)[0].action;
-		if(!url) {
-			url = document.location.href;
-			if(url.indexOf("?") > 0) {
-				url = url.substring(0, url.indexOf("?"));
-				if(url.length < document.location.origin.length) {
-					url = document.location.origin;
-				}
-			}
-		}
-
-		chrome.extension.sendMessage({
-			'action': 'set_remember_credentials',
-			'args': [usernameValue, passwordValue, url, usernameExists, credentialsList]
-		});
-	}
-}
+	cip.rememberCredentials(usernameValue, passwordValue);
+};
 
 
 
@@ -1574,6 +1527,101 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 		}
 	}
 }
+
+cip.contextMenuRememberCredentials = function() {
+	var el = document.activeElement;
+	if (el.tagName.toLowerCase() != "input") {
+		return;
+	}
+
+	cipFields.setUniqueId(cIPJQ(el));
+	var fieldId = cipFields.prepareId(cIPJQ(el).attr("data-cip-id"));
+	var combination = null;
+	if(el.type && el.type.toLowerCase() == "password") {
+		combination = cipFields.getCombination("password", fieldId);
+	}
+	else {
+		combination = cipFields.getCombination("username", fieldId);
+	}
+
+	var usernameValue = "";
+	var passwordValue = "";
+
+	var usernameField = _f(combination.username);
+	var passwordField = _f(combination.password);
+
+	if(usernameField) {
+		usernameValue = usernameField.val();
+	}
+	if(passwordField) {
+		passwordValue = passwordField.val();
+	}
+
+	if(!cip.rememberCredentials(usernameValue, passwordValue)) {
+		alert("Could not detect changed credentials.");
+	}
+};
+
+cip.rememberCredentials = function(usernameValue, passwordValue) {
+	// no password given or field cleaned by a site-running script
+	// --> no password to save
+	if(passwordValue == "") {
+		return false;
+	}
+
+	var usernameExists = false;
+
+	var nothingChanged = false;
+	for(var i = 0; i < cip.credentials.length; i++) {
+		if(cip.credentials[i].Login == usernameValue && cip.credentials[i].Password == passwordValue) {
+			nothingChanged = true;
+			break;
+		}
+
+		if(cip.credentials[i].Login == usernameValue) {
+			usernameExists = true;
+		}
+	}
+
+	if(!nothingChanged) {
+		if(!usernameExists) {
+			for(var i = 0; i < cip.credentials.length; i++) {
+				if(cip.credentials[i].Login == usernameValue) {
+					usernameExists = true;
+					break;
+				}
+			}
+		}
+		var credentialsList = [];
+		for(var i = 0; i < cip.credentials.length; i++) {
+			credentialsList.push({
+				"Login": cip.credentials[i].Login,
+				"Name": cip.credentials[i].Name,
+				"Uuid": cip.credentials[i].Uuid
+			});
+		}
+
+		var url = cIPJQ(this)[0].action;
+		if(!url) {
+			url = document.location.href;
+			if(url.indexOf("?") > 0) {
+				url = url.substring(0, url.indexOf("?"));
+				if(url.length < document.location.origin.length) {
+					url = document.location.origin;
+				}
+			}
+		}
+
+		chrome.extension.sendMessage({
+			'action': 'set_remember_credentials',
+			'args': [usernameValue, passwordValue, url, usernameExists, credentialsList]
+		});
+
+		return true;
+	}
+
+	return false;
+};
 
 
 
