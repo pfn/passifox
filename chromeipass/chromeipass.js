@@ -1420,8 +1420,6 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 	var uField = _f(combination.username);
 	var pField = _f(combination.password);
 
-	console.log("arrived");
-
 	// exactly one pair of credentials available
 	if (cip.credentials.length == 1) {
 		var filledIn = false;
