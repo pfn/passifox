@@ -1150,6 +1150,10 @@ cip.initCredentialFields = function(forceCall) {
 	}
 	cipFields.prepareCombinations(cipFields.combinations);
 
+	console.log(cipFields.combinations);
+	console.log(cip.u);
+	console.log(cip.p);
+
 	if(cipFields.combinations.length == 0) {
 		chrome.extension.sendMessage({
 			'action': 'show_default_browseraction'
@@ -1325,6 +1329,9 @@ cip.fillInCredentials = function(combination, onlyPassword, suppressWarnings) {
 cip.fillInFromActiveElement = function(suppressWarnings) {
 	var el = document.activeElement;
 	if (el.tagName.toLowerCase() != "input") {
+		if(cipFields.combinations.length > 0) {
+			cip.fillInCredentials(cipFields.combinations[0], false, suppressWarnings);
+		}
 		return;
 	}
 
@@ -1345,6 +1352,9 @@ cip.fillInFromActiveElement = function(suppressWarnings) {
 cip.fillInFromActiveElementPassOnly = function(suppressWarnings) {
 	var el = document.activeElement;
 	if (el.tagName.toLowerCase() != "input") {
+		if(cipFields.combinations.length > 0) {
+			cip.fillInCredentials(cipFields.combinations[0], false, suppressWarnings);
+		}
 		return;
 	}
 
