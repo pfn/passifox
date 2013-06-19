@@ -478,7 +478,9 @@ cipForm.init = function(form, credentialFields) {
 cipForm.destroy = function(form, credentialFields) {
     if(form === false && credentialFields) {
         var field = _f(credentialFields.password) || _f(credentialFields.username);
-        form = field.closest("form");
+		if(field) {
+			form = field.closest("form");
+		}
     }
 
     if(form && cIPJQ(form).length > 0) {
@@ -1191,6 +1193,12 @@ cip.retrieveCredentialsCallback = function (credentials, dontAutoFillIn) {
 cip.prepareFieldsForCredentials = function(autoFillInForSingle) {
 	// only one login for this site
 	if (autoFillInForSingle && cip.settings.autoFillSingleEntry && cip.credentials.length == 1) {
+		var combination = null;
+		if(!cip.p && !cip.u && cipFields.combinations.length > 0) {
+			cip.u = _f(cipFields.combinations[0].username);
+			cip.p = _f(cipFields.combinations[0].password);
+			combination = cipFields.combinations[0];
+		}
 		if (cip.u) {
 			cip.u.val(cip.credentials[0].Login);
 			combination = cipFields.getCombination("username", cip.u);
@@ -1200,10 +1208,12 @@ cip.prepareFieldsForCredentials = function(autoFillInForSingle) {
 			combination = cipFields.getCombination("password", cip.p);
 		}
 
-        var list = {};
-		if(cip.fillInStringFields(combination.fields, cip.credentials[0].StringFields, list)) {
-            cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
-        }
+		if(combination) {
+			var list = {};
+			if(cip.fillInStringFields(combination.fields, cip.credentials[0].StringFields, list)) {
+				cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+			}
+		}
 
 		// generate popup-list of usernames + descriptions
 		chrome.extension.sendMessage({
@@ -1409,6 +1419,8 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 
 	var uField = _f(combination.username);
 	var pField = _f(combination.password);
+
+	console.log("arrived");
 
 	// exactly one pair of credentials available
 	if (cip.credentials.length == 1) {
