@@ -1150,10 +1150,6 @@ cip.initCredentialFields = function(forceCall) {
 	}
 	cipFields.prepareCombinations(cipFields.combinations);
 
-	console.log(cipFields.combinations);
-	console.log(cip.u);
-	console.log(cip.p);
-
 	if(cipFields.combinations.length == 0) {
 		chrome.extension.sendMessage({
 			'action': 'show_default_browseraction'
