@@ -338,24 +338,32 @@ cipPassword.createIcon = function(field) {
 
 	var $zIndex = 0;
 	var $zIndexField = field;
-	while($zIndexField.css("z-index") == "auto") {
-		if($zIndexField == $zIndexField.parent()) {
-			break;
+	var z;
+	var c = 0;
+	while($zIndexField.length > 0) {
+		z = $zIndexField.css("z-index");
+		if(!isNaN(z) && parseInt(z) > $zIndex) {
+			$zIndex = parseInt(z);
 		}
 		$zIndexField = $zIndexField.parent();
+		if(c > 100) {
+			break;
+		}
+		c++;
 	}
-	$zIndex = $zIndexField.css("z-index");
 
 	if(isNaN($zIndex) || $zIndex < 1) {
 		$zIndex = 1;
 	}
+	$zIndex += 1;
 
 	var $icon = cIPJQ("<div>").addClass("cip-genpw-icon")
 		.addClass($className)
 		.css("z-index", $zIndex)
-		.css("top", field.offset().top + $offset + 1)
-		.css("left", field.offset().left + field.outerWidth() - $size - $offset)
+		.data("size", $size)
+		.data("offset", $offset)
 		.data("cip-genpw-field-id", field.data("cip-id"));
+	cipPassword.setIconPosition($icon, field);
 	$icon.click(function(e) {
 		e.preventDefault();
 
@@ -385,6 +393,11 @@ cipPassword.createIcon = function(field) {
 	cipPassword.observedIcons.push($icon);
 
 	cIPJQ("body").append($icon);
+}
+
+cipPassword.setIconPosition = function($icon, $field) {
+	$icon.css("top", $field.offset().top + $icon.data("offset") + 1)
+		.css("left", $field.offset().left + $field.outerWidth() - $icon.data("size") - $icon.data("offset"))
 }
 
 cipPassword.callbackPasswordCopied = function(bool) {
@@ -431,8 +444,13 @@ cipPassword.checkObservedElements = function() {
 				cipPassword.observedIcons.splice(index, 1);
 			}
 			else if(!field.is(":visible")) {
-				iconField.remove();
-				field.removeData("cip-password-generator");
+				iconField.hide();
+				//field.removeData("cip-password-generator");
+			}
+			else if(field.is(":visible")) {
+				iconField.show();
+				cipPassword.setIconPosition(iconField, field);
+				field.data("cip-password-generator", true);
 			}
 		}
 		else {
