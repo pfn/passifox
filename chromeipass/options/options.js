@@ -68,7 +68,55 @@ options.initGeneralSettings = function() {
 			action: "check_update_keepasshttp"
 		}, options.showKeePassHttpVersions);
 	});
-}
+
+
+	$("#showDangerousSettings").click(function() {
+		$("#dangerousSettings").show();
+		$(this).hide();
+	});
+
+	$("#hostname").val(options.settings["hostname"]);
+	$("#port").val(options.settings["port"]);
+
+	$("#portButton").click(function() {
+		var port = $.trim($("#port").val());
+		var portNumber = parseInt(port);
+		if(isNaN(port) || portNumber < 1025 || portNumber > 99999) {
+			$("#port").closest(".control-group").addClass("error");
+			alert("The port number has to be in range 1025 - 99999.\nNothing saved!");
+			return;
+		}
+
+		options.settings["port"] = portNumber.toString();
+		$("#port").closest(".control-group").removeClass("error").addClass("success");
+		setTimeout(function() {$("#port").closest(".control-group").removeClass("success")}, 2500);
+
+		localStorage.settings = JSON.stringify(options.settings);
+
+		chrome.extension.sendMessage({
+			action: 'load_settings'
+		});
+	});
+
+	$("#hostnameButton").click(function() {
+		var hostname = $("#hostname").val();
+		if($.trim(hostname) == "") {
+			$("#hostname").closest(".control-group").addClass("error");
+			alert("Hostname cannot be empty.\nNothing saved!");
+			return;
+		}
+
+		options.settings["hostname"] = hostname;
+		$("#hostname").closest(".control-group").removeClass("error").addClass("success");
+		setTimeout(function() {$("#hostname").closest(".control-group").removeClass("success")}, 2500);
+
+		localStorage.settings = JSON.stringify(options.settings);
+
+		chrome.extension.sendMessage({
+			action: 'load_settings'
+		});
+	});
+};
 
 options.showKeePassHttpVersions = function(response) {
 	if(response.current <= 0) {

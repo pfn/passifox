@@ -94,6 +94,10 @@
 			.checkUpdateKeePassHttp {
 				margin-left: 40px;
 			}
+
+			#dangerousSettings {
+				display: none;
+			}
 		</style>
 	</head>
 	<body>
@@ -183,6 +187,48 @@
 					</span>
 					<img src="/options/http-auth-dialog.png" alt="http-auth-dialog" />
 				</p>
+				<hr />
+				<div class="alert alert-error">
+					<strong>Attention!</strong> Please change the following settings only if you know what you are doing!
+				</div>
+				<button id="showDangerousSettings" class="btn btn-danger">Show these settings anyway</button>
+				<div id="dangerousSettings">
+					<p>
+						chromeIPass communicates on <em>http://[hostname]:[port]</em> with KeePassHTTP.
+						<br />
+						If you want to run KeePass on a remote computer, you have to change the hostname.
+						<br />
+						Sometimes the default port is still in use and you have to change the port number in KeePassHTTP to get it running. So you have to set the same port number in chromeIPass and KeePassHTTP.
+					</p>
+					<p>
+						<label>Hostname:</label>
+						<div class="control-group">
+							<div class="input-append">
+								<input type="text" id="hostname" placeholder="localhost" value="localhost" />
+								<button class="btn" id="hostnameButton" type="button">Save</button>
+							</div>
+							<span class="help-inline">
+								Default: localhost
+							</span>
+						</div>
+					</p>
+					<p>
+						<label>Port:</label>
+						<div class="control-group">
+							<div class="input-append">
+								<input type="text" id="port" placeholder="19455" value="19455" />
+								<button class="btn" id="portButton" type="button">Save</button>
+							</div>
+							<span class="help-inline">
+								Change the port if you have trouble with running KeePassHTTP on the default port.
+								<br />
+								You have to set the same port number in KeePassHTTP options!
+								<br />
+								Default: 19455
+							</span>
+						</div>
+					</p>
+				</div>
 			</div>
 
 			<!-- Connected Databases -->

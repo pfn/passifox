@@ -24,6 +24,12 @@ page.initSettings = function() {
 	if(!("autoFillSingleEntry" in page.settings)) {
 		page.settings.autoFillSingleEntry = 1;
 	}
+	if(!("hostname" in page.settings)) {
+		page.settings.hostname = "localhost";
+	}
+	if(!("port" in page.settings)) {
+		page.settings.port = "19455";
+	}
 	localStorage.settings = JSON.stringify(page.settings);
 }
 

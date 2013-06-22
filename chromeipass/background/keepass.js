@@ -7,7 +7,7 @@ keepass.isEncryptionKeyUnrecognized = false;
 keepass.currentKeePassHttp = {"version": 0, "versionParsed": 0};
 keepass.latestKeePassHttp = (typeof(localStorage.latestKeePassHttp) == 'undefined') ? {"version": 0, "versionParsed": 0, "lastChecked": null} : JSON.parse(localStorage.latestKeePassHttp);
 keepass.keySize = 8; // wtf? stupid cryptoHelpers
-keepass.pluginUrl = "http://localhost:19455/";
+keepass.pluginUrlDefault = "http://localhost:19455/";
 keepass.cacheTimeout = 30 * 1000; // milliseconds
 keepass.databaseHash = "no-hash"; //no-hash = keepasshttp is too old and does not return a hash value
 keepass.keyRing = (typeof(localStorage.keyRing) == 'undefined') ? {} : JSON.parse(localStorage.keyRing);
@@ -282,7 +282,7 @@ keepass.isAssociated = function() {
 
 keepass.send = function(request) {
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", keepass.pluginUrl, false);
+	xhr.open("POST", keepass.getPluginUrl(), false);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	try {
 		var r = JSON.stringify(request);
@@ -375,6 +375,13 @@ keepass.deleteKey = function(hash) {
 
 keepass.getIconColor = function() {
 	return ((keepass.databaseHash in keepass.keyRing) && keepass.keyRing[keepass.databaseHash].icon) ? keepass.keyRing[keepass.databaseHash].icon : "blue";
+}
+
+keepass.getPluginUrl = function() {
+	if(page.settings.hostname && page.settings.port) {
+		return "http://" + page.settings.hostname + ":" + page.settings.port;
+	}
+	return keepass.pluginUrlDefault;
 }
 
 keepass.setCurrentKeePassHttpVersion = function(version) {
