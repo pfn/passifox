@@ -426,10 +426,8 @@ keepass.checkForNewKeePassHttpVersion = function() {
 		console.log("Error: " + e);
 	}
 
-	if($version != -1) {
-		keepass.latestKeePassHttp.lastChecked = new Date();
-		localStorage.latestKeePassHttp = JSON.stringify(keepass.latestKeePassHttp);
-	}
+	keepass.latestKeePassHttp.lastChecked = new Date();
+	localStorage.latestKeePassHttp = JSON.stringify(keepass.latestKeePassHttp);
 }
 
 keepass.testAssociation = function (tab, triggerUnlock) {
