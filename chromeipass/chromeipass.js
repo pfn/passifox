@@ -255,7 +255,15 @@ cipPassword.createDialog = function() {
 		.on('change keypress paste textInput input', function() {
 			cIPJQ("#cip-genpw-btn-clipboard:first").removeClass("b2c-btn-success");
 		});
-	$dialog.append($textfieldPassword);
+	var $quality = cIPJQ("<span>")
+		.addClass("b2c-add-on")
+		.attr("id", "cip-genpw-quality")
+		.text("123 Bits");
+	var $frameInputAppend = cIPJQ("<div>")
+		.addClass("b2c-input-append")
+		.addClass("cip-genpw-password-frame");
+	$frameInputAppend.append($textfieldPassword).append($quality);
+	$dialog.append($frameInputAppend);
 
 	var $checkboxNextField = cIPJQ("<input>")
 		.attr("id", "cip-genpw-checkbox-next-field")
@@ -408,13 +416,20 @@ cipPassword.callbackPasswordCopied = function(bool) {
 
 cipPassword.callbackGeneratedPassword = function(entries) {
 	if(entries && entries.length >= 1) {
+		console.log(entries[0]);
 		cIPJQ("#cip-genpw-btn-clipboard:first").removeClass("b2c-btn-success");
 		cIPJQ("input#cip-genpw-textfield-password:first").val(entries[0].Password);
+		if(isNaN(entries[0].Login)) {
+			cIPJQ("#cip-genpw-quality:first").text("??? Bits");
+		}
+		else {
+			cIPJQ("#cip-genpw-quality:first").text(entries[0].Login + " Bits");
+		}
 	}
 	else {
 		if(cIPJQ("div#cip-genpw-error:first").length == 0) {
 			cIPJQ("button#cip-genpw-btn-generate:first").after("<div style='block' id='cip-genpw-error'>Cannot receive generated password.<br />Is your version of KeePassHttp up-to-date?<br /><br /><a href='https://github.com/pfn/keepasshttp/'>Please visit the KeePassHttp homepage</a></div>");
-			cIPJQ("input#cip-genpw-textfield-password:first").hide();
+			cIPJQ("input#cip-genpw-textfield-password:first").parent().hide();
 			cIPJQ("input#cip-genpw-checkbox-next-field:first").parent("label").hide();
 			cIPJQ("button#cip-genpw-btn-generate").hide();
 			cIPJQ("button#cip-genpw-btn-clipboard").hide();

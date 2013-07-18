@@ -26,6 +26,9 @@
 	font-size: .9em !important;
 }
 
+#cip-genpw-dialog {
+	text-align: left !important;
+}
 #cip-genpw-dialog button {
 	height: 26px !important;
 }
@@ -49,18 +52,30 @@
 	height: 24px;
 	background-image: url(chrome-extension://__MSG_@@extension_id__/icons/key_24x24.png);
 }
-.cip-genpw-textfield {
-	background: none !important;
+.cip-genpw-password-frame {
+	margin-top: 5px !important;
+	margin-bottom: 5px !important;
+}
+.cip-genpw-password-frame > * {
 	height: 20px !important;
 	font-size: 11px !important;
-	display: block !important;
+}
+.cip-genpw-textfield {
+	background: none !important;
+	font-size: 11px !important;
+	display: inline !important;
 	border: 1px solid rgb(170, 170, 170) !important;
 	padding: 1px 2px !important;
-	margin: 5px 0 !important;
-	width: 98% !important;
 	max-width: none !important;
-	min-width: none !important;
+	min-width: 0 !important;
 	font-size: 1em !important;
+	width: 240px !important;
+	padding-left: 5px !important;
+}
+#cip-genpw-quality {
+	width: 50px !important;
+	padding-top: 1px !important;
+	padding-bottom: 1px !important;
 }
 .cip-genpw-label {
 	display: block !important;
