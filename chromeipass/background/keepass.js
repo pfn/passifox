@@ -8,6 +8,7 @@ keepass.currentKeePassHttp = {"version": 0, "versionParsed": 0};
 keepass.latestKeePassHttp = (typeof(localStorage.latestKeePassHttp) == 'undefined') ? {"version": 0, "versionParsed": 0, "lastChecked": null} : JSON.parse(localStorage.latestKeePassHttp);
 keepass.keySize = 8; // wtf? stupid cryptoHelpers
 keepass.pluginUrlDefault = "http://localhost:19455/";
+keepass.latestVersionUrl = "https://passifox.appspot.com/latest-version.txt";
 keepass.cacheTimeout = 30 * 1000; // milliseconds
 keepass.databaseHash = "no-hash"; //no-hash = keepasshttp is too old and does not return a hash value
 keepass.keyRing = (typeof(localStorage.keyRing) == 'undefined') ? {} : JSON.parse(localStorage.keyRing);
@@ -407,7 +408,7 @@ keepass.keePassHttpUpdateAvailable = function() {
 
 keepass.checkForNewKeePassHttpVersion = function() {
 	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "https://raw.github.com/pfn/keepasshttp/master/update-version.txt", false);
+	xhr.open("GET", keepass.latestVersionUrl, false);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	try {
 		xhr.send();
@@ -426,8 +427,10 @@ keepass.checkForNewKeePassHttpVersion = function() {
 		console.log("Error: " + e);
 	}
 
+	if($version != -1) {
+		localStorage.latestKeePassHttp = JSON.stringify(keepass.latestKeePassHttp);
+	}
 	keepass.latestKeePassHttp.lastChecked = new Date();
-	localStorage.latestKeePassHttp = JSON.stringify(keepass.latestKeePassHttp);
 }
 
 keepass.testAssociation = function (tab, triggerUnlock) {
