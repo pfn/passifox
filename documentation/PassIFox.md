@@ -13,6 +13,10 @@ The XPI can be installed using the link: https://passifox.appspot.com/passifox.x
 1. [KeePass](http://keepass.info/)
 2. [KeePassHttp](https://github.com/pfn/keepasshttp/)
 
+### Installation
+
+[Download PassIFox](https://passifox.appspot.com/passifox.xpi) and drag-n-drop it into your Firefox. The installation process should start. 
+
 ### Configuration
 
 There is no explicit configuration necessary. PassIFox and KeePassHttp

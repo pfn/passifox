@@ -8,7 +8,7 @@ keepass.currentKeePassHttp = {"version": 0, "versionParsed": 0};
 keepass.latestKeePassHttp = (typeof(localStorage.latestKeePassHttp) == 'undefined') ? {"version": 0, "versionParsed": 0, "lastChecked": null} : JSON.parse(localStorage.latestKeePassHttp);
 keepass.keySize = 8; // wtf? stupid cryptoHelpers
 keepass.pluginUrlDefault = "http://localhost:19455/";
-keepass.latestVersionUrl = "https://passifox.appspot.com/latest-version.txt";
+keepass.latestVersionUrl = "https://passifox.appspot.com/kph/latest-version.txt";
 keepass.cacheTimeout = 30 * 1000; // milliseconds
 keepass.databaseHash = "no-hash"; //no-hash = keepasshttp is too old and does not return a hash value
 keepass.keyRing = (typeof(localStorage.keyRing) == 'undefined') ? {} : JSON.parse(localStorage.keyRing);
