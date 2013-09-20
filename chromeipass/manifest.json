@@ -42,7 +42,7 @@
 		}
 	],
 	"web_accessible_resources": [
-		"jquery.min.map",
+		"jquery-2.0.3.min.map",
 		"icons/key_16x16.png",
 		"icons/key_24x24.png",
 		"images/ui-bg_flat_0_aaaaaa_40x100.png",
