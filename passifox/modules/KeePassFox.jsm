@@ -339,13 +339,17 @@ KeePassFox.prototype = {
          return [id, key];
     },
     _send: function(request) {
+        let thread = Services.tm.currentThread;
         let xhr = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
                 .createInstance(Ci.nsIXMLHttpRequest);
-        xhr.open("POST", KEEPASS_HTTP_URL, false);
+        xhr.open("POST", KEEPASS_HTTP_URL, true);
         xhr.setRequestHeader("Content-Type", "application/json");
         let r = JSON.stringify(request);
         this.log("REQUEST: " + r);
         xhr.send(r);
+        while (xhr.readyState != 4) {
+          thread.processNextEvent(true);
+        }
 
         this.log("RESPONSE: " + xhr.status + " => " + xhr.responseText);
         return [xhr.status, xhr.responseText, xhr.readyState];
