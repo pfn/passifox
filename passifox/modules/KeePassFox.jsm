@@ -7,7 +7,6 @@ Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://services-crypto/WeaveCrypto.js");
 
 let AES_KEY_URL = "chrome://passifox";
-let KEEPASS_HTTP_URL = "http://localhost:19455/";
 
 let KEEPASSFOX_CACHE_TIME = 30 * 1000; // milliseconds
 
@@ -24,6 +23,7 @@ function KeePassFox() {
     });
 
     this._prefBranch = Services.prefs.getBranch("signon.");
+    this._myPrefs = Services.prefs.getBranch("passifox.");
     let kpf = this;
     this._observer = {
         QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver,
@@ -31,11 +31,17 @@ function KeePassFox() {
         observe: function(subject, topic, data) {
             kpf._debug = kpf._prefBranch.getBoolPref("debug");
             kpf.log("debug pref updated: " + kpf._debug);
+            kpf._keepassHttpUrl = kpf._myPrefs.getCharPref("keepasshttp_url");
+            kpf.log("keepassHttpUrl updated" + kpf._keepassHttpUrl);
         }
     };
     this._prefBranch.QueryInterface(Ci.nsIPrefBranch2);
     this._prefBranch.addObserver("debug", this._observer, false);
     this._debug = this._prefBranch.getBoolPref("debug");
+
+    this._keepassHttpUrl = this._myPrefs.getCharPref("keepasshttp_url");
+    this._myPrefs.QueryInterface(Ci.nsIPrefBranch2);
+    this._myPrefs.addObserver("keepasshttp_url", this._observer, false);
 }
 
 KeePassFox.reload = function() {
@@ -342,7 +348,7 @@ KeePassFox.prototype = {
         let thread = Services.tm.currentThread;
         let xhr = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
                 .createInstance(Ci.nsIXMLHttpRequest);
-        xhr.open("POST", KEEPASS_HTTP_URL, true);
+        xhr.open("POST", this._keepassHttpUrl, true);
         xhr.setRequestHeader("Content-Type", "application/json");
         let r = JSON.stringify(request);
         this.log("REQUEST: " + r);
