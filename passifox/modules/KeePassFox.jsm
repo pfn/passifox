@@ -23,7 +23,7 @@ function KeePassFox() {
     });
 
     this._prefBranch = Services.prefs.getBranch("signon.");
-    this._myPrefs = Services.prefs.getBranch("passifox.");
+    this._myPrefs = Services.prefs.getBranch("extensions.");
     let kpf = this;
     this._observer = {
         QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver,
@@ -31,7 +31,7 @@ function KeePassFox() {
         observe: function(subject, topic, data) {
             kpf._debug = kpf._prefBranch.getBoolPref("debug");
             kpf.log("debug pref updated: " + kpf._debug);
-            kpf._keepassHttpUrl = kpf._myPrefs.getCharPref("keepasshttp_url");
+            kpf._keepassHttpUrl = kpf._myPrefs.getCharPref("passifox.keepasshttp_url");
             kpf.log("keepassHttpUrl updated" + kpf._keepassHttpUrl);
         }
     };
@@ -41,7 +41,7 @@ function KeePassFox() {
 
     this._keepassHttpUrl = this._myPrefs.getCharPref("keepasshttp_url");
     this._myPrefs.QueryInterface(Ci.nsIPrefBranch2);
-    this._myPrefs.addObserver("keepasshttp_url", this._observer, false);
+    this._myPrefs.addObserver("passifox.keepasshttp_url", this._observer, false);
 }
 
 KeePassFox.reload = function() {

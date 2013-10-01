@@ -1,1 +1,1 @@
-pref("passifox.keepasshttp_url", "http://localhost:19455/");
+pref("extensions.passifox.keepasshttp_url", "http://localhost:19455/");
