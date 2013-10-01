@@ -231,6 +231,7 @@ LoginManagerStorage.prototype = {
         }
     },
 
+    get isLoggedIn() { return true; },
     findLogins: function findLogins(outCount, hostname, submitURL, realm) {
         this.stub(arguments);
 
