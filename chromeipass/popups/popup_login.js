@@ -1,5 +1,5 @@
 $(function() {
-	var global = chrome.extension.getBackgroundPage();
+	var global = chrome.runtime.getBackgroundPage();
 
 	chrome.tabs.query({"active": true, "windowId": chrome.windows.WINDOW_ID_CURRENT}, function(tabs) {
 		if (tabs.length === 0)

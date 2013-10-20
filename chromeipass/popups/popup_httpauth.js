@@ -1,5 +1,5 @@
 $(function() {
-	var global = chrome.extension.getBackgroundPage();
+	var global = chrome.runtime.getBackgroundPage();
 
 	chrome.tabs.getSelected(null, function(tab) {
 		//var data = global.tab_httpauth_list["tab" + tab.id];

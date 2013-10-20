@@ -37,7 +37,7 @@ options.initGeneralSettings = function() {
 		options.settings[$(this).attr("name")] = $(this).is(':checked');
 		localStorage.settings = JSON.stringify(options.settings);
 
-        chrome.extension.sendMessage({
+        chrome.runtime.sendMessage({
             action: 'load_settings'
         });
 	});
@@ -52,19 +52,19 @@ options.initGeneralSettings = function() {
 		options.settings[$(this).attr("name")] = $(this).val();
 		localStorage.settings = JSON.stringify(options.settings);
 
-        chrome.extension.sendMessage({
+        chrome.runtime.sendMessage({
             action: 'load_settings'
         });
 	});
 
-	chrome.extension.sendMessage({
+	chrome.runtime.sendMessage({
 		action: "get_keepasshttp_versions"
 	}, options.showKeePassHttpVersions);
 
 	$("#tab-general-settings button.checkUpdateKeePassHttp:first").click(function(e) {
 		e.preventDefault();
 		$(this).attr("disabled", true);
-		chrome.extension.sendMessage({
+		chrome.runtime.sendMessage({
 			action: "check_update_keepasshttp"
 		}, options.showKeePassHttpVersions);
 	});
@@ -93,7 +93,7 @@ options.initGeneralSettings = function() {
 
 		localStorage.settings = JSON.stringify(options.settings);
 
-		chrome.extension.sendMessage({
+		chrome.runtime.sendMessage({
 			action: 'load_settings'
 		});
 	});
@@ -112,7 +112,7 @@ options.initGeneralSettings = function() {
 
 		localStorage.settings = JSON.stringify(options.settings);
 
-		chrome.extension.sendMessage({
+		chrome.runtime.sendMessage({
 			action: 'load_settings'
 		});
 	});
@@ -151,7 +151,7 @@ options.initConnectedDatabases = function() {
 		delete options.keyRing[$hash];
 		localStorage.keyRing = JSON.stringify(options.keyRing);
 
-        chrome.extension.sendMessage({
+        chrome.runtime.sendMessage({
             action: 'load_keyring'
         });
 
@@ -174,7 +174,7 @@ options.initConnectedDatabases = function() {
 
 		options.keyRing[$hash].icon = $icon;
 		localStorage.keyRing = JSON.stringify(options.keyRing);
-        chrome.extension.sendMessage({
+        chrome.runtime.sendMessage({
             action: 'load_keyring'
         });
 	});
@@ -225,7 +225,7 @@ options.initSpecifiedCredentialFields = function() {
 		delete options.settings["defined-credential-fields"][$url];
 		localStorage.settings = JSON.stringify(options.settings);
 
-        chrome.extension.sendMessage({
+        chrome.runtime.sendMessage({
             action: 'load_settings'
         });
 

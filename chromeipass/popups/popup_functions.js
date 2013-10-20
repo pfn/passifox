@@ -1,6 +1,6 @@
 var $ = cIPJQ.noConflict(true);
 var _settings = typeof(localStorage.settings)=='undefined' ? {} : JSON.parse(localStorage.settings);
-//var global = chrome.extension.getBackgroundPage();
+//var global = chrome.runtime.getBackgroundPage();
 
 function updateAvailableResponse(available) {
 	if(available) {
@@ -20,7 +20,7 @@ function initSettings() {
 	});
 
 	$("#settings #btn-choose-credential-fields").click(function() {
-		var global = chrome.extension.getBackgroundPage();
+		var global = chrome.runtime.getBackgroundPage();
 		chrome.tabs.sendMessage(global.page.currentTabId, {
 			action: "choose_credential_fields"
 		});
@@ -32,7 +32,7 @@ function initSettings() {
 $(function() {
 	initSettings();
 
-	chrome.extension.sendMessage({
+	chrome.runtime.sendMessage({
 		action: "update_available_keepasshttp"
 	}, updateAvailableResponse);
 });
