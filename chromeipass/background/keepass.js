@@ -204,7 +204,7 @@ keepass.generatePassword = function (callback, tab, forceCallback) {
 }
 
 keepass.copyPassword = function(callback, tab, password) {
-	var bg = chrome.runtime.getBackgroundPage();
+	var bg = chrome.extension.getBackgroundPage();
 	var c2c = bg.document.getElementById("copy2clipboard");
 	if(!c2c) {
 		var input = document.createElement('input');
