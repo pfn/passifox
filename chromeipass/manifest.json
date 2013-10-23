@@ -1,6 +1,6 @@
 {
 	"name": "chromeIPass",
-	"version": "2.6.7",
+	"version": "2.6.6",
 	"manifest_version": 2,
 	"description": "KeePass integration for browser Chrome using KeePassHttp",
 	"icons": {
@@ -42,7 +42,7 @@
 		}
 	],
 	"web_accessible_resources": [
-		"jquery-1.10.2.min.map",
+		"jquery.min.map",
 		"icons/key_16x16.png",
 		"icons/key_24x24.png",
 		"images/ui-bg_flat_0_aaaaaa_40x100.png",
