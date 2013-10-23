@@ -20,7 +20,7 @@ function _initialize(tab) {
 	$(".information-username:first span:first").text(_tab.credentials.username);
 
 	$("#btn-new").click(function(e) {
-		chrome.extension.sendMessage({
+		chrome.runtime.sendMessage({
 			action: 'add_credentials',
 			args: [_tab.credentials.username, _tab.credentials.password, _tab.credentials.url]
 		}, _verifyResult);
@@ -31,7 +31,7 @@ function _initialize(tab) {
 
 		// only one entry which could be updated
 		if(_tab.credentials.list.length == 1) {
-			chrome.extension.sendMessage({
+			chrome.runtime.sendMessage({
 				action: 'update_credentials',
 				args: [_tab.credentials.list[0].Uuid, _tab.credentials.username, _tab.credentials.password, _tab.credentials.url]
 			}, _verifyResult);
@@ -56,7 +56,7 @@ function _initialize(tab) {
 					.data("entryId", i)
 					.click(function(e) {
 						e.preventDefault();
-						chrome.extension.sendMessage({
+						chrome.runtime.sendMessage({
 							action: 'update_credentials',
 							args: [_tab.credentials.list[$(this).data("entryId")].Uuid, _tab.credentials.username, _tab.credentials.password, _tab.credentials.url]
 						}, _verifyResult);
@@ -97,11 +97,11 @@ function _verifyResult(code) {
 }
 
 function _close() {
-	chrome.extension.sendMessage({
+	chrome.runtime.sendMessage({
 		action: 'remove_credentials_from_tab_information'
 	});
 
-	chrome.extension.sendMessage({
+	chrome.runtime.sendMessage({
 		action: 'pop_stack'
 	});
 
@@ -109,16 +109,16 @@ function _close() {
 }
 
 $(function() {
-	chrome.extension.sendMessage({
+	chrome.runtime.sendMessage({
 		action: 'stack_add',
 		args: ["icon_remember_red_background_19x19.png", "popup_remember.html", 10, true, 0]
 	});
 
-	chrome.extension.sendMessage({
+	chrome.runtime.sendMessage({
 		action: 'get_tab_information'
 	}, _initialize);
 
-	chrome.extension.sendMessage({
+	chrome.runtime.sendMessage({
 		action: 'get_connected_database'
 	}, _connected_database);
 });

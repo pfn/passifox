@@ -87,7 +87,7 @@ chrome.webRequest.onAuthRequired.addListener(httpAuth.handleRequest,
 /**
  * Interaction between background-script and front-script
  */
-chrome.extension.onMessage.addListener(event.onMessage);
+chrome.runtime.onMessage.addListener(event.onMessage);
 
 
 /**
