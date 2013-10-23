@@ -32,7 +32,7 @@ function initSettings() {
 $(function() {
 	initSettings();
 
-	chrome.extension.sendMessage({
+	chrome.runtime.sendMessage({
 		action: "update_available_keepasshttp"
 	}, updateAvailableResponse);
 });
