@@ -35,14 +35,14 @@
 	"content_scripts": [
 		{
 			"matches": ["http://*/*", "https://*/*"],
-			"js": ["jquery-1.9.1.min.js", "jquery-ui-1.10.2.custom.min.js", "chromeipass.js"],
+			"js": ["jquery-2.0.3.min.js", "jquery-ui-1.10.2.custom.min.js", "chromeipass.js"],
 			"css": ["jquery-ui-1.10.2.custom.min.css", "bootstrap-btn.css", "chromeipass.css"],
 			"run_at": "document_idle",
 			"all_frames": true
 		}
 	],
 	"web_accessible_resources": [
-		"jquery.min.map",
+		"jquery-2.0.3.min.map",
 		"icons/key_16x16.png",
 		"icons/key_24x24.png",
 		"images/ui-bg_flat_0_aaaaaa_40x100.png",
