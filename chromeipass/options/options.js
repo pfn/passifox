@@ -26,7 +26,7 @@ options.initMenu = function() {
 	});
 
 	$("div.tab:first").show();
-}
+};
 
 options.initGeneralSettings = function() {
 	$("#tab-general-settings input[type=checkbox]").each(function() {
@@ -75,47 +75,26 @@ options.initGeneralSettings = function() {
 		$(this).hide();
 	});
 
-	$("#hostname").val(options.settings["hostname"]);
-	$("#port").val(options.settings["port"]);
+    $("#keepassHttpUrl").val(options.settings["keepassHttpUrl"]);
 
-	$("#portButton").click(function() {
-		var port = $.trim($("#port").val());
-		var portNumber = parseInt(port);
-		if(isNaN(port) || portNumber < 1025 || portNumber > 99999) {
-			$("#port").closest(".control-group").addClass("error");
-			alert("The port number has to be in range 1025 - 99999.\nNothing saved!");
-			return;
-		}
+    $("#keepassHttpUrlButton").click(function() {
+        var keepassHttpUrl = $("#keepassHttpUrl").val();
+        if($.trim(keepassHttpUrl) == "") {
+            $("#keepassHttpUrl").closest(".control-group").addClass("error");
+            alert("KeePassHttp URL cannot be empty.\nNothing saved!");
+            return;
+        }
 
-		options.settings["port"] = portNumber.toString();
-		$("#port").closest(".control-group").removeClass("error").addClass("success");
-		setTimeout(function() {$("#port").closest(".control-group").removeClass("success")}, 2500);
+        options.settings["keepassHttpUrl"] = keepassHttpUrl;
+        $("#keepassHttpUrl").closest(".control-group").removeClass("error").addClass("success");
+        setTimeout(function() {$("#keepassHttpUrl").closest(".control-group").removeClass("success")}, 2500);
 
-		localStorage.settings = JSON.stringify(options.settings);
+        localStorage.settings = JSON.stringify(options.settings);
 
-		chrome.extension.sendMessage({
-			action: 'load_settings'
-		});
-	});
-
-	$("#hostnameButton").click(function() {
-		var hostname = $("#hostname").val();
-		if($.trim(hostname) == "") {
-			$("#hostname").closest(".control-group").addClass("error");
-			alert("Hostname cannot be empty.\nNothing saved!");
-			return;
-		}
-
-		options.settings["hostname"] = hostname;
-		$("#hostname").closest(".control-group").removeClass("error").addClass("success");
-		setTimeout(function() {$("#hostname").closest(".control-group").removeClass("success")}, 2500);
-
-		localStorage.settings = JSON.stringify(options.settings);
-
-		chrome.extension.sendMessage({
-			action: 'load_settings'
-		});
-	});
+        chrome.extension.sendMessage({
+            action: 'load_settings'
+        });
+    });
 };
 
 options.showKeePassHttpVersions = function(response) {
@@ -131,7 +110,7 @@ options.showKeePassHttpVersions = function(response) {
 	$("#tab-about em.versionKPH").text(response.current);
 
 	$("#tab-general-settings button.checkUpdateKeePassHttp:first").attr("disabled", false);
-}
+};
 
 options.initConnectedDatabases = function() {
 	$("#dialogDeleteConnectedDatabase").modal({keyboard: true, show: false, backdrop: true});
@@ -203,7 +182,7 @@ options.initConnectedDatabases = function() {
 	else {
 		$("#tab-connected-databases table tbody:first tr.empty:first").show();
 	}
-}
+};
 
 options.initSpecifiedCredentialFields = function() {
 	$("#dialogDeleteSpecifiedCredentialFields").modal({keyboard: true, show: false, backdrop: true});
@@ -256,8 +235,8 @@ options.initSpecifiedCredentialFields = function() {
 	else {
 		$("#tab-specified-fields table tbody:first tr.empty:first").show();
 	}
-}
+};
 
 options.initAbout = function() {
 	$("#tab-about em.versionCIP").text(chrome.app.getDetails().version);
-}
+};

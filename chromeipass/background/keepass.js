@@ -8,7 +8,7 @@ keepass.currentKeePassHttp = {"version": 0, "versionParsed": 0};
 keepass.latestKeePassHttp = (typeof(localStorage.latestKeePassHttp) == 'undefined') ? {"version": 0, "versionParsed": 0, "lastChecked": null} : JSON.parse(localStorage.latestKeePassHttp);
 keepass.keySize = 8; // wtf? stupid cryptoHelpers
 keepass.pluginUrlDefault = "http://localhost:19455/";
-keepass.latestVersionUrl = "https://passifox.appspot.com/kph/latest-version.txt";
+keepass.latestVersionUrl = "https://raw.githubusercontent.com/mheese/keepasshttp/master/latest-version.txt";
 keepass.cacheTimeout = 30 * 1000; // milliseconds
 keepass.databaseHash = "no-hash"; //no-hash = keepasshttp is too old and does not return a hash value
 keepass.keyRing = (typeof(localStorage.keyRing) == 'undefined') ? {} : JSON.parse(localStorage.keyRing);
@@ -287,13 +287,13 @@ keepass.send = function(request) {
 	xhr.setRequestHeader("Content-Type", "application/json");
 	try {
 		var r = JSON.stringify(request);
-		page.debug("Request: {1}", r);
+		console.debug("Request: {1}", r);
 		xhr.send(r);
 	}
 	catch (e) {
 		console.log("KeePassHttp: " + e);
 	}
-	page.debug("Response: {1} => {2}", xhr.status, xhr.responseText);
+	console.debug("Response: {1} => {2}", xhr.status, xhr.responseText);
 	return [xhr.status, xhr.responseText];
 }
 
@@ -379,9 +379,12 @@ keepass.getIconColor = function() {
 }
 
 keepass.getPluginUrl = function() {
-	if(page.settings.hostname && page.settings.port) {
-		return "http://" + page.settings.hostname + ":" + page.settings.port;
+	if(page.settings.keepassHttpUrl) {
+        var ret = page.settings.keepassHttpUrl;
+        console.log("Using Plugin URL: "+ret);
+        return ret;
 	}
+    console.log("Using default Plugin URL: "+ keepass.pluginUrlDefault);
 	return keepass.pluginUrlDefault;
 }
 

@@ -162,7 +162,7 @@
 				<div class="help-block kphVersion">
 					chromeIPass needs the plugin KeePassHttp to retrieve credentials from and send them to KeePass.
 					<br />
-					You can download the latest stable version from here: <a target="_blank" href="https://github.com/pfn/keepasshttp">https://github.com/pfn/keepasshttp</a>
+					You can download the latest stable version from here: <a target="_blank" href="https://github.com/mheese/keepasshttp">https://github.com/mheese/keepasshttp</a>
 					<br />
 					<br />
 					<div class="row">
@@ -194,40 +194,24 @@
 				<button id="showDangerousSettings" class="btn btn-danger">Show these settings anyway</button>
 				<div id="dangerousSettings">
 					<p>
-						chromeIPass communicates on <em>http://[hostname]:[port]</em> with KeePassHTTP.
+						chromeIPass communicates on <em>http(s)://[hostname]:[port]</em> with KeePassHTTP.
 						<br />
-						If you want to run KeePass on a remote computer, you have to change the hostname.
+						If you want to run KeePass on a remote computer, you have to change the hostname. Also, if you want to access KeePass remotely, consider using HTTPS! Read the <a href="https://github.com/mheese/keepasshttp/wiki/Listener-Configuration">instructions</a> on how to setup KeePassHTTP for remote access.
 						<br />
 						Sometimes the default port is still in use and you have to change the port number in KeePassHTTP to get it running. So you have to set the same port number in chromeIPass and KeePassHTTP.
 					</p>
-					<p>
-						<label>Hostname:</label>
-						<div class="control-group">
-							<div class="input-append">
-								<input type="text" id="hostname" placeholder="localhost" value="localhost" />
-								<button class="btn" id="hostnameButton" type="button">Save</button>
-							</div>
+                    <p>
+                        <label>KeePassHttp URL:</label>
+                        <div class="control-group">
+                            <div class="input-append">
+                               <input type="text" id="keepassHttpUrl" placeholder="http://localhost:19455/" value="http://localhost:19455/" />
+                               <button class="btn" id="keepassHttpUrlButton" type="button">Save</button>
+                            </div>
 							<span class="help-inline">
-								Default: localhost
+								Default: http://localhost:19455/ (for SSL default is: https://localhost:19456/)
 							</span>
-						</div>
-					</p>
-					<p>
-						<label>Port:</label>
-						<div class="control-group">
-							<div class="input-append">
-								<input type="text" id="port" placeholder="19455" value="19455" />
-								<button class="btn" id="portButton" type="button">Save</button>
-							</div>
-							<span class="help-inline">
-								Change the port if you have trouble with running KeePassHTTP on the default port.
-								<br />
-								You have to set the same port number in KeePassHTTP options!
-								<br />
-								Default: 19455
-							</span>
-						</div>
-					</p>
+                        </div>
+                    </p>
 				</div>
 			</div>
 
@@ -357,10 +341,10 @@
 				<h2>About</h2>
 				<hr />
 				<p>
-					Developed by <a target="_blank" href="https://github.com/pfn/">Perry Nguyen</a> and <a target="_blank" href="http://lukas-schulze.de">Lukas Schulze</a>.
+					Developed by <a target="_blank" href="https://github.com/pfn/">Perry Nguyen</a>, <a target="_blank" href="http://lukas-schulze.de">Lukas Schulze</a> and <a target="_blank" href="https://github.com/mheese/">Marcus Heese</a>.
 				</p>
 				<p>
-					To visit the plugin page, just go to <a target="_blank" href="https://github.com/pfn/passifox">https://github.com/pfn/passifox</a>.
+					To visit the plugin page, just go to <a target="_blank" href="https://github.com/mheese/passifox">https://github.com/mheese/passifox</a>.
 				</p>
 				<hr />
 				<div class="row">
@@ -376,7 +360,7 @@
 			<hr>
 
 			<div class="footer">
-				<p>2013 - Perry Nguyen, Lukas Schulze</p>
+				<p>2014 - Perry Nguyen, Lukas Schulze, Marcus Heese</p>
 			</div>
 
 		</div> <!-- /container -->

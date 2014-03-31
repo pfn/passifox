@@ -2,3 +2,5 @@
 /nbproject/
 chromeipass.pem
 /chromeipass-data/
+chromeipass/.idea
+chromeipass.iml
