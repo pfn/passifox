@@ -262,6 +262,8 @@ options.initSpecifiedCredentialFields = function() {
 options.initBlockedPages = function() {
 	$("#dialogDeleteBlockedPages").modal({keyboard: true, show: false, backdrop: true});
 	
+	/* Utility functions for table manipulation and row display. */
+	// Add a row and its hidden edit row to the blocked pages table.
 	var bp_addRow = function(blockedPage, index) {
 		var url = blockedPage["text"];
 		var regex = blockedPage["regex"];
@@ -269,24 +271,25 @@ options.initBlockedPages = function() {
 		// Add content row.
 		var $tr = $trClone.clone(true);
 		$tr.data("url", url);
-		$tr.attr("id", "tr-bp" + counter);
+		$tr.data("index", index);
+		$tr.attr("id", "tr-bp" + index);
 		$tr.children("td:first").text(url);
 		// TODO: Add check icon if regex.
 		$("#tab-blocked-pages table tbody:first").append($tr);
 
 		// Add edit row.
 		var $trEdit = $trEditClone.clone(true);
-		// TODO: Set ids of input box and checkbox?
 
-		// TODO: Set values of input box and checkbox? Or will this be set in the button invokation?
 		// Set tr-specific information 
 		$trEdit.data("url", url);
+		$trEdit.data("index", index);
 		$trEdit.attr("id", "tr-edit-bp" + index);
-		$trEdit.children("td:first").children("td.bp-edit:first").value = url;
+		$trEdit.children("td:first").children("td.bp-edit:first").textContent = url;
 		$("#tab-blocked-pages table tbody:first").append($trEdit);
 		$trEdit.hide();
 	}
 
+	// Create edit row for addition of new entries.
 	var bp_addNewRow = function() {
 		// Create new row and append to bottom of table.
 		var $trNew = $trEditClone.clone(true);
@@ -297,14 +300,35 @@ options.initBlockedPages = function() {
 		$("#tab-blocked-pages table tbody:first").append($trNew);
 	}
 
+	// Display placeholder text if there are no entries in the table.
+	var bp_placeholder = function() {
+		if($("#tab-blocked-pages table tbody:first tr").length > 4) {
+			$("#tab-blocked-pages table tbody:first tr.empty:first").hide();
+		} else {
+			$("#tab-blocked-pages table tbody:first tr.empty:first").show();
+		}
+	}
+
 	// TODO: Set row delete button action.
 	$("#tab-blocked-pages tr.clone:first button.delete:first").click(function(e) {
 		e.preventDefault();
-		//$("#dialogDeleteBlockedPages").data("url", $(this).closest("tr").data("url"));
-		//$("#dialogDeleteBlockedPages").data("tr-id", $(this).closest("tr").attr("id"));
-		// Set dynamic values in modal text body.
-		//$("#dialogDeleteBlockedPages .modal-body:first strong:first").text($(this).closest("tr").children("td:first").text());
-		//$("#dialogDeleteBlockedPages").modal("show");
+		var row = $(this).closest("tr");
+		var url = row.data("url");
+		var location = options.settings["blocked-pages"]
+				.map(function (elt) { elt["text"] })
+				.indexOf(url);
+		$("#tr-edit-bp" + row.data("index")).remove();
+		row.remove();
+
+
+		options.settings["blocked-pages"].splice(location, 1);
+		localStorage.settings = JSON.stringify(options.settings);
+
+        chrome.extension.sendMessage({
+            action: 'load_settings'
+        });
+
+    bp_placeholder();
 	});
 
 	// Set row edit button action.
@@ -313,11 +337,13 @@ options.initBlockedPages = function() {
 		// Hide original row.
 		var row = $(this).closest("tr");
 		row.hide();
+		// Set edit row values.
+		var editRow = $("#tr-edit-bp" + row.data("index"));
+		var input = editRow.children("td:first").children("input.bp-edit")[0];
+		input.value = row.data("url");
+		// TODO: Set regex checkbox.
 		// Show edit row.
-		var id = row.attr("id");
-		var nId = id.replace("tr-bp", "");
-		var id = parseInt(nId);
-		$("#tr-edit-bp" + id).show();
+		editRow.show();
 	});
 
 	// Set row save button action.
@@ -348,10 +374,11 @@ options.initBlockedPages = function() {
 		if (newRow) {
 			console.debug("New row.");
 			
-			var i = options.settings["blocked-pages"].push(data);
+			options.settings["blocked-pages"].push(data);
 
 			// Append new row to table with relevant information.
-			bp_addRow(data, i);
+			bp_addRow(data, options.bpRowCounter);
+			options.bpRowCounter += 1;
 
 			// Remove old new row and add another to the end of the table.
 			row.remove();
@@ -370,14 +397,14 @@ options.initBlockedPages = function() {
 			}
 
 			// Show the old row but update the data to reflect the new values.
-			var existingId = parseInt(id.replace("tr-edit-bp", ""));
-			var existingRow = $("#tr-bp" + existingId);
+			var existingRow = $("#tr-bp" + row.data("index"));
 			existingRow.children("td:first").text(data["text"]);
 			existingRow.data("url", data["text"]);
 			existingRow.show();
 			
 			// Update edit row.
 			row.data("url", data["text"]);
+			row.hide();
 		}
 
 		// Update settings.
@@ -386,21 +413,23 @@ options.initBlockedPages = function() {
         chrome.extension.sendMessage({
             action: 'load_settings'
         });
+
+    bp_placeholder();
 	});
 
 	// Set row cancel button action.
 	$("#tab-blocked-pages tr.cloneedit:first button.cancel:first").click(function(e) {
 		e.preventDefault();
-		var id = $(this).closest("tr").attr("id");
+		var row = $(this).closest("tr");
+		var id = row.attr("id");
 		var newRow = (id == "tr-new-bp");
 
 		// Hide edit row regardless.
-		$(this).closest("tr").hide();
+		row.hide();
 
 		if (!newRow) {
 			// Also unhide the existing entry.
-			id = parseInt(id.replace("tr-edit-bp", ""));
-			$("#tr-bp" + id).show();
+			$("#tr-bp" + row.data("index")).show();
 		}
 	});
 
@@ -440,22 +469,16 @@ options.initBlockedPages = function() {
 	$trEditClone.removeClass("cloneedit");
 
 	// Create rows in table.
-	var counter = 1;
+	options.bpRowCounter = 1;
 	for(var item in options.settings["blocked-pages"]) {
 		item = options.settings["blocked-pages"][item];
-		bp_addRow(item, counter);
-		counter += 1;
+		bp_addRow(item, options.bpRowCounter);
+		options.bpRowCounter += 1;
 	}
 
 	bp_addNewRow();
 
-	// Not sure what this does.
-	if($("#tab-blocked-pages table tbody:first tr").length > 4) {
-		$("#tab-blocked-pages table tbody:first tr.empty:first").hide();
-	}
-	else {
-		$("#tab-blocked-pages table tbody:first tr.empty:first").show();
-	}
+	bp_placeholder();
 }
 
 options.initAbout = function() {
