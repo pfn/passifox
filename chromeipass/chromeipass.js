@@ -1135,6 +1135,10 @@ cip.url = null;
 cip.submitUrl = null;
 // received credentials from KeePassHTTP
 cip.credentials = [];
+// block status, which is changed if the url is not blocked
+cip.blocked = true;
+
+console.debug("Custom test.");
 
 cIPJQ(function() {
 	cip.init();
@@ -1144,9 +1148,57 @@ cip.init = function() {
 	chrome.extension.sendMessage({
 		"action": "get_settings",
 	}, function(response) {
+		console.debug(response.data);
 		cip.settings = response.data;
-		cip.initCredentialFields();
 	});
+
+	cip.url = document.location.origin;
+	cip.href = document.location.href;
+
+	var blocked = cip.getBlockStatus();
+
+	if (blocked) {
+		console.debug("Disabled for this page.");
+		// Send message to change
+	} else {
+		console.debug("Enabled for this page.");
+		cip.initCredentialFields();
+	}
+}
+
+cip.getBlockStatus = function() {
+	if (cip.blocked) {
+		// Check if page is blocked.
+		if(cip.settings["blocked-pages"]) {
+			var matched = false;
+			for(var i = 0; i < cip.settings["blocked-pages"].length; i++) {
+				var blockedPage = cip.settings["blocked-pages"][i];
+				var blockedStr = blockedPage["text"];
+				var regex = blockedPage["regex"];
+				if (regex) {
+					var re = RegExp(blockedStr);
+					if (re.test(cip.href)) {
+						matched = true;
+						break;
+					}
+				} else {
+					console.debug("We aren't set up to handle wildcards yet!");
+					// Handling for entries that use easier syntax here.
+				}
+			}
+			cip.blocked = matched;
+		} else {
+			cip.settings["blocked-pages"] = [];
+
+			chrome.extension.sendMessage({
+				action: 'save_settings',
+				args: [cip.settings]
+			});
+			cip.blocked = false;
+		}
+	}
+	
+	return cip.blocked;
 }
 
 cip.initCredentialFields = function(forceCall) {
@@ -1172,7 +1224,6 @@ cip.initCredentialFields = function(forceCall) {
 		return;
 	}
 
-	cip.url = document.location.origin;
 	cip.submitUrl = cip.getFormActionUrl(cipFields.combinations[0]);
 
 	chrome.extension.sendMessage({
