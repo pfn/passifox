@@ -1145,25 +1145,24 @@ cIPJQ(function() {
 });
 
 cip.init = function() {
+	cip.url = document.location.origin;
+	cip.href = document.location.href;
+	
 	chrome.extension.sendMessage({
 		"action": "get_settings",
 	}, function(response) {
 		console.debug(response.data);
 		cip.settings = response.data;
-	});
+		var blocked = cip.getBlockStatus();
 
-	cip.url = document.location.origin;
-	cip.href = document.location.href;
-
-	var blocked = cip.getBlockStatus();
-
-	if (blocked) {
-		console.debug("Disabled for this page.");
-		// Send message to change
-	} else {
-		console.debug("Enabled for this page.");
-		cip.initCredentialFields();
-	}
+		if (blocked) {
+			console.debug("Disabled for this page.");
+			// Send message to change
+		} else {
+			console.debug("Enabled for this page.");
+			cip.initCredentialFields();
+		}
+	});	
 }
 
 cip.getBlockStatus = function() {
@@ -1176,6 +1175,7 @@ cip.getBlockStatus = function() {
 				var blockedStr = blockedPage["text"];
 				var regex = blockedPage["regex"];
 				if (regex) {
+					// TODO: Error handling here.
 					var re = RegExp(blockedStr);
 					if (re.test(cip.href)) {
 						matched = true;
@@ -1184,6 +1184,7 @@ cip.getBlockStatus = function() {
 				} else {
 					console.debug("We aren't set up to handle wildcards yet!");
 					// Handling for entries that use easier syntax here.
+					// e.g. simply using * as a catch-all
 				}
 			}
 			cip.blocked = matched;
