@@ -71,12 +71,21 @@
 			#tab-connected-databases .color.dropdown a.dropdown-toggle img {
 				margin-right: 5px;
 			}
-			tr.clone {
+			tr.clone, tr.cloneedit {
+				display: none;
+			}
+			#tr-new-bp {
 				display: none;
 			}
 			td.last-used,
 			td.created {
 				white-space: nowrap;
+			}
+			.bp-edit {
+				margin-bottom:0px !important;
+			}
+			#new-item-holder > button.new {
+				float:right;
 			}
 			.bold {
 				font-weight: bold;
@@ -374,10 +383,24 @@
 						</tr>
 						<tr class="clone">
 							<td></td>
-							<td><button class="btn delete btn-danger btn">Remove</button></td>
+							<td></td>
+							<td>
+								<button class="btn edit btn-default btn">Edit</button>
+								<button class="btn delete btn-danger btn">Remove</button>
+							</td>
 						</tr>
+						<tr class="cloneedit">
+							<td><input type="text" class="bp-edit"></td>
+							<td><input type="checkbox"></td>
+							<td>
+								<button class="btn save btn-primary">Save</button>
+								<button class="btn cancel btn-default">Cancel</button>
+							</td>
 					</tbody>
 				</table>
+				<div class="new-item-holder">
+					<button class="btn new btn-success">New</button>
+				</div>
 
 				<div id="dialogDeleteBlockedPage" class="modal hide" tabindex="-1" role="dialog">
 					<div class="modal-header">

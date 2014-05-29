@@ -7,6 +7,7 @@ $(function() {
 	options.initGeneralSettings();
 	options.initConnectedDatabases();
 	options.initSpecifiedCredentialFields();
+	options.initBlockedPages();
 	options.initAbout();
 });
 
@@ -255,6 +256,205 @@ options.initSpecifiedCredentialFields = function() {
 	}
 	else {
 		$("#tab-specified-fields table tbody:first tr.empty:first").show();
+	}
+}
+
+options.initBlockedPages = function() {
+	$("#dialogDeleteBlockedPages").modal({keyboard: true, show: false, backdrop: true});
+	
+	var bp_addRow = function(blockedPage, index) {
+		var url = blockedPage["text"];
+		var regex = blockedPage["regex"];
+
+		// Add content row.
+		var $tr = $trClone.clone(true);
+		$tr.data("url", url);
+		$tr.attr("id", "tr-bp" + counter);
+		$tr.children("td:first").text(url);
+		// TODO: Add check icon if regex.
+		$("#tab-blocked-pages table tbody:first").append($tr);
+
+		// Add edit row.
+		var $trEdit = $trEditClone.clone(true);
+		// TODO: Set ids of input box and checkbox?
+
+		// TODO: Set values of input box and checkbox? Or will this be set in the button invokation?
+		// Set tr-specific information 
+		$trEdit.data("url", url);
+		$trEdit.attr("id", "tr-edit-bp" + index);
+		$trEdit.children("td:first").children("td.bp-edit:first").value = url;
+		$("#tab-blocked-pages table tbody:first").append($trEdit);
+		$trEdit.hide();
+	}
+
+	var bp_addNewRow = function() {
+		// Create new row and append to bottom of table.
+		var $trNew = $trEditClone.clone(true);
+		// TODO: Set ids of input box and checkbox
+		// Set tr-specific information
+		$trNew.attr("id", "tr-new-bp");
+		$trNew.children("td:first").children(".bp-edit").attr("id")
+		$("#tab-blocked-pages table tbody:first").append($trNew);
+	}
+
+	// TODO: Set row delete button action.
+	$("#tab-blocked-pages tr.clone:first button.delete:first").click(function(e) {
+		e.preventDefault();
+		//$("#dialogDeleteBlockedPages").data("url", $(this).closest("tr").data("url"));
+		//$("#dialogDeleteBlockedPages").data("tr-id", $(this).closest("tr").attr("id"));
+		// Set dynamic values in modal text body.
+		//$("#dialogDeleteBlockedPages .modal-body:first strong:first").text($(this).closest("tr").children("td:first").text());
+		//$("#dialogDeleteBlockedPages").modal("show");
+	});
+
+	// Set row edit button action.
+	$("#tab-blocked-pages tr.clone:first button.edit:first").click(function(e) {
+		e.preventDefault();
+		// Hide original row.
+		var row = $(this).closest("tr");
+		row.hide();
+		// Show edit row.
+		var id = row.attr("id");
+		var nId = id.replace("tr-bp", "");
+		var id = parseInt(nId);
+		$("#tr-edit-bp" + id).show();
+	});
+
+	// Set row save button action.
+	$("#tab-blocked-pages tr.cloneedit:first button.save:first").click(function(e) {
+		e.preventDefault();
+		// Get information.
+		var id = $(this).closest("tr").attr("id");
+		var newRow = (id == "tr-new-bp");
+		var row = $(this).closest("tr");
+
+		var url = row.children("td:first").children("input.bp-edit:first")[0].value;
+		var treatAsRegex = true; // TODO: implement.
+
+		// TODO: Check against some validations.
+		// Can't be blank
+		// Can't match another row
+
+		var data = {
+			text: url,
+			regex: treatAsRegex
+		};
+
+		// Ensure array is present.
+		if (!options.settings["blocked-pages"]) {
+			options.settings["blocked-pages"] = [];
+		}
+
+		if (newRow) {
+			console.debug("New row.");
+			
+			var i = options.settings["blocked-pages"].push(data);
+
+			// Append new row to table with relevant information.
+			bp_addRow(data, i);
+
+			// Remove old new row and add another to the end of the table.
+			row.remove();
+			bp_addNewRow();
+		} else {
+			var originalUrl = row.data("url");
+			var location = options.settings["blocked-pages"]
+				.map(function (elt) { elt["text"] })
+				.indexOf(originalUrl);
+
+			if (location != -1) {
+				console.error("Existing entry not found.");
+				// TODO: Error message.
+			} else {
+				options.settings["blocked-pages"][location] = data;
+			}
+
+			// Show the old row but update the data to reflect the new values.
+			var existingId = parseInt(id.replace("tr-edit-bp", ""));
+			var existingRow = $("#tr-bp" + existingId);
+			existingRow.children("td:first").text(data["text"]);
+			existingRow.data("url", data["text"]);
+			existingRow.show();
+			
+			// Update edit row.
+			row.data("url", data["text"]);
+		}
+
+		// Update settings.
+		localStorage.settings = JSON.stringify(options.settings);
+
+        chrome.extension.sendMessage({
+            action: 'load_settings'
+        });
+	});
+
+	// Set row cancel button action.
+	$("#tab-blocked-pages tr.cloneedit:first button.cancel:first").click(function(e) {
+		e.preventDefault();
+		var id = $(this).closest("tr").attr("id");
+		var newRow = (id == "tr-new-bp");
+
+		// Hide edit row regardless.
+		$(this).closest("tr").hide();
+
+		if (!newRow) {
+			// Also unhide the existing entry.
+			id = parseInt(id.replace("tr-edit-bp", ""));
+			$("#tr-bp" + id).show();
+		}
+	});
+
+	// Set new button action.
+	$("#tab-blocked-pages .new-item-holder button.new:first").click(function(e) {
+		e.preventDefault();
+		$("#tr-new-bp").toggle();
+	});
+
+	// Set modal button action.
+	$("#dialogDeleteBlockedPages .modal-footer:first button.yes:first").click(function(e) {
+		$("#dialogDeleteBlockedPages").modal("hide");
+
+		var $url = $("#dialogDeleteBlockedPages").data("url");
+		var $trId = $("#dialogDeleteBlockedPages").data("tr-id");
+		$("#tab-blocked-pages #" + $trId).remove();
+
+		delete options.settings["blocked-pages"][$url];
+		localStorage.settings = JSON.stringify(options.settings);
+
+        chrome.extension.sendMessage({
+            action: 'load_settings'
+        });
+
+		if($("#tab-blocked-pages table tbody:first tr").length > 2) {
+			$("#tab-blocked-pages table tbody:first tr.empty:first").hide();
+		}
+		else {
+			$("#tab-blocked-pages table tbody:first tr.empty:first").show();
+		}
+	});
+
+	// Get template rows.
+	var $trClone = $("#tab-blocked-pages table tr.clone:first").clone(true);
+	$trClone.removeClass("clone");
+	var $trEditClone = $("#tab-blocked-pages table tr.cloneedit:first").clone(true);
+	$trEditClone.removeClass("cloneedit");
+
+	// Create rows in table.
+	var counter = 1;
+	for(var item in options.settings["blocked-pages"]) {
+		item = options.settings["blocked-pages"][item];
+		bp_addRow(item, counter);
+		counter += 1;
+	}
+
+	bp_addNewRow();
+
+	// Not sure what this does.
+	if($("#tab-blocked-pages table tbody:first tr").length > 4) {
+		$("#tab-blocked-pages table tbody:first tr.empty:first").hide();
+	}
+	else {
+		$("#tab-blocked-pages table tbody:first tr.empty:first").show();
 	}
 }
 
