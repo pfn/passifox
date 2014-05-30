@@ -75,8 +75,19 @@ page.createTabEntry = function(tabId) {
 	page.tabs[tabId] = {
 		"stack": [],
 		"errorMessage": null,
-		"loginList": {}
+		"loginList": {},
+		"url": null
 	};
+}
+
+page.updateTabEntry = function(callback, tabId) {
+	if(!page.tabs[tabId]) {
+		page.createTabEntry(tabId);
+	}
+	chrome.tabs.get(tabId, function(tab) {
+		page.tabs[tabId]["url"] = tab.url;
+		callback(page.tabs[tabId]);
+	});
 }
 
 page.removePageInformationFromNotExistingTabs = function() {

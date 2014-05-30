@@ -141,7 +141,9 @@ event.onPopStack = function(callback, tab) {
 event.onGetTabInformation = function(callback, tab) {
 	var id = tab.id || page.currentTabId;
 
-	callback(page.tabs[id]);
+	page.updateTabEntry(function(tabInfo) {
+		callback(tabInfo);
+	}, id);
 }
 
 event.onGetConnectedDatabase = function(callback, tab) {

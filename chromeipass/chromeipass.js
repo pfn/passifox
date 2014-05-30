@@ -1146,23 +1146,30 @@ cIPJQ(function() {
 
 cip.init = function() {
 	cip.url = document.location.origin;
-	cip.href = document.location.href;
 	
+	// Set href based on url of tab, as opposed to iframe.
 	chrome.extension.sendMessage({
-		"action": "get_settings",
+		"action": "get_tab_information",
 	}, function(response) {
-		console.debug(response.data);
-		cip.settings = response.data;
-		var blocked = cip.getBlockStatus();
+		cip.href = response["url"];
+		console.log(cip.href);
+		chrome.extension.sendMessage({
+			"action": "get_settings",
+		}, function(response) {
+			console.debug(response.data);
+			cip.settings = response.data;
+			var blocked = cip.getBlockStatus();
 
-		if (blocked) {
-			console.debug("Disabled for this page.");
-			// Send message to change
-		} else {
-			console.debug("Enabled for this page.");
-			cip.initCredentialFields();
-		}
-	});	
+			if (blocked) {
+				console.debug("Disabled for this page.");
+				// Send message to change
+			} else {
+				console.debug("Enabled for this page.");
+				cip.initCredentialFields();
+			}
+		});
+	});
+	
 }
 
 cip.getBlockStatus = function() {
