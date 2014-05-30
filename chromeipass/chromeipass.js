@@ -1166,6 +1166,23 @@ cip.init = function() {
 }
 
 cip.getBlockStatus = function() {
+	var escapeRegExp = function (str) {
+	  // Handle escaped backslash. '\\'
+	  var pass1 = str.replace(/\\\\/g,"###LITERAL BACKSLASH###");
+	  // Handle escaped asterisk. '\*'
+	  var pass2 = pass1.replace(/\\\*/g,"###LITERAL ASTERISK###");
+	  // Escape regex-sensitive characters (except asterisks), from
+	  // http://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex/6969486
+	  var pass3 = pass2.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, "\\$&")
+	  // Replace wildcard asterisks with regex equivalent. '*' => '.*?'
+	  var pass4 = pass3.replace(/\*/g, ".*?");
+	  // Replace backslash.
+	  var pass5 = pass4.replace(/###LITERAL BACKSLASH###/g, "\\");
+	  // Replace asterisks.
+	  var final = pass5.replace(/###LITERAL ASTERISK###/g, "\\*");
+	  return final;
+	}
+
 	if (cip.blocked) {
 		// Check if page is blocked.
 		if(cip.settings["blocked-pages"]) {
@@ -1174,17 +1191,20 @@ cip.getBlockStatus = function() {
 				var blockedPage = cip.settings["blocked-pages"][i];
 				var blockedStr = blockedPage["text"];
 				var regex = blockedPage["regex"];
+				var re = null;
+
 				if (regex) {
 					// TODO: Error handling here.
-					var re = RegExp(blockedStr);
-					if (re.test(cip.href)) {
-						matched = true;
-						break;
-					}
+					re = RegExp(blockedStr);
 				} else {
-					console.debug("We aren't set up to handle wildcards yet!");
-					// Handling for entries that use easier syntax here.
-					// e.g. simply using * as a catch-all
+					// Handling for entries that use easier syntax.
+					// e.g. * is wildcard, and that's it.
+					re = RegExp(escapeRegExp(blockedStr));
+				}
+
+				if (re.test(cip.href)) {
+					matched = true;
+					break;
 				}
 			}
 			cip.blocked = matched;

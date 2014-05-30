@@ -271,9 +271,17 @@ options.initBlockedPages = function() {
 		// Add content row.
 		var $tr = $trClone.clone(true);
 		$tr.data("url", url);
+		$tr.data("regex", regex);
 		$tr.data("index", index);
 		$tr.attr("id", "tr-bp" + index);
 		$tr.children("td:first").text(url);
+		var regText = null;
+		if (regex) {
+			regText = "Yes";//<span class=\"glyphicon glyphicon-ok\"></span>";
+		} else {
+			regText = "No";//<span class=\"glyphicon glyphicon-remove\"></span>";
+		}
+		$tr.children("td:nth-child(2)").text(regText);//html(regText);
 		// TODO: Add check icon if regex.
 		$("#tab-blocked-pages table tbody:first").append($tr);
 
@@ -282,6 +290,7 @@ options.initBlockedPages = function() {
 
 		// Set tr-specific information 
 		$trEdit.data("url", url);
+		$trEdit.data("regex", regex);
 		$trEdit.data("index", index);
 		$trEdit.attr("id", "tr-edit-bp" + index);
 		$trEdit.children("td:first").children("td.bp-edit:first").textContent = url;
@@ -339,9 +348,11 @@ options.initBlockedPages = function() {
 		row.hide();
 		// Set edit row values.
 		var editRow = $("#tr-edit-bp" + row.data("index"));
-		var input = editRow.children("td:first").children("input.bp-edit")[0];
-		input.value = row.data("url");
-		// TODO: Set regex checkbox.
+		var textInput = editRow.children("td:first").children("input.bp-edit");
+		textInput.val(row.data("url"));
+		var checkbox = editRow.children("td:nth-child(2)").children("input.bp-cb");
+		var regex = row.data("regex");
+		checkbox.prop("checked", regex);
 		// Show edit row.
 		editRow.show();
 	});
@@ -354,8 +365,8 @@ options.initBlockedPages = function() {
 		var newRow = (id == "tr-new-bp");
 		var row = $(this).closest("tr");
 
-		var url = row.children("td:first").children("input.bp-edit:first")[0].value;
-		var treatAsRegex = true; // TODO: implement.
+		var url = row.children("td:first").children("input.bp-edit:first").val();
+		var treatAsRegex = row.children("td:nth-child(2)").children("input.bp-cb").prop("checked");
 
 		// TODO: Check against some validations.
 		// Can't be blank
@@ -386,10 +397,10 @@ options.initBlockedPages = function() {
 		} else {
 			var originalUrl = row.data("url");
 			var location = options.settings["blocked-pages"]
-				.map(function (elt) { elt["text"] })
+				.map(function (elt) { return elt["text"]; })
 				.indexOf(originalUrl);
 
-			if (location != -1) {
+			if (location == -1) {
 				console.error("Existing entry not found.");
 				// TODO: Error message.
 			} else {
@@ -399,11 +410,15 @@ options.initBlockedPages = function() {
 			// Show the old row but update the data to reflect the new values.
 			var existingRow = $("#tr-bp" + row.data("index"));
 			existingRow.children("td:first").text(data["text"]);
+			var regText = (data["regex"] ? "Yes" : "No");
+			existingRow.children("td:nth-child(2)").text(regText);
 			existingRow.data("url", data["text"]);
+			existingRow.data("regex", data["regex"]);
 			existingRow.show();
 			
 			// Update edit row.
 			row.data("url", data["text"]);
+			row.data("regex", data["regex"]);
 			row.hide();
 		}
 
