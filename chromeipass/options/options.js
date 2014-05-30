@@ -329,7 +329,6 @@ options.initBlockedPages = function() {
 		$("#tr-edit-bp" + row.data("index")).remove();
 		row.remove();
 
-
 		options.settings["blocked-pages"].splice(location, 1);
 		localStorage.settings = JSON.stringify(options.settings);
 
