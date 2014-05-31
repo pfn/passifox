@@ -83,6 +83,98 @@ function _fs(fieldId) {
 
 
 
+var cipHooks = {};
+
+cipHooks.queue = [];
+
+cipHooks.init = function() {
+	cipHooks.initHooks();
+}
+
+cipHooks.initHooks = function() {
+	if(_called.initHooks) {
+		return;
+	}
+
+	_called.initHooks = true;
+
+	cipHooks.addHook("val", cipHooks.onInvoke, true);
+	cipHooks.addHook("append", cipHooks.onInvoke);
+	cipHooks.addHook("show", cipHooks.onInvoke);
+	cipHooks.addHook("click", cipHooks.onInvoke);
+	cipHooks.addHook("blur", cipHooks.onInvoke);
+	cipHooks.addHook("focus", cipHooks.onInvoke);
+}
+
+cipHooks.onVal = function() {
+	return !cip.blocked;
+}
+
+cipHooks.onAppend = function() {
+	return !cip.blocked;
+}
+
+cipHooks.onShow = function() {
+	return !cip.blocked;
+}
+
+cipHooks.onInvoke = function() {
+	if (cip.blocked) {
+		var args = Array.prototype.slice.call(arguments);
+		var method = args.shift();
+		cipHooks.queue.push({
+			method: method,
+			args: args,
+			context: this
+		});
+	}
+	return !cip.blocked;
+}
+
+// Replay function calls if unblocked on a page.
+cipHooks.replay = function() {
+	// Ensure unblocked, issues arise otherwise when callbacks call hooked functions.
+	// in part due to the 
+	if(!cip.blocked) {
+		while(cipHooks.queue.length !== 0) {
+			var elt = cipHooks.queue.shift();
+			elt.method.apply(elt.context, elt.args);
+		}
+	}
+}
+
+/**
+ * Replace the jQuery function given by the name with a function that will only
+ * execute the original function if the wrapper returns true
+ * @param	name	the name of the jQuery method to override
+ * @param	wrapper	the function to check before running the jQuery method
+ * @param	getter	whether or not the jQuery function should continue like normal if no arguments are passed (for getting values)
+ */
+cipHooks.addHook = function(name, wrapper, getter) {
+	var original = cIPJQ.fn[name];
+
+	if (original) {
+		cIPJQ.fn[name] = function() {
+			var args = Array.prototype.slice.call(arguments);
+			args.unshift(original);
+
+			// `this` will be the jQuery object that the method was called on
+			if (getter && args.length === 0) {
+				return original.apply(this, args);
+			} else {
+				if (wrapper.apply(this, args)) {
+					return original.apply(this, arguments);
+				} else {
+					// For method chaining
+					return this;
+				}
+			}
+		}
+	}
+}
+
+
+
 var cipAutocomplete = {};
 
 // objects of username + description for autocomplete
@@ -1152,7 +1244,7 @@ cip.init = function() {
 		"action": "get_tab_information",
 	}, function(response) {
 		cip.href = response["url"];
-		console.log(cip.href);
+
 		chrome.extension.sendMessage({
 			"action": "get_settings",
 		}, function(response) {
@@ -1162,14 +1254,14 @@ cip.init = function() {
 
 			if (blocked) {
 				console.debug("Disabled for this page.");
-				// Send message to change
 			} else {
 				console.debug("Enabled for this page.");
-				cip.initCredentialFields();
 			}
+
+			cipHooks.init();
+			cip.initCredentialFields();
 		});
 	});
-	
 }
 
 cip.getBlockStatus = function() {
