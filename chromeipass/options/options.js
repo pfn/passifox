@@ -274,12 +274,13 @@ options.initBlockedPages = function() {
 		$tr.data("regex", regex);
 		$tr.data("index", index);
 		$tr.attr("id", "tr-bp" + index);
+		$tr.addClass("bp-content-row");
 		$tr.children("td:first").text(url);
 		var regText = null;
 		if (regex) {
-			regText = "Yes";//<span class=\"glyphicon glyphicon-ok\"></span>";
+			regText = "Yes";//"<span class=\"glyphicon glyphicon-ok\"></span>";
 		} else {
-			regText = "No";//<span class=\"glyphicon glyphicon-remove\"></span>";
+			regText = "No";//"<span class=\"glyphicon glyphicon-remove\"></span>";
 		}
 		$tr.children("td:nth-child(2)").text(regText);//html(regText);
 		// TODO: Add check icon if regex.
@@ -318,7 +319,7 @@ options.initBlockedPages = function() {
 		}
 	}
 
-	// TODO: Set row delete button action.
+	// TODO: Set content row remove button action.
 	$("#tab-blocked-pages tr.clone:first button.delete:first").click(function(e) {
 		e.preventDefault();
 		var row = $(this).closest("tr");
@@ -332,14 +333,14 @@ options.initBlockedPages = function() {
 		options.settings["blocked-pages"].splice(location, 1);
 		localStorage.settings = JSON.stringify(options.settings);
 
-        chrome.extension.sendMessage({
-            action: 'load_settings'
-        });
+		chrome.extension.sendMessage({
+			action: 'load_settings'
+		});
 
     bp_placeholder();
 	});
 
-	// Set row edit button action.
+	// Set content row edit button action.
 	$("#tab-blocked-pages tr.clone:first button.edit:first").click(function(e) {
 		e.preventDefault();
 		// Hide original row.
@@ -354,35 +355,65 @@ options.initBlockedPages = function() {
 		checkbox.prop("checked", regex);
 		// Show edit row.
 		editRow.show();
+		textInput.focus();
 	});
 
-	// Set row save button action.
+	// Set edit row save button action.
 	$("#tab-blocked-pages tr.cloneedit:first button.save:first").click(function(e) {
 		e.preventDefault();
 		// Get information.
 		var id = $(this).closest("tr").attr("id");
 		var newRow = (id == "tr-new-bp");
 		var row = $(this).closest("tr");
+		var index = row.data("index");
 
 		var url = row.children("td:first").children("input.bp-edit:first").val();
 		var treatAsRegex = row.children("td:nth-child(2)").children("input.bp-cb").prop("checked");
 
-		// TODO: Check against some validations.
+		// Validations
 		// Can't be blank
+		if (url === "") {
+			alert("Entry cannot be blank!");
+			return;
+		}
+
 		// Can't match another row
+		var matched = false;
+		$(".bp-content-row").each(function(i) {
+			if ($(this).data("index") !== index) {
+				if ($(this).data("url") == url) {
+					matched = true;
+				}
+			}
+		});
+
+		if (matched) {
+			alert("That entry already exists!");
+			return;
+		}
+
+		// If regex, can't produce syntax error
+		if (treatAsRegex) {
+			try {
+				var re = new RegExp(url);
+			} catch(e) {
+				alert("Regular expression syntax invalid:\n" + e.message);
+				return;
+			}
+		}
 
 		var data = {
 			text: url,
 			regex: treatAsRegex
 		};
 
-		// Ensure array is present.
+		// Ensure array in settings is present.
 		if (!options.settings["blocked-pages"]) {
 			options.settings["blocked-pages"] = [];
 		}
 
 		if (newRow) {
-			console.debug("New row.");
+			//console.debug("New row.");
 			
 			options.settings["blocked-pages"].push(data);
 
@@ -399,9 +430,11 @@ options.initBlockedPages = function() {
 				.map(function (elt) { return elt["text"]; })
 				.indexOf(originalUrl);
 
+
 			if (location == -1) {
-				console.error("Existing entry not found.");
-				// TODO: Error message.
+				//console.error("Existing entry not found.");
+				alert("Sorry, there was an error saving that. Refresh the page and try again.");
+				return;
 			} else {
 				options.settings["blocked-pages"][location] = data;
 			}
@@ -424,11 +457,11 @@ options.initBlockedPages = function() {
 		// Update settings.
 		localStorage.settings = JSON.stringify(options.settings);
 
-        chrome.extension.sendMessage({
-            action: 'load_settings'
-        });
+		chrome.extension.sendMessage({
+			action: 'load_settings'
+		});
 
-    bp_placeholder();
+		bp_placeholder();
 	});
 
 	// Set row cancel button action.
@@ -453,6 +486,19 @@ options.initBlockedPages = function() {
 		$("#tr-new-bp").toggle();
 	});
 
+	// Enter button handlers on input fields
+	$("#tab-blocked-pages tr.cloneedit:first input.bp-edit:first").keypress(function(e) {
+		if(e.which == 13) {
+			$(this).closest("tr").children("td:nth-child(3)").children("button.save").click();
+		}
+	});
+
+	$("#tab-blocked-pages tr.cloneedit:first input.bp-cb:first").keypress(function(e) {
+		if(e.which == 13) {
+			$(this).closest("tr").children("td:nth-child(3)").children("button.save").click();
+		}
+	});
+
 	// Set modal button action.
 	$("#dialogDeleteBlockedPages .modal-footer:first button.yes:first").click(function(e) {
 		$("#dialogDeleteBlockedPages").modal("hide");
@@ -464,9 +510,9 @@ options.initBlockedPages = function() {
 		delete options.settings["blocked-pages"][$url];
 		localStorage.settings = JSON.stringify(options.settings);
 
-        chrome.extension.sendMessage({
-            action: 'load_settings'
-        });
+		chrome.extension.sendMessage({
+			action: 'load_settings'
+		});
 
 		if($("#tab-blocked-pages table tbody:first tr").length > 2) {
 			$("#tab-blocked-pages table tbody:first tr.empty:first").hide();
