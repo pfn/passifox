@@ -67,6 +67,7 @@ event.invoke = function(handler, callback, senderTabId, args, secondTime) {
 		if(!page.tabs[tab.id]) {
 			page.createTabEntry(tab.id);
 		}
+		page.tabs[tab.id]["url"] = tab.url;
 
 		args = args || [];
 
@@ -141,9 +142,7 @@ event.onPopStack = function(callback, tab) {
 event.onGetTabInformation = function(callback, tab) {
 	var id = tab.id || page.currentTabId;
 
-	page.updateTabEntry(function(tabInfo) {
-		callback(tabInfo);
-	}, id);
+	callback(page.tabs[id]);
 }
 
 event.onGetConnectedDatabase = function(callback, tab) {

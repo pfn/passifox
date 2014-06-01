@@ -80,16 +80,6 @@ page.createTabEntry = function(tabId) {
 	};
 }
 
-page.updateTabEntry = function(callback, tabId) {
-	if(!page.tabs[tabId]) {
-		page.createTabEntry(tabId);
-	}
-	chrome.tabs.get(tabId, function(tab) {
-		page.tabs[tabId]["url"] = tab.url;
-		callback(page.tabs[tabId]);
-	});
-}
-
 page.removePageInformationFromNotExistingTabs = function() {
 	var rand = Math.floor(Math.random()*1001);
 	if(rand == 28) {
