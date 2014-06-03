@@ -53,6 +53,20 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 				cip.initCredentialFields(true);
 			});
 		}
+		else if (req.action == "get_block_status") {
+			if (callback) {
+				// In case it hasn't happened yet.
+				cip.init();
+				callback(cip.blocked);
+			}
+		}
+		else if (req.action == "unblock_page") {
+			cip.init();
+			if (cip.blocked) {
+				cip.blocked = false;
+				cipHooks.replay();
+			}
+		}
 	}
 });
 
@@ -86,6 +100,8 @@ function _fs(fieldId) {
 var cipHooks = {};
 
 cipHooks.queue = [];
+
+cipHooks.hooked = {};
 
 cipHooks.init = function() {
 	cipHooks.initHooks();
@@ -152,6 +168,7 @@ cipHooks.replay = function() {
  */
 cipHooks.addHook = function(name, wrapper, getter) {
 	var original = cIPJQ.fn[name];
+	cipHooks.hooked[name] = original;
 
 	if (original) {
 		cIPJQ.fn[name] = function() {
@@ -1229,8 +1246,6 @@ cip.submitUrl = null;
 cip.credentials = [];
 // block status, which is changed if the url is not blocked
 cip.blocked = true;
-
-console.debug("Custom test.");
 
 cIPJQ(function() {
 	cip.init();
