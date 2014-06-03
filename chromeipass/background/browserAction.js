@@ -30,12 +30,12 @@ browserAction.update = function(interval) {
 
 	var data = page.tabs[page.currentTabId].stack[page.tabs[page.currentTabId].stack.length - 1];
 
-    if(typeof data.visibleForMilliSeconds != "undefined") {
+	if(typeof data.visibleForMilliSeconds != "undefined") {
 		if(data.visibleForMilliSeconds <= 0) {
 			browserAction.stackPop(page.currentTabId);
 			browserAction.show(null, {"id": page.currentTabId});
 			page.clearCredentials(page.currentTabId);
-            return;
+			return;
 		}
 		data.visibleForMilliSeconds -= interval;
 	}
@@ -70,10 +70,10 @@ browserAction.showDefault = function(callback, tab) {
 		stackData.iconType = "cross";
 	}
 
-    if(page.tabs[tab.id].loginList.length > 0) {
-        stackData.iconType = "questionmark";
-        stackData.popup = "popup_login.html";
-    }
+	if(page.tabs[tab.id].loginList.length > 0) {
+		stackData.iconType = "questionmark";
+		stackData.popup = "popup_login.html";
+	}
 
 	browserAction.stackUnshift(stackData, tab.id);
 
@@ -171,23 +171,23 @@ browserAction.removeRememberPopup = function(callback, tab, removeImmediately) {
 	}
 
 	if(page.tabs[tab.id].stack.length == 0) {
-        page.clearCredentials(tab.id);
+		page.clearCredentials(tab.id);
 		return;
 	}
 
-    if(removeImmediately) {
-        browserAction.stackPop(tab.id);
-        browserAction.show(null, {"id": tab.id});
-        page.clearCredentials(tab.id);
-        return;
-    }
+	if(removeImmediately) {
+		browserAction.stackPop(tab.id);
+		browserAction.show(null, {"id": tab.id});
+		page.clearCredentials(tab.id);
+		return;
+	}
 };
 
 browserAction.setRememberPopup = function(tabId, username, password, url, usernameExists, credentialsList) {
 	var id = tabId || page.currentTabId;
 
 	var stackData = {
-        visibleForMilliSeconds: 7500,
+		visibleForMilliSeconds: 7500,
 		level: 10,
 		intervalIcon: {
 			index: 0,
