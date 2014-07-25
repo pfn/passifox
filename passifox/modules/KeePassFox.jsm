@@ -14,8 +14,15 @@ let EXPORTED_SYMBOLS = [ "KeePassFox" ];
 function KeePassFox() {
     XPCOMUtils.defineLazyGetter(this, "_mozStorage", function() {
         let contract = "@mozilla.org/login-manager/storage/mozStorage;1";
-        let storage = Cc[contract].createInstance(Ci.nsILoginManagerStorage);
-        storage.init();
+        let storage;
+        if (typeof Cc[contract] == 'undefined') {
+            contract = "@mozilla.org/login-manager/storage/json;1";
+            storage = Cc[contract].createInstance(Ci.nsILoginManagerStorage);
+            storage.initialize();
+        } else {
+            storage = Cc[contract].createInstance(Ci.nsILoginManagerStorage);
+            storage.init();
+        }
         return storage;
     });
     XPCOMUtils.defineLazyGetter(this, "_crypto", function() {
