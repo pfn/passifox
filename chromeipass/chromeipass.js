@@ -789,7 +789,7 @@ cipDefine.prepareStep3 = function() {
 
 cipFields = {}
 
-cipFields.inputQueryPattern = "input[type='text'], input[type='email'], input[type='password'], input:not([type])";
+cipFields.inputQueryPattern = "input[type='text']:not(.no-chromeipass), input[type='email']:not(.no-chromeipass), input[type='password']:not(.no-chromeipass), input:not([type]):not(.no-chromeipass)";
 // unique number as new IDs for input fields
 cipFields.uniqueNumber = 342845638;
 // objects with combination of username + password fields
