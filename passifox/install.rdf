@@ -2,11 +2,11 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>passifox@hanhuy.com</em:id>
-    <em:version>1.1.11</em:version>
+    <em:version>1.1.12</em:version>
     <em:type>2</em:type>
     <!-- firefox -->
     <em:targetApplication>
-      <Description em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}" em:minVersion="4.0b1" em:maxVersion="32.*"/>
+      <Description em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}" em:minVersion="4.0b1" em:maxVersion="34.*"/>
     </em:targetApplication>
     <!-- Front End MetaData -->
     <em:name>PassIFox</em:name>
