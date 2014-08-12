@@ -1405,6 +1405,7 @@ cip.setValue = function(field, value) {
 	}
 	else {
 		field.val(value);
+		field.trigger('input');
 	}
 }
 
