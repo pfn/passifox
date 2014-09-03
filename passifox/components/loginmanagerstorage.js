@@ -69,6 +69,7 @@ LoginManagerStorage.prototype = {
     },
 
     init: function _init() { }, // don't need to init
+    initialize: function _init() { }, // don't need to init
     // ignored, no implementation
     initWithFile: function _initWithFile(inFile, outFile) { },
 
