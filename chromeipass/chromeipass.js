@@ -815,18 +815,9 @@ cipFields.setUniqueId = function(field) {
 }
 
 cipFields.prepareId = function(id) {
-	id = id.replace(":", "\\:")
-		.replace("#", "\\#")
-		.replace(".", "\\.")
-		.replace(",", "\\,")
-		.replace("[", "\\[")
-		.replace("]", "\\]")
-		.replace("(", "\\(")
-		.replace(")", "\\)")
-		.replace("'", "\\'")
-		.replace(" ", "\\ ")
-		.replace("\"", "\\\"");
-	return id;
+	return id.replace(/[:#.,\[\]\(\)' "]/g, function(m) {
+												return "\\"+m
+											});
 }
 
 cipFields.getAllFields = function() {
