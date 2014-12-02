@@ -29,19 +29,25 @@ function initSettings() {
 }
 
 function initBlockState() {
-	$('#page-blocked #unblock-button').click(function() {
-		var global = chrome.extension.getBackgroundPage();
-		chrome.tabs.sendMessage(global.page.currentTabId, {
-			action: "unblock_page"
+	$('#page-blocked').load('_blocked_page.html', null, function() {
+		$('#page-blocked #unblock-button').click(function() {
+			var global = chrome.extension.getBackgroundPage();
+			chrome.tabs.sendMessage(global.page.currentTabId, {
+				action: "unblock_page"
+			});
+			$('#page-blocked').hide();
 		});
 	});
 
+	
 	var global = chrome.extension.getBackgroundPage();
 	chrome.tabs.sendMessage(global.page.currentTabId, {
 		action: "get_block_status"
 	}, function(response) {
 		if (response) {
 			$('#page-blocked').show();
+		} else {
+			$('#page-blocked').hide();
 		}
 	});
 }

@@ -72,3 +72,22 @@ body {
 #update-available a:active {
 	text-decoration: none;
 }
+#status {
+	position: relative;
+	overflow: auto;
+}
+#page-blocked {
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 10;
+	background-color: rgba(0, 0, 0, 0.5);
+	text-align: center;
+}
+#block-message {
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background-color: #eee;
+}

@@ -18,21 +18,17 @@
 				<a target="_blank" href="https://github.com/pfn/keepasshttp#installation">Please download the latest version from GitHub</a>.
 			</div>
 		</div>
-
-		<div class="credentials">
-			<p>
-				Select the login information you would like to get entered into the page:
-			</p>
-			<ul id="login-list"></ul>
-		</div>
-
-		<div id="page-blocked" style="display: none">
-			<p>
-				This page is blocked!
-			</p>
-			<div style="text-align: center">
-				<button id="unblock-button" class="b2c-btn">Unblock</button>
+	
+		<div id="status">
+			<div class="credentials">
+				<p>
+					Select the login information you would like to get entered into the page:
+				</p>
+				<ul id="login-list"></ul>
 			</div>
+
+			<!-- Dynamically populated -->
+			<div id="page-blocked"></div>
 		</div>
 	</body>
 </html>

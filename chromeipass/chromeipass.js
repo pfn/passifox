@@ -1263,15 +1263,15 @@ cip.init = function() {
 		chrome.extension.sendMessage({
 			"action": "get_settings",
 		}, function(response) {
-			console.debug(response.data);
+			//console.debug(response.data); // DEBUG
 			cip.settings = response.data;
 			var blocked = cip.getBlockStatus();
 
-			if (blocked) {
+			/*if (blocked) {
 				console.debug("Disabled for this page.");
 			} else {
 				console.debug("Enabled for this page.");
-			}
+			}*/// DEBUG
 
 			cipHooks.init();
 			cip.initCredentialFields();
