@@ -458,6 +458,9 @@ cipPassword.createIcon = function(field) {
 	var z;
 	var c = 0;
 	while($zIndexField.length > 0) {
+		if ($zIndexField.is(document)) {
+			break;
+		}
 		z = $zIndexField.css("z-index");
 		if(!isNaN(z) && parseInt(z) > $zIndex) {
 			$zIndex = parseInt(z);
