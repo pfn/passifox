@@ -349,14 +349,14 @@ cipPassword.createIcon = function(field) {
 	var z;
 	var c = 0;
 	while($zIndexField.length > 0) {
+		if(c > 100 || $zIndexField[0].nodeName == "#document") {
+			break;
+		}
 		z = $zIndexField.css("z-index");
 		if(!isNaN(z) && parseInt(z) > $zIndex) {
 			$zIndex = parseInt(z);
 		}
 		$zIndexField = $zIndexField.parent();
-		if(c > 100) {
-			break;
-		}
 		c++;
 	}
 
