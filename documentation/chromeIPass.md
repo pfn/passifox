@@ -250,9 +250,9 @@ This feature is activated by default and can be disabled in settings.
 You can fill-in additional information by defining string fields.
 
 1. Choose your own credential fields for the page like explained in [section 3.4](#34-choose-own-credential-fields-for-a-page). You can also skip both, username and password.
-2. Now you can choose additional fields which are named _String Fields_. You can even choose dropdown elements.  
+2. Now you can choose additional fields which are named _String Fields_. You can even choose dropdown elements.
 The order you choose these string fields is important for the fill-in method!
-3. Activate the _String Fields_ setting in KeePassHttp like explained in the [KeePassHttp-documentation (setting no. 11)](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options).  
+3. Activate the _String Fields_ setting in KeePassHttp like explained in the [KeePassHttp-documentation (setting no. 11)](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options).
 The alphanumeric ordered entries are mapped with the order you chose the String Fields.
 
 Dropdown elements are filled in by the visible value. If you open a dropdown element you can see all available values. This visible value has to match with one String Field value from KeePass.
@@ -263,7 +263,7 @@ You don't need to configure chromeIPass.<br />
 If chromeIPass does not have an authenticated connection to KeePassHttp it displays a red cross in the browser icon and requests you to establish a new connection.<br />
 [<img src="https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-connect.png" alt="popup-connect" width="200px" />](https://raw.github.com/pfn/passifox/master/documentation/images/cip-popup-connect.png)
 
-For further configurations you can open the settings which are accessible via the settings button in the popups, the context-menu of the browser icon (entry is called _Options_) or the tab _chrome://extensions_ on the chromeIPass-entry there is also a link called _Options_. 
+For further configurations you can open the settings which are accessible via the settings button in the popups, the context-menu of the browser icon (entry is called _Options_) or the tab _chrome://extensions_ on the chromeIPass-entry there is also a link called _Options_.
 
 ### 4.1 Settings: General
 
@@ -300,7 +300,7 @@ If chromeIPass detects wrong credential fields choose them by yourself with the 
 
 If chomeIPass always asks to unlock the database and this is annoying you, you can simply disable this feature in the [options of KeePassHttp](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options).
 
-__It's always a good idea to have a look into the options of KeePassHttp. Maybe your feature request or problem is still implemented and can be solved by changing the options.__  
+__It's always a good idea to have a look into the options of KeePassHttp. Maybe your feature request or problem is still implemented and can be solved by changing the options.__
 [Go to the illustrated readme for the KeePassHttp options](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options)
 
 #### Support multiple URLs for one username + password combination
@@ -353,7 +353,7 @@ You can also focus the visible username field or password field and press __Ctrl
 
 ## 8. Troubleshooting
 
-__First:__ Did you read the section [5. Tips and tricks](#5-tips-and-tricks)?  
+__First:__ Did you read the section [5. Tips and tricks](#5-tips-and-tricks)?
 __Second:__ Did you checked your [KeePassHttp options](https://github.com/pfn/keepasshttp#settings-in-keepasshttp-options)? Maybe you only have to change the options...
 
 If you [open an issue](https://github.com/pfn/passifox/issues/) always give us at least the following information:

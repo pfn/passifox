@@ -1,12 +1,12 @@
 /*
  * aes.js: implements AES - Advanced Encryption Standard
  * from the SlowAES project, http://code.google.com/p/slowaes/
- * 
+ *
  * Copyright (c) 2008 	Josh Davis ( http://www.josh-davis.org ),
  *						Mark Percival ( http://mpercival.com ),
  *
  * Ported from C code written by Laurent Haan ( http://www.progressive-coding.com )
- * 
+ *
  * Licensed under the Apache License, Version 2.0
  * http://www.apache.org/licenses/
  */
@@ -22,7 +22,7 @@ var slowAES = {
 			SIZE_192:24,
 			SIZE_256:32
 		},
-		
+
 		// Rijndael S-box
 		sbox:[
 		0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
@@ -41,7 +41,7 @@ var slowAES = {
 		0x70, 0x3e, 0xb5, 0x66, 0x48, 0x03, 0xf6, 0x0e, 0x61, 0x35, 0x57, 0xb9, 0x86, 0xc1, 0x1d, 0x9e,
 		0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
 		0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16 ],
-		
+
 		// Rijndael Inverted S-box
 		rsbox:
 		[ 0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb
@@ -60,7 +60,7 @@ var slowAES = {
 		, 0x60, 0x51, 0x7f, 0xa9, 0x19, 0xb5, 0x4a, 0x0d, 0x2d, 0xe5, 0x7a, 0x9f, 0x93, 0xc9, 0x9c, 0xef
 		, 0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61
 		, 0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d ],
-		
+
 		/* rotate the word eight bits to the left */
 		rotate:function(word)
 		{
@@ -68,10 +68,10 @@ var slowAES = {
 			for (var i = 0; i < 3; i++)
 				word[i] = word[i+1];
 			word[3] = c;
-			
+
 			return word;
 		},
-		
+
 		// Rijndael Rcon
 		Rcon:[
 		0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8,
@@ -244,7 +244,7 @@ var slowAES = {
 		0xd7, 0xd9, 0xcb, 0xc5, 0xef, 0xe1, 0xf3, 0xfd, 0xa7, 0xa9, 0xbb, 0xb5,
 		0x9f, 0x91, 0x83, 0x8d
 		],
-		
+
 		// Key Schedule Core
 		core:function(word,iteration)
 		{
@@ -257,7 +257,7 @@ var slowAES = {
 			word[0] = word[0]^this.Rcon[iteration];
 			return word;
 		},
-		
+
 		/* Rijndael's key expansion
 		 * expands an 128,192,256 key into an 176,208,240 bytes key
 		 *
@@ -267,38 +267,38 @@ var slowAES = {
 		expandKey:function(key,size)
 		{
 			var expandedKeySize = (16*(this.numberOfRounds(size)+1));
-			
+
 			/* current expanded keySize, in bytes */
 			var currentSize = 0;
 			var rconIteration = 1;
 			var t = [];   // temporary 4-byte variable
-			
+
 			var expandedKey = [];
 			for(var i = 0;i < expandedKeySize;i++)
 				expandedKey[i] = 0;
-		
+
 			/* set the 16,24,32 bytes of the expanded key to the input key */
 			for (var j = 0; j < size; j++)
 				expandedKey[j] = key[j];
 			currentSize += size;
-		
+
 			while (currentSize < expandedKeySize)
 			{
 				/* assign the previous 4 bytes to the temporary value t */
 				for (var k = 0; k < 4; k++)
 					t[k] = expandedKey[(currentSize - 4) + k];
-		
+
 				/* every 16,24,32 bytes we apply the core schedule to t
 				 * and increment rconIteration afterwards
 				 */
 				if(currentSize % size == 0)
 					t = this.core(t, rconIteration++);
-		
+
 				/* For 256-bit keys, we add an extra sbox to the calculation */
 				if(size == this.keySize.SIZE_256 && ((currentSize % size) == 16))
 					for(var l = 0; l < 4; l++)
 						t[l] = this.sbox[t[l]];
-		
+
 				/* We XOR t with the four-byte block 16,24,32 bytes before the new expanded key.
 				 * This becomes the next four bytes in the expanded key.
 				 */
@@ -309,7 +309,7 @@ var slowAES = {
 			}
 			return expandedKey;
 		},
-		
+
 		// Adds (XORs) the round key to the state
 		addRoundKey:function(state,roundKey)
 		{
@@ -317,7 +317,7 @@ var slowAES = {
 				state[i] ^= roundKey[i];
 			return state;
 		},
-		
+
 		// Creates a round key from the given expanded key and the
 		// position within the expanded key.
 		createRoundKey:function(expandedKey,roundKeyPointer)
@@ -328,7 +328,7 @@ var slowAES = {
 					roundKey[j*4+i] = expandedKey[roundKeyPointer + i*4 + j];
 			return roundKey;
 		},
-		
+
 		/* substitute all the values from the state with the value in the SBox
 		 * using the state value as index for the SBox
 		 */
@@ -338,7 +338,7 @@ var slowAES = {
 				state[i] = isInv?this.rsbox[state[i]]:this.sbox[state[i]];
 			return state;
 		},
-		
+
 		/* iterate over the 4 rows and call shiftRow() with that row */
 		shiftRows:function(state,isInv)
 		{
@@ -346,7 +346,7 @@ var slowAES = {
 				state = this.shiftRow(state,i*4, i,isInv);
 			return state;
 		},
-		
+
 		/* each iteration shifts the row to the left by 1 */
 		shiftRow:function(state,statePointer,nbr,isInv)
 		{
@@ -390,7 +390,7 @@ var slowAES = {
 			}
 			return p;
 		},
-		
+
 		// galois multipication of the 4x4 matrix
 		mixColumns:function(state,isInv)
 		{
@@ -413,7 +413,7 @@ var slowAES = {
 		// galois multipication of 1 column of the 4x4 matrix
 		mixColumn:function(column,isInv)
 		{
-			var mult = [];	
+			var mult = [];
 			if(isInv)
 				mult = [14,9,13,11];
 			else
@@ -421,7 +421,7 @@ var slowAES = {
 			var cpy = [];
 			for(var i = 0; i < 4; i++)
 				cpy[i] = column[i];
-			
+
 			column[0] = 	this.galois_multiplication(cpy[0],mult[0]) ^
 					this.galois_multiplication(cpy[3],mult[1]) ^
 					this.galois_multiplication(cpy[2],mult[2]) ^
@@ -440,7 +440,7 @@ var slowAES = {
 					this.galois_multiplication(cpy[0],mult[3]);
 			return column;
 		},
-		
+
 		// applies the 4 operations of the forward round in sequence
 		round:function(state, roundKey)
 		{
@@ -450,7 +450,7 @@ var slowAES = {
 			state = this.addRoundKey(state, roundKey);
 			return state;
 		},
-		
+
 		// applies the 4 operations of the inverse round in sequence
 		invRound:function(state,roundKey)
 		{
@@ -460,7 +460,7 @@ var slowAES = {
 			state = this.mixColumns(state,true);
 			return state;
 		},
-		
+
 		/*
 		 * Perform the initial operations, the standard round, and the final operations
 		 * of the forward aes, creating a round key for each round
@@ -475,7 +475,7 @@ var slowAES = {
 			state = this.addRoundKey(state, this.createRoundKey(expandedKey,16*nbrRounds));
 			return state;
 		},
-		
+
 		/*
 		 * Perform the initial operations, the standard round, and the final operations
 		 * of the inverse aes, creating a round key for each round
@@ -511,7 +511,7 @@ var slowAES = {
 			}
 			return nbrRounds;
 		},
-		
+
 		// encrypts a 128 bit input block against the given key of size specified
 		encrypt:function(input,key,size)
 		{
@@ -528,7 +528,7 @@ var slowAES = {
 			for (var i = 0; i < 4; i++) /* iterate over the columns */
 				for (var j = 0; j < 4; j++) /* iterate over the rows */
 					block[(i+(j*4))] = input[(i*4)+j];
-		
+
 			/* expand the key into an 176, 208, 240 bytes key */
 			var expandedKey = this.expandKey(key, size); /* the expanded key */
 			/* encrypt the block using the expandedKey */
@@ -538,7 +538,7 @@ var slowAES = {
 					output[(k*4)+l] = block[(k+(l*4))];
 			return output;
 		},
-		
+
 		// decrypts a 128 bit input block against the given key of size specified
 		decrypt:function(input, key, size)
 		{
@@ -568,7 +568,7 @@ var slowAES = {
 	/*
 	 * END AES SECTION
 	 */
-	 
+
 	/*
 	 * START MODE OF OPERATION SECTION
 	 */
@@ -578,16 +578,16 @@ var slowAES = {
 		CFB:1,
 		CBC:2
 	},
-	
+
 	// get the next block of 16 bytes (aes operates on 128bits)
 	getNextBlock: function(bytesIn,start,end,mode)
 	{
 		if(end - start > 16)
 			end = start + 16;
-		
+
 		return bytesIn.slice(start, end);
 	},
-	
+
 	/*
 	 * Mode of Operation Encryption
 	 * bytesIn - Input String as array of bytes
@@ -666,7 +666,7 @@ var slowAES = {
 		}
 		return cipherOut;
 	},
-	
+
 	/*
 	 * Mode of Operation Decryption
 	 * cipherIn - Encrypted String as array of bytes

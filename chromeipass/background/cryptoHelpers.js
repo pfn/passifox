@@ -1,12 +1,12 @@
 /*
  * cryptoHelpers.js: implements AES - Advanced Encryption Standard
  * from the SlowAES project, http://code.google.com/p/slowaes/
- * 
+ *
  * Copyright (c) 2008 	Josh Davis ( http://www.josh-davis.org ),
  *						Mark Percival ( http://mpercival.com ),
  *						Johan Sundstrom ( http://ecmanaut.blogspot.com ),
  *			 			John Resig ( http://ejohn.org )
- * 
+ *
  * Licensed under the Apache License, Version 2.0
  * http://www.apache.org/licenses/
  */
@@ -18,14 +18,14 @@ var cryptoHelpers = {
 		try{return unescape(encodeURIComponent(s));}
 		catch(e){throw 'error during utf8 encoding: cryptoHelpers.encode_utf8.';}
 	},
-	
+
 	// decodes a UTF8 string back to unicode
 	decode_utf8:function(s)
 	{
 		try{return decodeURIComponent(escape(s));}
 		catch(e){throw('error during utf8 decoding: cryptoHelpers.decode_utf8.');}
 	},
-	
+
 	//convert a number array to a hex string
 	toHex:function()
 	{
@@ -39,7 +39,7 @@ var cryptoHelpers = {
 			ret += (array[i] < 16 ? '0' : '') + array[i].toString(16);
 		return ret.toLowerCase();
 	},
-	
+
 	//convert a hex string to a number array
 	toNumbers:function(s)
 	{
@@ -49,7 +49,7 @@ var cryptoHelpers = {
 		});
 		return ret;
 	},
-	
+
 	// get a random number in the range [min,max]
 	getRandom:function(min,max)
 	{
@@ -59,7 +59,7 @@ var cryptoHelpers = {
 			max = 1;
 		return Math.floor(Math.random()*(max+1)) + min;
 	},
-	
+
 	generateSharedKey:function(len)
 	{
 		if(len === null)
@@ -69,7 +69,7 @@ var cryptoHelpers = {
 			key.push(this.getRandom(0,255));
 		return key;
 	},
-	
+
 	generatePrivateKey:function(s,size)
 	{
 		var sha = jsHash.sha2.arr_sha256(s);
@@ -95,7 +95,7 @@ var cryptoHelpers = {
 				}
 		return s;
 	},
-	
+
 	base64: {
 		// Takes a Nx16x1 byte array and converts it to Base64
 		chars: [
@@ -109,7 +109,7 @@ var cryptoHelpers = {
 		'4', '5', '6', '7', '8', '9', '+', '/',
 		'=', // for decoding purposes
 		],
-	
+
 		encode_line: function(flatArr){
 			var b64 = '';
 
@@ -129,7 +129,7 @@ var cryptoHelpers = {
 			}
 			return b64;
 		},
-	
+
 		encode: function(flatArr)
 		{
 			var b64 = this.encode_line(flatArr);
@@ -141,7 +141,7 @@ var cryptoHelpers = {
 			}
 			return broken_b64;
 		},
-	
+
 	    decode: function(string)
 		{
 			string = string.replace(/[\r\n\t ]+/g, '') + '===='; // drop all whitespaces and pad with '=' (end of b64 marker)
@@ -156,7 +156,7 @@ var cryptoHelpers = {
 				c[1] = this.chars.indexOf(string.charAt(i + 1));
 				c[2] = this.chars.indexOf(string.charAt(i + 2));
 				c[3] = this.chars.indexOf(string.charAt(i + 3));
-	
+
 				if(
 					(c[0] < 0) || // char1 is wrong
 					(c[1] < 0) || (c[1] == 64) || // char2 is wrong
@@ -165,7 +165,7 @@ var cryptoHelpers = {
 				){
 					throw 'error during base64 decoding at pos '+i+': cryptoHelpers.base64.decode.';
 				}
-	
+
 				flatArr.push((c[0] << 2) | (c[1] >> 4));
 				if(c[2] >= 0 && c[2] < 64){
 					flatArr.push(((c[1] & 15) << 4) | (c[2] >> 2));
@@ -175,7 +175,7 @@ var cryptoHelpers = {
 				}
 			}
 		},
-		
+
 	},
-	
+
 };
