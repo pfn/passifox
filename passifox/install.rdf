@@ -2,7 +2,7 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>passifox@hanhuy.com</em:id>
-    <em:version>1.1.12</em:version>
+    <em:version>1.1.13</em:version>
     <em:type>2</em:type>
     <!-- firefox -->
     <em:targetApplication>

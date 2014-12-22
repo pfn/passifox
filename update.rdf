@@ -6,14 +6,14 @@
     <r:Seq>
       <r:li>
         <r:Description>
-          <version>1.1.12</version>
+          <version>1.1.13</version>
           <targetApplication>
             <r:Description>
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
               <minVersion>4.0b1</minVersion>
               <maxVersion>32.*</maxVersion>
               <updateLink>https://passifox.appspot.com/passifox.xpi</updateLink>
-              <updateHash>sha1:ec931f1f8c7d54be5666cda93512bb2ce0b73eb5</updateHash>
+              <updateHash>sha1:e97802817cee126ef06ac51086c2a592a38aed45</updateHash>
             </r:Description>
           </targetApplication>
         </r:Description>
