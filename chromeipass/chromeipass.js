@@ -61,10 +61,10 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 // ctrl + shift + u = fill username + password
 window.addEventListener("keydown", function(e) {
 	if (e.ctrlKey && e.shiftKey) {
-		if (e.keyCode == 112) { // P
+		if (e.keyCode == 80) { // P
 			e.preventDefault();
 			cip.fillInFromActiveElementPassOnly(false);
-		} else if (e.keyCode == 117) { // U
+		} else if (e.keyCode == 85) { // U
 			e.preventDefault();
 			cip.fillInFromActiveElement(false);
 		}
