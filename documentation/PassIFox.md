@@ -15,7 +15,7 @@ The XPI can be installed using the link: https://passifox.appspot.com/passifox.x
 
 ### Installation
 
-[Download PassIFox](https://passifox.appspot.com/passifox.xpi) and drag-n-drop it into your Firefox. The installation process should start. 
+[Download PassIFox](https://passifox.appspot.com/passifox.xpi) and drag-n-drop it into your Firefox. The installation process should start.
 
 ### Configuration
 

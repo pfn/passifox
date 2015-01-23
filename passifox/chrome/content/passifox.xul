@@ -45,7 +45,6 @@
                 $('kpf-insert-user').hidden = !textinput;
                 $('kpf-context-sep').hidden = !textinput;
 
-                let node = document.popupNode;
                 if (node instanceof Ci.nsIDOMHTMLInputElement)
                     password = node.type.toLowerCase() == "password";
                 if (password && !node.form)
@@ -85,13 +84,13 @@
                     p.value = login['Password'];
             }
             function getLogin(both) {
-                let node = document.popupNode;
+                let node = gContextMenu.target;
                 let url = gBrowser.currentURI.spec;
                 let action = node.form ? node.form.action : null;
                 let logins = kpf.wrappedJSObject._kpf.get_logins(
                         url, action, true);
                 if (logins.length > 0) {
-                    let node = document.popupNode;
+                    let node = gContextMenu.target;
                     let u,p;
                     if (!both) {
                         p = node;

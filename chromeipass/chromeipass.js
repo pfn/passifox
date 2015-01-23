@@ -458,7 +458,7 @@ cipPassword.createIcon = function(field) {
 	var z;
 	var c = 0;
 	while($zIndexField.length > 0) {
-		if ($zIndexField.is(document)) {
+		if(c > 100 || $zIndexField[0].nodeName == "#document") {
 			break;
 		}
 		z = $zIndexField.css("z-index");
@@ -466,9 +466,6 @@ cipPassword.createIcon = function(field) {
 			$zIndex = parseInt(z);
 		}
 		$zIndexField = $zIndexField.parent();
-		if(c > 100) {
-			break;
-		}
 		c++;
 	}
 
@@ -901,7 +898,7 @@ cipDefine.prepareStep3 = function() {
 
 cipFields = {}
 
-cipFields.inputQueryPattern = "input[type='text'], input[type='email'], input[type='password'], input:not([type])";
+cipFields.inputQueryPattern = "input[type='text'], input[type='email'], input[type='password'], input[type='tel'], input:not([type])";
 // unique number as new IDs for input fields
 cipFields.uniqueNumber = 342845638;
 // objects with combination of username + password fields
@@ -927,18 +924,9 @@ cipFields.setUniqueId = function(field) {
 }
 
 cipFields.prepareId = function(id) {
-	id = id.replace(":", "\\:")
-		.replace("#", "\\#")
-		.replace(".", "\\.")
-		.replace(",", "\\,")
-		.replace("[", "\\[")
-		.replace("]", "\\]")
-		.replace("(", "\\(")
-		.replace(")", "\\)")
-		.replace("'", "\\'")
-		.replace(" ", "\\ ")
-		.replace("\"", "\\\"");
-	return id;
+	return id.replace(/[:#.,\[\]\(\)' "]/g, function(m) {
+												return "\\"+m
+											});
 }
 
 cipFields.getAllFields = function() {
@@ -1594,6 +1582,7 @@ cip.setValue = function(field, value) {
 	}
 	else {
 		field.val(value);
+		field.trigger('input');
 	}
 }
 
