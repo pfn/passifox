@@ -64,6 +64,7 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 			cip.init();
 			if (cip.blocked) {
 				cip.blocked = false;
+				// Replay the jQuery method calls to edit the page fields.
 				cipHooks.replay();
 			}
 		}
@@ -122,18 +123,13 @@ cipHooks.initHooks = function() {
 	cipHooks.addHook("focus", cipHooks.onInvoke);
 }
 
-cipHooks.onVal = function() {
-	return !cip.blocked;
-}
-
-cipHooks.onAppend = function() {
-	return !cip.blocked;
-}
-
-cipHooks.onShow = function() {
-	return !cip.blocked;
-}
-
+/**
+ * Used when jQuery method is called. If we are on a blocked page then
+ * put the method call into a queue to be run if the user unblocks the
+ * page.
+ * @return {boolean} - Whether or not the action should be run on the
+ *   page.
+ */
 cipHooks.onInvoke = function() {
 	if (cip.blocked) {
 		var args = Array.prototype.slice.call(arguments);
@@ -160,11 +156,15 @@ cipHooks.replay = function() {
 }
 
 /**
- * Replace the jQuery function given by the name with a function that will only
- * execute the original function if the wrapper returns true
- * @param	name	the name of the jQuery method to override
- * @param	wrapper	the function to check before running the jQuery method
- * @param	getter	whether or not the jQuery function should continue like normal if no arguments are passed (for getting values)
+ * Replace the jQuery function given by the name with a function that
+ * will only execute the original function if a page is not blocked.
+ * The getter argument allows methods that are only readying values
+ * to continue even on blocked pages.
+ * @param {string} name - The name of the jQuery method to override.
+ * @param {Function} wrapper - The function to check before running the
+ *   jQuery method.
+ * @param {boolean} getter - Whether or not the jQuery function should
+ *   continue like normal if no arguments are passed.
  */
 cipHooks.addHook = function(name, wrapper, getter) {
 	var original = cIPJQ.fn[name];
@@ -1270,6 +1270,8 @@ cip.init = function() {
 	});
 }
 
+// Function to check if current page is blocked per the blocked page
+// URLs in the chromeIPass settings.
 cip.getBlockStatus = function() {
 	var escapeRegExp = function (str) {
 	  // Handle escaped backslash. '\\'

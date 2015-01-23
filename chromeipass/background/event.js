@@ -67,6 +67,7 @@ event.invoke = function(handler, callback, senderTabId, args, secondTime) {
 		if(!page.tabs[tab.id]) {
 			page.createTabEntry(tab.id);
 		}
+		// Store top-level page URL for access in iframes.
 		page.tabs[tab.id]["url"] = tab.url;
 
 		args = args || [];
