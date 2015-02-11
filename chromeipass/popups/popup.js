@@ -64,7 +64,6 @@ $(function() {
 			chrome.tabs.sendMessage(tab.id, {
 				action: "redetect_fields"
 			});
-			close();
 		});
 	});
 
