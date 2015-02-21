@@ -128,6 +128,40 @@
 					<br />
 					If you only want to insert the password, just press Ctrl + Shift + P.
 				</p>
+				<p>
+					<label>Blink Time:</label>
+					<div class="input-append">
+						<input type="number" id="blinkTimeout" placeholder="7500" value="7500" />
+						<button class="btn" id="blinkTimeoutButton" type="button">Save</button>
+					</div>
+					<span class="help-inline">
+						What is the maximum time (ms) the icon should blink after detecting new credentials
+						<br />
+						Default: 7500
+					</span>
+					<label>Redirect Offset:</label>
+					<div class="input-append">
+						<input type="number" id="blinkMinTimeout" placeholder="2000" value="2000" />
+						<button class="btn" id="blinkMinTimeoutButton" type="button">Save</button>
+					</div>
+					<span class="help-inline">
+						What is the minimum time (ms) the icon should blink before deactivating due to page redirects.
+						<br />
+						-1 to only use <i>Blink Time</i> ignoring Redirect Allowance (old behavior)
+						<br />
+						Default: -1, Recommended: 2000
+					</span>
+					<label>Redirect Allowance:</label>
+					<div class="input-append">
+						<input type="number" id="allowedRedirect" placeholder="1" value="1" />
+						<button class="btn" id="allowedRedirectButton" type="button">Save</button>
+					</div>
+					<span class="help-inline">
+						How many pages should the tab cycle through after the redirect offset before deactivating the icon
+						<br />
+						Default: 1
+					</span>
+				</p>
 				<hr />
 				<p>
 					<label class="checkbox">

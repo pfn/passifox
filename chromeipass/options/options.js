@@ -77,6 +77,9 @@ options.initGeneralSettings = function() {
 
 	$("#hostname").val(options.settings["hostname"]);
 	$("#port").val(options.settings["port"]);
+	$("#blinkTimeout").val(options.settings["blinkTimeout"]);
+	$("#blinkMinTimeout").val(options.settings["blinkMinTimeout"]);
+	$("#allowedRedirect").val(options.settings["allowedRedirect"]);
 
 	$("#portButton").click(function() {
 		var port = $.trim($("#port").val());
@@ -116,6 +119,47 @@ options.initGeneralSettings = function() {
 			action: 'load_settings'
 		});
 	});
+
+	$("#blinkTimeout").keyup(function(){
+		saveBlinkTimeoutSetting();
+	});
+	$("#blinkTimeoutButton").click(function(){
+		saveBlinkTimeoutSetting();
+	});
+	function saveBlinkTimeoutSetting() {
+		saveIntSetting("blinkTimeout", $("#blinkTimeout").val());
+	}
+
+	$("#blinkMinTimeout").keyup(function(){
+		saveBlinkMinTimeoutSetting();
+	});
+	$("#blinkMinTimeoutButton").click(function(){
+		saveBlinkMinTimeoutSetting();
+	});
+	function saveBlinkMinTimeoutSetting() {
+		saveIntSetting("blinkMinTimeout", $("#blinkMinTimeout").val());
+	}
+
+	$("#allowedRedirect").keyup(function(){
+		saveAllowedRedirectSetting();
+	});
+	$("#allowedRedirectButton").click(function(){
+		saveAllowedRedirectSetting();
+	});
+	function saveAllowedRedirectSetting() {
+		saveIntSetting("allowedRedirect", $("#allowedRedirect").val());
+	}
+
+	function saveIntSetting(key, value){
+		if(isNaN(value)) {
+			return;
+		}
+		options.settings[key] = value;
+		localStorage.settings = JSON.stringify(options.settings);
+		chrome.extension.sendMessage({
+			action: 'load_settings'
+		});
+	}
 };
 
 options.showKeePassHttpVersions = function(response) {

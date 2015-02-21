@@ -1,5 +1,9 @@
 var browserAction = {};
 
+var BLINK_TIMEOUT_DEFAULT = 7500;
+var BLINK_TIMEOUT_REDIRECT_THRESHOLD_TIME_DEFAULT = -1;
+var BLINK_TIMEOUT_REDIRECT_COUNT_DEFAULT = 1;
+
 browserAction.show = function(callback, tab) {
 	var data = {};
 	if(!page.tabs[tab.id] || page.tabs[tab.id].stack.length == 0) {
@@ -80,7 +84,7 @@ browserAction.showDefault = function(callback, tab) {
 	browserAction.show(null, tab);
 }
 
-browserAction.stackAdd = function(callback, tab, icon, popup, level, push, visibleForMilliSeconds, dontShow) {
+browserAction.stackAdd = function(callback, tab, icon, popup, level, push, visibleForMilliSeconds, visibleForPageUpdates, redirectOffset,  dontShow) {
 	var id = tab.id || page.currentTabId;
 
 	if(!level) {
@@ -98,6 +102,14 @@ browserAction.stackAdd = function(callback, tab, icon, popup, level, push, visib
 
 	if(visibleForMilliSeconds) {
 		stackData.visibleForMilliSeconds = visibleForMilliSeconds;
+	}
+
+	if(visibleForPageUpdates) {
+		stackData.visibleForPageUpdates = visibleForPageUpdates;
+	}
+
+	if(redirectOffset) {
+		stackData.redirectOffset = redirectOffset;
 	}
 
 	if(push) {
@@ -174,20 +186,38 @@ browserAction.removeRememberPopup = function(callback, tab, removeImmediately) {
         page.clearCredentials(tab.id);
 		return;
 	}
+	var data = page.tabs[tab.id].stack[page.tabs[tab.id].stack.length - 1];
 
-    if(removeImmediately) {
-        browserAction.stackPop(tab.id);
-        browserAction.show(null, {"id": tab.id});
-        page.clearCredentials(tab.id);
-        return;
+    if(removeImmediately || !isNaN(data.visibleForPageUpdates)) {
+		var currentMS = Date.now();
+		if( removeImmediately || (data.visibleForPageUpdates <= 0 && data.redirectOffset > 0)) {
+			browserAction.stackPop(tab.id);
+			browserAction.show(null, {"id": tab.id});
+			page.clearCredentials(tab.id);
+			return;
+		}
+		else if (!isNaN(data.visibleForPageUpdates) && data.redirectOffset > 0 && currentMS >= data.redirectOffset) {
+			data.visibleForPageUpdates = data.visibleForPageUpdates - 1;
+		}
     }
 };
 
 browserAction.setRememberPopup = function(tabId, username, password, url, usernameExists, credentialsList) {
+	var settings = typeof(localStorage.settings)=='undefined' ? {} : JSON.parse(localStorage.settings);
+
 	var id = tabId || page.currentTabId;
 
+	var timeoutMinMillis = parseInt(getValueOrDefault(settings, "blinkMinTimeout", BLINK_TIMEOUT_REDIRECT_THRESHOLD_TIME_DEFAULT, 0)) ;
+	if (timeoutMinMillis > 0) {
+		timeoutMinMillis += Date.now();
+	}
+	var blinkTimeout = getValueOrDefault(settings, "blinkTimeout", BLINK_TIMEOUT_DEFAULT, 0);
+	var pageUpdateAllowance = getValueOrDefault(settings, "allowedRedirect", BLINK_TIMEOUT_REDIRECT_COUNT_DEFAULT, 0);
+
 	var stackData = {
-        visibleForMilliSeconds: 7500,
+        visibleForMilliSeconds: blinkTimeout,
+		visibleForPageUpdates: pageUpdateAllowance,
+		redirectOffset: timeoutMinMillis,
 		level: 10,
 		intervalIcon: {
 			index: 0,
@@ -210,6 +240,16 @@ browserAction.setRememberPopup = function(tabId, username, password, url, userna
 	};
 
 	browserAction.show(null, {"id": id});
+}
+
+function getValueOrDefault(settings, key, defaultVal, min) {
+	try {
+		var val = settings[key];
+		if (isNaN(val) || val < min) {
+			val = defaultVal;
+		}
+		return val;
+	} catch(e) { return defaultVal; }
 }
 
 browserAction.generateIconName = function(iconType, icon) {
