@@ -330,7 +330,7 @@ This event checks whether the submitted username and password have changed and s
 
 But there exist several problems which we currently cannot overcome and which lead to not recognize the changes:
 
-1. If the password field is cleared by some JavaScript code which hashes the value for example, chromeIPass can no longer access the value of the password and therefor no remember dialog is shown.
+1. If the password field is cleared by some JavaScript code which hashes the value for example, chromeIPass can no longer access the value of the password and therefore no remember dialog is shown.
 2. If there are page internal submit events registered on the form which will be triggered before our submit-request (for example: ajax calls), our request is possibly not triggered and no remember dialog will be shown.
 
 Another problem is that chromeIPass cannot clearly differentiate between a successful and failed login attempt.<br />
