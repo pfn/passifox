@@ -132,9 +132,9 @@ __Show Password Generator Icons__ restarts the detection of _visible_ password f
 
 chromeIPass supports 2 page-wide shortcuts:
 
-__Ctrl+Shift+U__ is the shortcut for __Fill User + Pass__ of the context-menu which is described in [3.1.3](#313-context-menu).
+__Ctrl+Shift+F6__ is the shortcut for __Fill User + Pass__ of the context-menu which is described in [3.1.3](#313-context-menu).
 
-__Ctrl+Shift+P__ is the shortcut for __Fill Pass Only__ of the context-menu which is also described in [3.1.3](#313-context-menu).
+__Ctrl+Shift+F1__ is the shortcut for __Fill Pass Only__ of the context-menu which is also described in [3.1.3](#313-context-menu).
 
 
 ### 3.2 Password generator
