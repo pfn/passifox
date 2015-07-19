@@ -203,6 +203,11 @@ options.initConnectedDatabases = function() {
 	else {
 		$("#tab-connected-databases table tbody:first tr.empty:first").show();
 	}
+	$("#connect-button").click(function() {
+		chrome.extension.sendMessage({
+			action: "associate"
+		});
+	});
 }
 
 options.initSpecifiedCredentialFields = function() {
