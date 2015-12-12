@@ -26,3 +26,8 @@ If you [open an issue](https://github.com/pfn/passifox/issues/) always give us a
 2. KeePassHttp version
 3. KeePass version
 4. Pages on which the error occur
+
+PassIFox & ChromeIPass Copyright (C) 2010-2015 Perry Nguyen  
+This program comes with ABSOLUTELY NO WARRANTY  
+This is free software, and you are welcome to redistribute it under certain conditions.  
+See LICENSE.md for details.
