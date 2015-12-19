@@ -248,7 +248,7 @@ KeePassFox.prototype = {
     },
     _showNotification: function(m, buttons, id) {
         // check based on ID if user has allowed this notification to be shown
-        if (kpf._myNotifyPrefs.getBoolPref(id)) {
+        if (this._myNotifyPrefs.getBoolPref(id) == true) {
             let win     = Services.wm.getMostRecentWindow("navigator:browser");
             if (id) {
                 let notif = win.document.getElementById(id);
@@ -260,7 +260,7 @@ KeePassFox.prototype = {
             let n       = box.appendNotification(m, null,
                     "chrome://passifox/skin/keepass.png", 3, buttons);
             // let the notification show for configured amout of seconds
-            n.timeout = Date.now() + kpf._myNotifyPrefs.getIntPref(timeout) * 1000;
+            n.timeout = Date.now() + this._myNotifyPrefs.getIntPref("timeout") * 1000;
             if (id)
                 n.setAttribute("id", id);
             return n;
