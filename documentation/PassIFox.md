@@ -19,8 +19,9 @@ The XPI can be installed using the link: https://passifox.appspot.com/passifox.x
 
 ### Configuration
 
-There is no explicit configuration necessary. PassIFox and KeePassHttp
-will communicate with each other on http://localhost:19455/
+There is no explicit configuration necessary. Only `Remember passwords for
+sites` in Firefox under Preferences > Security has to be enabled. PassIFox
+and KeePassHttp will communicate with each other on http://localhost:19455/
 
 When a login form is discovered for the first time, PassIFox will
 initialize itself and request an "Association" with KeePass (KeePassHttp).
