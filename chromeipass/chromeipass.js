@@ -1056,11 +1056,6 @@ cipFields.getPasswordField = function(usernameId, checkDisabled) {
 
 cipFields.prepareCombinations = function(combinations) {
 	for(var i = 0; i < combinations.length; i++) {
-		// disable autocomplete for username field
-		if(_f(combinations[i].username)) {
-			_f(combinations[i].username).attr("autocomplete", "off");
-		}
-
 		var pwField = _f(combinations[i].password);
 		// needed for auto-complete: don't overwrite manually filled-in password field
 		if(pwField && !pwField.data("cipFields-onChange")) {
