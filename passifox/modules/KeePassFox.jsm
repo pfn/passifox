@@ -31,6 +31,7 @@ function KeePassFox() {
 
     this._prefBranch = Services.prefs.getBranch("signon.");
     this._myPrefs = Services.prefs.getBranch("extensions.passifox.");
+    this._myNotifyPrefs = Services.prefs.getBranch("extensions.passifox.notification.");
     let kpf = this;
     this._observer = {
         QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver,
@@ -246,21 +247,24 @@ KeePassFox.prototype = {
         return l.length > 0 ? [l[0].username, l[0].password] : null;
     },
     _showNotification: function(m, buttons, id) {
-        let win     = Services.wm.getMostRecentWindow("navigator:browser");
-        if (id) {
-            let notif = win.document.getElementById(id);
-            if (notif)
-                return notif;
+        // check based on ID if user has allowed this notification to be shown
+        if (this._myNotifyPrefs.getBoolPref(id) == true) {
+            let win     = Services.wm.getMostRecentWindow("navigator:browser");
+            if (id) {
+                let notif = win.document.getElementById(id);
+                if (notif)
+                    return notif;
+            }
+            let browser = win.gBrowser;
+            let box     = browser.getNotificationBox(browser.selectedBrowser);
+            let n       = box.appendNotification(m, null,
+                    "chrome://passifox/skin/keepass.png", 3, buttons);
+            // let the notification show for configured amout of seconds
+            n.timeout = Date.now() + this._myNotifyPrefs.getIntPref("timeout") * 1000;
+            if (id)
+                n.setAttribute("id", id);
+            return n;
         }
-        let browser = win.gBrowser;
-        let box     = browser.getNotificationBox(browser.selectedBrowser);
-        let n       = box.appendNotification(m, null,
-                "chrome://passifox/skin/keepass.png", 3, buttons);
-        // let the notification show for 30 seconds
-        n.timeout = Date.now() + 30 * 1000;
-        if (id)
-            n.setAttribute("id", id);
-        return n;
     },
     _test_associate: function() {
         if (this._associated)
