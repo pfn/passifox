@@ -67,6 +67,8 @@ window.addEventListener("keydown", function(e) {
 		} else if (e.keyCode == 85) { // U
 			e.preventDefault();
 			cip.fillInFromActiveElement(false);
+			var field =_f(cipFields.combinations[0].username);
+			cipAutocomplete.init(field);
 		}
 	}
 }, false);
@@ -105,6 +107,8 @@ cipAutocomplete.init = function(field) {
 		.click(cipAutocomplete.onClick)
 		.blur(cipAutocomplete.onBlur)
 		.focus(cipAutocomplete.onFocus);
+		
+	field.click();
 }
 
 cipAutocomplete.onClick = function() {

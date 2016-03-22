@@ -84,7 +84,8 @@ event.invoke = function(handler, callback, senderTabId, args, secondTime) {
 
 
 event.onShowAlert = function(callback, tab, message) {
-	alert(message);
+	if( page.settings.supressAlerts ){ console.log(message); }
+	else { alert(message); }
 }
 
 event.onLoadSettings = function(callback, tab) {
