@@ -10,7 +10,6 @@ $(function() {
 	options.initAbout();
 });
 
-
 var options = options || {};
 
 options.settings = typeof(localStorage.settings)=='undefined' ? {} : JSON.parse(localStorage.settings);
@@ -69,11 +68,10 @@ options.initGeneralSettings = function() {
 		}, options.showKeePassHttpVersions);
 	});
 
-
 	$("#showDangerousSettings").click(function() {
         $('#dangerousSettings').is(":visible") ? $(this).text("Show these settings anyway") : $(this).text("Hide");
         $("#dangerousSettings").toggle();
-    });
+	});
 		 
 	$("#hostname").val(options.settings["hostname"]);
 	$("#port").val(options.settings["port"]);
