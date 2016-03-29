@@ -3,11 +3,12 @@
 	<head>
 		<title>Settings | chromeIPass</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<link href="/options/bootstrap.min.css" rel="stylesheet" />
-		<link href="/options/bootstrap-responsive.min.css" rel="stylesheet" />
-		<script type="text/javascript" src="/jquery-1.11.1.min.js"></script>
-		<script type="text/javascript" src="/options/bootstrap.min.js"></script>
-		<script type="text/javascript" src="/options/options.js"></script>
+		<link href="bootstrap.min.css" rel="stylesheet" />
+		<link rel="stylesheet" href="../bootstrap-btn.css" />
+		<link href="bootstrap-responsive.min.css" rel="stylesheet" />
+		<script type="text/javascript" src="../jquery-1.11.1.min.js"></script>
+		<script type="text/javascript" src="bootstrap.min.js"></script>
+		<script type="text/javascript" src="options.js"></script>
 		<style type="text/css">
 			body {
 				padding-top: 20px;
@@ -102,7 +103,6 @@
 	</head>
 	<body>
 		<div class="container">
-
 			<div class="masthead">
 				<h3 class="muted"><img src="/icons/keepass_48x48.png" alt="logo" /> chromeIPass</h3>
 				<div class="navbar">
@@ -118,7 +118,6 @@
 					</div>
 				</div><!-- /.navbar -->
 			</div>
-
 			<!-- General Settings -->
 			<div class="tab" id="tab-general-settings">
 				<h2>General Settings</h2>
@@ -129,7 +128,8 @@
 					If you only want to insert the password, just press Ctrl + Shift + P.
 				</p>
 				<p>
-					<label>Blink Time:</label>
+					Blink Time:
+					<div class="control-group">
 					<div class="input-append">
 						<input type="number" id="blinkTimeout" placeholder="7500" value="7500" />
 						<button class="btn" id="blinkTimeoutButton" type="button">Save</button>
@@ -139,7 +139,10 @@
 						<br />
 						Default: 7500
 					</span>
-					<label>Redirect Offset:</label>
+					</div>
+					</p>
+					Redirect Offset:
+					<div class="control-group">
 					<div class="input-append">
 						<input type="number" id="blinkMinTimeout" placeholder="2000" value="2000" />
 						<button class="btn" id="blinkMinTimeoutButton" type="button">Save</button>
@@ -151,7 +154,11 @@
 						<br />
 						Default: -1, Recommended: 2000
 					</span>
-					<label>Redirect Allowance:</label>
+					</div>
+					</p>
+					<p>
+					Redirect Allowance:
+					<div class="control-group">
 					<div class="input-append">
 						<input type="number" id="allowedRedirect" placeholder="1" value="1" />
 						<button class="btn" id="allowedRedirectButton" type="button">Save</button>
@@ -161,6 +168,7 @@
 						<br />
 						Default: 1
 					</span>
+					</div>
 				</p>
 				<hr />
 				<p>
@@ -210,7 +218,6 @@
 				</div>
 				<hr />
 				<p>
-
 					<label class="checkbox">
 						<input type="checkbox" name="autoFillAndSend" value="1" /> Auto fill HTTP Auth dialogs and send them.
 					</label>
@@ -225,8 +232,9 @@
 				<div class="alert alert-error">
 					<strong>Attention!</strong> Please change the following settings only if you know what you are doing!
 				</div>
-				<button id="showDangerousSettings" class="btn btn-danger">Show these settings anyway</button>
+				<button id="showDangerousSettings" class="btn btn-danger" style="width: 202.656px; height: 30px;" >Show these settings anyway</button>
 				<div id="dangerousSettings">
+				<br />
 					<p>
 						chromeIPass communicates on <em>http://[hostname]:[port]</em> with KeePassHTTP.
 						<br />
@@ -235,7 +243,7 @@
 						Sometimes the default port is still in use and you have to change the port number in KeePassHTTP to get it running. So you have to set the same port number in chromeIPass and KeePassHTTP.
 					</p>
 					<p>
-						<label>Hostname:</label>
+						Hostname:
 						<div class="control-group">
 							<div class="input-append">
 								<input type="text" id="hostname" placeholder="localhost" value="localhost" />
@@ -247,10 +255,10 @@
 						</div>
 					</p>
 					<p>
-						<label>Port:</label>
+						Port:
 						<div class="control-group">
 							<div class="input-append">
-								<input type="text" id="port" placeholder="19455" value="19455" />
+								<input type="number" id="port" placeholder="19455" value="19455" />
 								<button class="btn" id="portButton" type="button">Save</button>
 							</div>
 							<span class="help-inline">
@@ -270,7 +278,6 @@
 					</p>
 				</div>
 			</div>
-
 			<!-- Connected Databases -->
 			<div class="tab" id="tab-connected-databases">
 				<h2>Connected Databases</h2>
@@ -332,8 +339,7 @@
 				</table>
 				<div style="text-align: right">
 					<button id="connect-button" class="b2c-btn b2c-btn-primary">Connect</button>
-				</div>
-
+					</div>
 				<div id="dialogDeleteConnectedDatabase" class="modal hide" tabindex="-1" role="dialog">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -349,7 +355,6 @@
 					</div>
 				</div>
 			</div>
-
 			<!-- Specified credential fields -->
 			<div class="tab" id="tab-specified-fields">
 				<h2>Specified credential fields</h2>
@@ -378,7 +383,6 @@
 						</tr>
 					</tbody>
 				</table>
-
 				<div id="dialogDeleteSpecifiedCredentialFields" class="modal hide" tabindex="-1" role="dialog">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -394,7 +398,6 @@
 					</div>
 				</div>
 			</div>
-
 			<!-- About -->
 			<div class="tab" id="tab-about">
 				<h2>About</h2>
@@ -403,7 +406,10 @@
 					Developed by <a target="_blank" href="https://github.com/pfn/">Perry Nguyen</a> and <a target="_blank" href="http://lukas-schulze.de">Lukas Schulze</a>.
 				</p>
 				<p>
-					To visit the plugin page, just go to <a target="_blank" href="https://github.com/pfn/passifox">https://github.com/pfn/passifox</a>.
+					<a target="_blank" href="https://github.com/pfn/passifox">Browse source code in GitHub</a>.
+				</p>
+				<p>
+					<a target="_blank" href="https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae">Visit extension's page in Chrome Web store</a>.
 				</p>
 				<hr />
 				<div class="row">
@@ -415,13 +421,10 @@
 					<div class="span6"><em class="versionKPH"></em></div>
 				</div>
 			</div>
-
 			<hr>
-
 			<div class="footer">
-				<p>2013 - Perry Nguyen, Lukas Schulze</p>
+				<p>2010-2016 - Perry Nguyen, Lukas Schulze</p>
 			</div>
-
 		</div> <!-- /container -->
 	</body>
 </html>
