@@ -10,7 +10,6 @@ $(function() {
 	options.initAbout();
 });
 
-
 var options = options || {};
 
 options.settings = typeof(localStorage.settings)=='undefined' ? {} : JSON.parse(localStorage.settings);
@@ -69,12 +68,11 @@ options.initGeneralSettings = function() {
 		}, options.showKeePassHttpVersions);
 	});
 
-
 	$("#showDangerousSettings").click(function() {
-		$("#dangerousSettings").show();
-		$(this).hide();
+        $('#dangerousSettings').is(":visible") ? $(this).text("Show these settings anyway") : $(this).text("Hide");
+        $("#dangerousSettings").toggle();
 	});
-
+		 
 	$("#hostname").val(options.settings["hostname"]);
 	$("#port").val(options.settings["port"]);
 	$("#blinkTimeout").val(options.settings["blinkTimeout"]);
@@ -120,48 +118,52 @@ options.initGeneralSettings = function() {
 		});
 	});
 
-	$("#blinkTimeout").keyup(function(){
-		saveBlinkTimeoutSetting();
-	});
-	$("#blinkTimeoutButton").click(function(){
-		saveBlinkTimeoutSetting();
-	});
-	function saveBlinkTimeoutSetting() {
-		saveIntSetting("blinkTimeout", $("#blinkTimeout").val());
-	}
+		$("#blinkTimeoutButton").click(function(){
+		var blinkTimeout = $.trim($("#blinkTimeout").val());
+		var blinkTimeoutval = parseInt(blinkTimeout);
+		
+        options.settings["blinkTimeout"] = blinkTimeoutval.toString();
+		$("#blinkTimeout").closest(".control-group").removeClass("error").addClass("success");
+		setTimeout(function() {$("#blinkTimeout").closest(".control-group").removeClass("success")}, 2500);
 
-	$("#blinkMinTimeout").keyup(function(){
-		saveBlinkMinTimeoutSetting();
-	});
-	$("#blinkMinTimeoutButton").click(function(){
-		saveBlinkMinTimeoutSetting();
-	});
-	function saveBlinkMinTimeoutSetting() {
-		saveIntSetting("blinkMinTimeout", $("#blinkMinTimeout").val());
-	}
-
-	$("#allowedRedirect").keyup(function(){
-		saveAllowedRedirectSetting();
-	});
-	$("#allowedRedirectButton").click(function(){
-		saveAllowedRedirectSetting();
-	});
-	function saveAllowedRedirectSetting() {
-		saveIntSetting("allowedRedirect", $("#allowedRedirect").val());
-	}
-
-	function saveIntSetting(key, value){
-		if(isNaN(value)) {
-			return;
-		}
-		options.settings[key] = value;
 		localStorage.settings = JSON.stringify(options.settings);
+
 		chrome.extension.sendMessage({
 			action: 'load_settings'
 		});
-	}
-};
+	});
 
+	$("#blinkMinTimeoutButton").click(function(){
+		var blinkMinTimeout = $.trim($("#blinkMinTimeout").val());
+		var blinkMinTimeoutval = parseInt(blinkMinTimeout);
+		
+        options.settings["blinkMinTimeout"] = blinkMinTimeoutval.toString();
+		$("#blinkMinTimeout").closest(".control-group").removeClass("error").addClass("success");
+		setTimeout(function() {$("#blinkMinTimeout").closest(".control-group").removeClass("success")}, 2500);
+
+		localStorage.settings = JSON.stringify(options.settings);
+
+		chrome.extension.sendMessage({
+			action: 'load_settings'
+		});
+	});
+
+	$("#allowedRedirectButton").click(function(){
+		var allowedRedirect = $.trim($("#allowedRedirect").val());
+		var allowedRedirectval = parseInt(allowedRedirect);
+		
+        options.settings["allowedRedirect"] = allowedRedirectval.toString();
+		$("#allowedRedirect").closest(".control-group").removeClass("error").addClass("success");
+		setTimeout(function() {$("#allowedRedirect").closest(".control-group").removeClass("success")}, 2500);
+
+		localStorage.settings = JSON.stringify(options.settings);
+
+		chrome.extension.sendMessage({
+			action: 'load_settings'
+		});
+	});
+};
+			
 options.showKeePassHttpVersions = function(response) {
 	if(response.current <= 0) {
 		response.current = "unknown";
