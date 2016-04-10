@@ -65,11 +65,11 @@ window.addEventListener("keydown", function(e) {
 	if (e.ctrlKey && e.shiftKey) {
 		if (e.keyIdentifier == "U+0050") { // P
 			e.preventDefault();
-      cip.receiveCredentialsIfNecessary();
+			cip.receiveCredentialsIfNecessary();
 			cip.fillInFromActiveElementPassOnly(false);
 		} else if (e.keyIdentifier == "U+0055") { // U
 			e.preventDefault();
-      cip.receiveCredentialsIfNecessary();
+			cip.receiveCredentialsIfNecessary();
 			cip.fillInFromActiveElement(false);
 			var field =_f(cipFields.combinations[0].username);
 			cipAutocomplete.init(field);
@@ -1190,12 +1190,12 @@ cip.initPasswordGenerator = function(inputs) {
 }
 
 cip.cip.receiveCredentialsIfNecessary = function () {
-  if(cip.credentials.length == 0) {
-    chrome.extension.sendMessage({
-      'action': 'retrieve_credentials',
-      'args': [ cip.url, cip.submitUrl ]
-    }, cip.retrieveCredentialsCallback);
-  }
+	if(cip.credentials.length == 0) {
+		chrome.extension.sendMessage({
+			'action': 'retrieve_credentials',
+			'args': [ cip.url, cip.submitUrl ]
+		}, cip.retrieveCredentialsCallback);
+	}
 }
 
 cip.retrieveCredentialsCallback = function (credentials, dontAutoFillIn) {
