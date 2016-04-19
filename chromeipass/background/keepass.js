@@ -45,9 +45,9 @@ keepass.updateCredentials = function(callback, tab, entryId, username, password,
 	var iv = request.Nonce;
 
 
-	request.Login = keepass.encrypt(username, key, iv);
+	request.Login = keepass.encrypt(cryptoHelpers.encode_utf8(username), key, iv);
 
-	request.Password = keepass.encrypt(password, key, iv);
+	request.Password = keepass.encrypt(cryptoHelpers.encode_utf8(password), key, iv);
 	request.Url = keepass.encrypt(url, key, iv);
 	request.SubmitUrl = keepass.encrypt(url, key, iv);
 
