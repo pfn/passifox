@@ -15,7 +15,7 @@ function initSettings() {
 	$("#settings #btn-options").click(function() {
 		close();
 		chrome.tabs.create({
-			url: "/options/options.html"
+			url: "../options/options.html"
 		})
 	});
 
