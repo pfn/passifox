@@ -1437,11 +1437,13 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 		var filledIn = false;
 		if(uField && !onlyPassword) {
 			uField.val(cip.credentials[0].Login);
+			uField.change();
 			filledIn = true;
 		}
 		if(pField) {
 			pField.attr("type", "password");
 			pField.val(cip.credentials[0].Password);
+			pField.change();
 			pField.data("unchanged", true);
 			filledIn = true;
 		}
@@ -1467,11 +1469,13 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 		var filledIn = false;
 		if(uField) {
 			uField.val(cip.credentials[combination.loginId].Login);
+			uField.change();
 			filledIn = true;
 		}
 
 		if(pField) {
 			pField.val(cip.credentials[combination.loginId].Password);
+			pField.change();
 			pField.data("unchanged", true);
 			filledIn = true;
 		}
@@ -1522,9 +1526,11 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 			if(countPasswords == 1) {
 				if(!onlyPassword) {
 					uField.val(valUsername);
+					uField.change();
 				}
 				if(pField) {
 					pField.val(valPassword);
+					pField.change();
 					pField.data("unchanged", true);
 				}
 
