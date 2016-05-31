@@ -7,12 +7,12 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 			if(cip.credentials[req.id]) {
 				var combination = null;
 				if (cip.u) {
-					cip.u.val(cip.credentials[req.id].Login);
+					cip.setValueWithChange(cip.u, cip.credentials[req.id].Login);
 					combination = cipFields.getCombination("username", cip.u);
 					cip.u.focus();
 				}
 				if (cip.p) {
-					cip.p.val(cip.credentials[req.id].Password);
+					cip.setValueWithChange(cip.p, cip.credentials[req.id].Password);
 					combination = cipFields.getCombination("password", cip.p);
 				}
 
@@ -132,7 +132,7 @@ cipAutocomplete.onSource = function (request, callback) {
 
 cipAutocomplete.onSelect = function (e, ui) {
 	e.preventDefault();
-	cIPJQ(this).val(ui.item.value);
+	cip.setValueWithChange(cIPJQ(this), ui.item.value);
 	var fieldId = cipFields.prepareId(cIPJQ(this).attr("data-cip-id"));
 	var combination = cipFields.getCombination("username", fieldId);
 	combination.loginId = ui.item.loginId;
@@ -1205,11 +1205,11 @@ cip.prepareFieldsForCredentials = function(autoFillInForSingle) {
 			combination = cipFields.combinations[0];
 		}
 		if (cip.u) {
-			cip.u.val(cip.credentials[0].Login);
+			cip.setValueWithChange(cip.u, cip.credentials[0].Login);
 			combination = cipFields.getCombination("username", cip.u);
 		}
 		if (cip.p) {
-			cip.p.val(cip.credentials[0].Password);
+			cip.setValueWithChange(cip.p, cip.credentials[0].Password);
 			combination = cipFields.getCombination("password", cip.p);
 		}
 
@@ -1388,13 +1388,13 @@ cip.setValue = function(field, value) {
 		value = value.toLowerCase().trim();
 		cIPJQ("option", field).each(function() {
 			if(cIPJQ(this).text().toLowerCase().trim() == value) {
-				field.val(cIPJQ(this).val());
+				cip.setValueWithChange(field, cIPJQ(this).val());
 				return false;
 			}
 		});
 	}
 	else {
-		field.val(value);
+		cip.setValueWithChange(field, value);
 		field.trigger('input');
 	}
 }
@@ -1418,6 +1418,11 @@ cip.fillInStringFields = function(fields, StringFields, filledInFields) {
 	return $filledIn;
 }
 
+cip.setValueWithChange = function(field, value) {
+	field.val(value);
+	field[0].dispatchEvent(new Event('change', {'bubbles': true}));
+}
+
 cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 	// no credentials available
 	if (cip.credentials.length == 0 && !suppressWarnings) {
@@ -1436,14 +1441,12 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 	if (cip.credentials.length == 1) {
 		var filledIn = false;
 		if(uField && !onlyPassword) {
-			uField.val(cip.credentials[0].Login);
-			uField.change();
+			cip.setValueWithChange(uField, cip.credentials[0].Login);
 			filledIn = true;
 		}
 		if(pField) {
 			pField.attr("type", "password");
-			pField.val(cip.credentials[0].Password);
-			pField.change();
+			cip.setValueWithChange(pField, cip.credentials[0].Password);
 			pField.data("unchanged", true);
 			filledIn = true;
 		}
@@ -1468,14 +1471,12 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 	else if(combination.loginId != undefined && cip.credentials[combination.loginId]) {
 		var filledIn = false;
 		if(uField) {
-			uField.val(cip.credentials[combination.loginId].Login);
-			uField.change();
+			cip.setValueWithChange(uField, cip.credentials[combination.loginId].Login);
 			filledIn = true;
 		}
 
 		if(pField) {
-			pField.val(cip.credentials[combination.loginId].Password);
-			pField.change();
+			cip.setValueWithChange(pField, cip.credentials[combination.loginId].Password);
 			pField.data("unchanged", true);
 			filledIn = true;
 		}
@@ -1525,12 +1526,10 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 			// only one mapping username found
 			if(countPasswords == 1) {
 				if(!onlyPassword) {
-					uField.val(valUsername);
-					uField.change();
+					cip.setValueWithChange(uField, valUsername);
 				}
 				if(pField) {
-					pField.val(valPassword);
-					pField.change();
+					cip.setValueWithChange(pField, valPassword);
 					pField.data("unchanged", true);
 				}
 
