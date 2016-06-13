@@ -69,6 +69,7 @@ window.addEventListener("keydown", function(e) {
 			cip.fillInFromActiveElement(false);
 			var field =_f(cipFields.combinations[0].username);
 			cipAutocomplete.init(field);
+			field.click();
 		}
 	}
 }, false);
@@ -107,8 +108,6 @@ cipAutocomplete.init = function(field) {
 		.click(cipAutocomplete.onClick)
 		.blur(cipAutocomplete.onBlur)
 		.focus(cipAutocomplete.onFocus);
-		
-	field.click();
 }
 
 cipAutocomplete.onClick = function() {
