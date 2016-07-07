@@ -11,7 +11,7 @@ They require [KeePassHttp](https://github.com/pfn/keepasshttp/), a plugin for Ke
 
 ## PassIFox for Mozilla Firefox
 
-- [Download](https://passifox.appspot.com/passifox.xpi)
+- [Download](https://addons.mozilla.org/en-US/firefox/addon/passifox/)
 - [Documentation](https://github.com/pfn/passifox/blob/master/documentation/PassIFox.md)
 
 Currently the documentation of PassIFox is not up-to-date!
