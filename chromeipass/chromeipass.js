@@ -1188,7 +1188,7 @@ cip.initPasswordGenerator = function(inputs) {
 	}
 }
 
-cip.cip.receiveCredentialsIfNecessary = function () {
+cip.receiveCredentialsIfNecessary = function () {
 	if(cip.credentials.length == 0) {
 		chrome.extension.sendMessage({
 			'action': 'retrieve_credentials',
