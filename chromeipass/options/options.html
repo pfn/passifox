@@ -277,6 +277,16 @@
 						</label>
 						<span class="help-block">Disables communicating errors and warnings via JavaScript alert.</span>
 					</p>
+					<p>
+						<label class="checkbox">
+							<input type="checkbox" name="respectMaxLength" value="0" /> Respect maxlength="" attribute on inputs.
+						</label>
+						<span class="help-block">Limit the field filled in to the maximum number of characters allowed by
+							maxlength="" in the input as set by the website admin?<br />
+							There is a possibility of this causing issues with sites that have decreased this value after
+							you have already created one, or have increased it before the fact and the password stored in keepass itself is longer than maxlength.
+						</span>
+					</p>
 				</div>
 			</div>
 

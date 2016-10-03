@@ -1419,12 +1419,14 @@ cip.fillInStringFields = function(fields, StringFields, filledInFields) {
 
 cip.setValueWithChange = function(field, value) {
 
-	var attribute_maxlength = field.attr('maxlength');
-	if (typeof attribute_maxlength !== typeof undefined &&
-		$.isNumeric(attribute_maxlength) === true &&
-		attribute_maxlength > 0) {
+	if (cip.settings.respectMaxLength === true) {
+		var attribute_maxlength = field.attr('maxlength');
+		if (typeof attribute_maxlength !== typeof undefined &&
+			$.isNumeric(attribute_maxlength) === true &&
+			attribute_maxlength > 0) {
 
-		value = value.substr(0, attribute_maxlength);
+			value = value.substr(0, attribute_maxlength);
+		}
 	}
 
 	field.val(value);
