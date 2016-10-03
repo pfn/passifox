@@ -1418,6 +1418,15 @@ cip.fillInStringFields = function(fields, StringFields, filledInFields) {
 }
 
 cip.setValueWithChange = function(field, value) {
+
+	var attribute_maxlength = field.attr('maxlength');
+	if (typeof attribute_maxlength !== typeof undefined &&
+		$.isNumeric(attribute_maxlength) === true &&
+		attribute_maxlength > 0) {
+
+		value = value.substr(0, attribute_maxlength);
+	}
+
 	field.val(value);
 	field[0].dispatchEvent(new Event('input', {'bubbles': true}));
 	field[0].dispatchEvent(new Event('change', {'bubbles': true}));
