@@ -184,9 +184,25 @@ LoginManagerStorage.prototype = {
     },
     searchLogins: function searchLogins(count, matchData) {
         this.stub(arguments);
-        // this appears to be used by weave/sync, don't need it
-        count.value = 0;
-        return [];
+        var host, form, realm;
+
+        try{
+            host = matchData.getProperty("hostname");
+        } catch(e){
+            host = '';
+        }
+        try{
+            form = matchData.getProperty("formSubmitURL");
+        } catch(e){
+            form = '';
+        }
+        try{
+            realm = matchData.getProperty("httpRealm");
+        } catch(e){
+            realm = '';
+        }
+
+        return this.findLogins(count, host, form, realm);
     },
 
     removeAllLogins: function() { }, // never, ever do this
