@@ -199,7 +199,7 @@ LoginManagerStorage.prototype = {
         try{
             realm = matchData.getProperty("httpRealm");
         } catch(e){
-            realm = '';
+            realm = null;
         }
 
         return this.findLogins(count, host, form, realm);
