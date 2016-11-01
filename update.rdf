@@ -13,7 +13,7 @@
               <minVersion>4.0b1</minVersion>
               <maxVersion>49.*</maxVersion>
               <updateLink>https://passifox.appspot.com/passifox.xpi</updateLink>
-              <updateHash>sha1:6a3586aafeb3e8da206a81bfa59ddc039eab393d</updateHash>
+              <updateHash>sha1:6f888d614b7551c8f07b24fee2066650d8815841</updateHash>
             </r:Description>
           </targetApplication>
         </r:Description>
