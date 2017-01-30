@@ -1,6 +1,6 @@
 # chromeIPass
 
-is an extension for the browser Google Chrome to send and receive credentials from KeePass through the plugin [KeePassHttp](https://github.com/pfn/keepasshttp).
+is an extension for the browser Google Chrome to send and receive credentials from KeePass(XC).
 <br />It can be downloaded from [Chrome Web Store](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae).
 
 Please read at least the section [Important information](#6-important-information).
@@ -63,9 +63,13 @@ Table of content:
 ## 2. Installation
 
 ### 2.1 Requirements
+- [KeePassXC](https://keepassxc.org/) v2.1.1 or higher
+
+OR
 - [KeePass](http://keepass.info) v2.17 or higher
 - [KeePassHttp](https://github.com/pfn/keepasshttp) v1.0.7 or higher (recommended v1.4 or higher)
-- it is recommended to disable the built-in Chrome password management when using this extension
+
+It is recommended to disable the built-in Chrome password management when using this extension
 
 ### 2.2 Installation
 1. Your database in KeePass has to be unlocked.
@@ -377,7 +381,7 @@ If this does not solve your problem, please [open an issue](https://github.com/p
 
 1. Check if you are using the [latest version of chromeIPass](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae).
 2. Check if your browser Google chrome is up-to-date
-3. Check if your versions of [KeePassHttp](https://github.com/pfn/keepasshttp) and [KeePass](http://www.keepass.info) are up-to-date
+3. Check if your versions of [KeePassXC](https://keepassxc.org/) OR ([KeePassHttp](https://github.com/pfn/keepasshttp) + [KeePass](http://www.keepass.info)) are up-to-date
 
 #### 8.2.2 Check the background page console for error messages
 1. Open a tab with URL _chrome://extensions_ and activate the _Developer mode_ to be able to generate the background page:<br />
