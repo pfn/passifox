@@ -10,7 +10,7 @@
     </em:targetApplication>
     <!-- Front End MetaData -->
     <em:name>PassIFox</em:name>
-    <em:description>KeePass Login Manager Storage and Integration using the KeePassHttp plugin</em:description>
+    <em:description>KeePass(XC) Login Manager Storage and Integration using the KeePassHttp plugin</em:description>
     <em:iconURL>chrome://passifox/skin/keepass-big.png</em:iconURL>
     <em:creator>Perry Nguyen</em:creator>
     <em:homepageURL>https://github.com/pfn/passifox</em:homepageURL>
