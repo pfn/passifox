@@ -1,8 +1,9 @@
 # PassIFox and chromeIPass
 
-are extensions to integrate KeePass as a password manager with Mozilla Firefox and Google Chrome browsers.
+are extensions to integrate [KeePass](http://keepass.info)/[KeePassXC](https://keepassxc.org/) as a password manager with Mozilla Firefox and Google Chrome browsers.
 
 They require [KeePassHttp](https://github.com/pfn/keepasshttp/), a KeePass plugin to expose password entries securely (256bit AES/CBC) over HTTP.
+
 
 ## chromeIPass (for Google Chrome)
 
@@ -24,7 +25,7 @@ If you [open an issue](https://github.com/pfn/passifox/issues/), always give us 
 1. the extension are you using (chromeIPass or PassIFox) and its version
 2. version of your browser
 2. KeePassHttp version
-3. KeePass version
+3. KeePass/KeePassXC version
 4. pages on which the error occur
 
 PassIFox & ChromeIPass Copyright © 2010-2017 Perry Nguyen  
