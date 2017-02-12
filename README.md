@@ -27,7 +27,7 @@ If you [open an issue](https://github.com/pfn/passifox/issues/), always give us 
 3. KeePass version
 4. pages on which the error occur
 
-PassIFox & ChromeIPass Copyright © 2010-2016 Perry Nguyen  
+PassIFox & ChromeIPass Copyright © 2010-2017 Perry Nguyen  
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3 of the License.
