@@ -1,7 +1,7 @@
 $(function() {
-	var global = chrome.extension.getBackgroundPage();
+	var global = browser.runtime.getBackgroundPage();
 
-	chrome.tabs.query({"active": true, "windowId": chrome.windows.WINDOW_ID_CURRENT}, function(tabs) {
+	browser.tabs.query({"active": true, "currentWindow": true}).then(function(tabs) {
 		if (tabs.length === 0)
 			return; // For example: only the background devtools or a popup are opened
 		var tab = tabs[0];
@@ -16,7 +16,7 @@ $(function() {
 			a.setAttribute("id", "" + i);
 			a.addEventListener('click', function(e) {
 				var id = e.target.id;
-				chrome.tabs.sendMessage(tab.id, {
+				browser.tabs.sendMessage(tab.id, {
 					action: 'fill_user_pass_with_specific_login',
 					id: id
 				});

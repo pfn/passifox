@@ -43,12 +43,7 @@ event.invoke = function(handler, callback, senderTabId, args, secondTime) {
 	// remove information from no longer existing tabs
 	page.removePageInformationFromNotExistingTabs();
 
-	chrome.tabs.get(senderTabId, function(tab) {
-	//chrome.tabs.query({"active": true, "windowId": chrome.windows.WINDOW_ID_CURRENT}, function(tabs) {
-		//if (tabs.length === 0)
-		//	return; // For example: only the background devtools or a popup are opened
-		//var tab = tabs[0];
-
+	browser.tabs.get(senderTabId).then(function(tab) {
 		if(!tab) {
 			return;
 		}

@@ -37,7 +37,7 @@ page.initSettings = function() {
 }
 
 page.initOpenedTabs = function() {
-	chrome.tabs.query({}, function(tabs) {
+	browser.tabs.query({}).then(function(tabs) {
 		for(var i = 0; i < tabs.length; i++) {
 			page.createTabEntry(tabs[i].id);
 		}
@@ -53,7 +53,7 @@ page.isValidProtocol = function(url) {
 page.switchTab = function(callback, tab) {
 	browserAction.showDefault(null, tab);
 
-	chrome.tabs.sendMessage(tab.id, {action: "activated_tab"});
+	browser.tabs.sendMessage(tab.id, {action: "activated_tab"});
 }
 
 page.clearCredentials = function(tabId, complete) {
@@ -67,7 +67,7 @@ page.clearCredentials = function(tabId, complete) {
     if(complete) {
         page.tabs[tabId].loginList = [];
 
-        chrome.tabs.sendMessage(tabId, {
+        browser.tabs.sendMessage(tabId, {
             action: "clear_credentials"
         });
     }
@@ -85,7 +85,7 @@ page.createTabEntry = function(tabId) {
 page.removePageInformationFromNotExistingTabs = function() {
 	var rand = Math.floor(Math.random()*1001);
 	if(rand == 28) {
-		chrome.tabs.query({}, function(tabs) {
+		browser.tabs.query({}).then(function(tabs) {
 			var $tabIds = {};
 			var $infoIds = Object.keys(page.tabs);
 
