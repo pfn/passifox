@@ -181,6 +181,18 @@ cipPassword.init = function() {
 	window.setInterval(function() {
 		cipPassword.checkObservedElements();
 	}, 400);
+
+	/* Append extension-local background-image URLs to
+	   'generate password' icon CSS classes */
+	var make_keyicon_css = function(nested_class, icon_size) {
+		return ".cip-genpw-icon." + nested_class + " {" +
+			"background-image: url(" +
+			browser.runtime.getURL("/icons/key_"+icon_size+".png") +
+			"); }\n";
+	}
+	var styleStr = make_keyicon_css("cip-icon-key-small", "16x16") +
+		make_keyicon_css("cip-icon-key-big", "24x24");
+	cIPJQ('<style>'+styleStr+'</style>').appendTo('head');
 }
 
 cipPassword.initField = function(field, inputs, pos) {
