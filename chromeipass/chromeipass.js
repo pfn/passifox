@@ -1136,7 +1136,6 @@ cip.init = function() {
 	browser.runtime.sendMessage({
 		"action": "get_settings",
 	}).then(function(response) {
-		console.log("got response!");
 		cip.settings = response.data;
 		cip.initCredentialFields();
 	});

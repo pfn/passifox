@@ -204,21 +204,22 @@ keepass.generatePassword = function (callback, tab, forceCallback) {
 }
 
 keepass.copyPassword = function(callback, tab, password) {
-	var bg = browser.runtime.getBackgroundPage();
-	var c2c = bg.document.getElementById("copy2clipboard");
-	if(!c2c) {
-		var input = document.createElement('input');
-		input.type = "text";
-		input.id = "copy2clipboard";
-		bg.document.getElementsByTagName('body')[0].appendChild(input);
-		c2c = bg.document.getElementById("copy2clipboard");
-	}
+	browser.runtime.getBackgroundPage().then(function (bg) {
+		var c2c = bg.document.getElementById("copy2clipboard");
+		if(!c2c) {
+			var input = document.createElement('input');
+			input.type = "text";
+			input.id = "copy2clipboard";
+			bg.document.getElementsByTagName('body')[0].appendChild(input);
+			c2c = bg.document.getElementById("copy2clipboard");
+		}
 
-	c2c.value = password;
-	c2c.select();
-	document.execCommand("copy");
-	c2c.value = "";
-	callback(true);
+		c2c.value = password;
+		c2c.select();
+		document.execCommand("copy");
+		c2c.value = "";
+		callback(true);
+	});
 }
 
 keepass.associate = function(callback, tab) {

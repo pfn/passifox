@@ -1,6 +1,5 @@
 var $ = cIPJQ.noConflict(true);
 var _settings = typeof(localStorage.settings)=='undefined' ? {} : JSON.parse(localStorage.settings);
-//var global = browser.runtime.getBackgroundPage();
 
 function updateAvailableResponse(available) {
 	if(available) {
@@ -19,11 +18,12 @@ function initSettings() {
 	});
 
 	$("#settings #btn-choose-credential-fields").click(function() {
-		var global = browser.runtime.getBackgroundPage();
-		browser.tabs.sendMessage(global.page.currentTabId, {
-			action: "choose_credential_fields"
+		browser.runtime.getBackgroundPage().then(function(global) {
+			browser.tabs.sendMessage(global.page.currentTabId, {
+				action: "choose_credential_fields"
+			});
+			close();
 		});
-		close();
 	});
 }
 
