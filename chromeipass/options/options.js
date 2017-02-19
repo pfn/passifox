@@ -319,4 +319,8 @@ options.initSpecifiedCredentialFields = function() {
 options.initAbout = function() {
 	var manifest = browser.runtime.getManifest();
 	$("#tab-about em.versionCIP").text(manifest.version);
+	if (!(/Chrome/.test(navigator.userAgent) && /Google/.test(navigator.vendor))) {
+		/* Not Chrome or Chromium  */
+		$("#chrome-web-store-link").remove();
+	}
 }
