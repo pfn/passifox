@@ -162,6 +162,13 @@ options.initGeneralSettings = function() {
 			action: 'load_settings'
 		});
 	});
+
+	if (!browser.webRequest.onAuthRequired) {
+		/* onAuthRequired isn't supported on current Firefox,
+		   so hide this feature.
+		*/
+		$("#http-auth-options").hide();
+	}
 };
 
 options.showKeePassHttpVersions = function(response) {

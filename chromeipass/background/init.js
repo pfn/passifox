@@ -79,12 +79,14 @@ browser.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
 /**
  * Retrieve Credentials and try auto-login for HTTPAuth requests
+ *
+ * (Intercepting HTTP auth currently unsupported in Firefox.)
  */
-/* TODO: Not supported in Firefox/WebExtensions
-chrome.webRequest.onAuthRequired.addListener(httpAuth.handleRequest,
-	{ urls: ["<all_urls>"] }, ["asyncBlocking"]
-);
-*/
+if (browser.webRequest.onAuthRequired) {
+	browser.webRequest.onAuthRequired.addListener(httpAuth.handleRequest,
+												  { urls: ["<all_urls>"] }, ["asyncBlocking"]
+												 );
+}
 
 /**
  * Interaction between background-script and front-script
