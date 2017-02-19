@@ -255,14 +255,8 @@ cipPassword.createDialog = function() {
 		.addClass("b2c-btn")
 		.addClass("b2c-btn-small")
 		.css("float", "right")
-		.click(function(e) {
-			e.preventDefault();
+		.click(cipPassword.copyPasswordToClipboard);
 
-			browser.runtime.sendMessage({
-				action: "copy_password",
-				args: [cIPJQ("input#cip-genpw-textfield-password").val()]
-			}).then(cipPassword.callbackPasswordCopied);
-		});
 	$divFloat.append($btnClipboard);
 
 	$dialog.append($divFloat);
@@ -327,11 +321,7 @@ cipPassword.createDialog = function() {
 					}
 				}
 
-				// copy password to clipboard
-				browser.runtime.sendMessage({
-					action: "copy_password",
-					args: [$password]
-				}).then(cipPassword.callbackPasswordCopied);
+				cipPassword.copyPasswordToClipboard();
 			}
 		});
 	$dialog.append($btnFillIn);
@@ -427,10 +417,18 @@ cipPassword.setIconPosition = function($icon, $field) {
 		.css("left", $field.offset().left + $field.outerWidth() - $icon.data("size") - $icon.data("offset"))
 }
 
-cipPassword.callbackPasswordCopied = function(bool) {
-	if(bool) {
+cipPassword.copyPasswordToClipboard = function(e) {
+	if (e) {
+		e.preventDefault();
+	}
+
+	var input = cIPJQ("input#cip-genpw-textfield-password");
+	input.select()
+	var success = document.execCommand("copy");
+	if(success) {
 		cIPJQ("#cip-genpw-btn-clipboard").addClass("b2c-btn-success");
 	}
+	cIPJQ("#cip-genpw-dialog").select();
 }
 
 cipPassword.callbackGeneratedPassword = function(entries) {

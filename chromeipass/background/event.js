@@ -236,5 +236,4 @@ event.messageHandlers = {
 	'stack_add': browserAction.stackAdd,
 	'update_available_keepasshttp': event.onUpdateAvailableKeePassHttp,
 	'generate_password': keepass.generatePassword,
-	'copy_password': keepass.copyPassword
 };
