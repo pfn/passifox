@@ -41,6 +41,22 @@
 			"all_frames": true
 		}
 	],
+	"commands": {
+		"fill-username-password": {
+			"description": "Insert username + password",
+			"suggested_key": {
+				"default": "Ctrl+Shift+U",
+				"mac": "Command+Shift+U"
+			}
+		},
+		"fill-password": {
+			"description": "Insert a password",
+			"suggested_key": {
+				"default": "Ctrl+Shift+P",
+				"mac": "Command+Shift+P"
+			}
+		}
+	},
 	"web_accessible_resources": [
 		"jquery.min.map",
 		"icons/key_16x16.png",
@@ -56,6 +72,7 @@
 		"images/ui-bg_highlight-soft_75_cccccc_1x100.png"
 	],
 	"permissions": [
+		"activeTab",
 		"contextMenus",
 		"clipboardWrite",
 		"tabs",
