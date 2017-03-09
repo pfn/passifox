@@ -58,26 +58,6 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 	}
 });
 
-// Hotkeys for every page
-// ctrl + shift + p = fill only password
-// ctrl + shift + u = fill username + password
-window.addEventListener("keydown", function(e) {
-	if (e.ctrlKey && e.shiftKey) {
-		if (e.key == "KeyP" || e.keyIdentifier == "U+0050") { // P
-			e.preventDefault();
-			cip.receiveCredentialsIfNecessary();
-			cip.fillInFromActiveElementPassOnly(false);
-		} else if (e.key == "KeyU" || e.keyIdentifier == "U+0055") { // U
-			e.preventDefault();
-			cip.receiveCredentialsIfNecessary();
-			cip.fillInFromActiveElement(false);
-			var field =_f(cipFields.combinations[0].username);
-			cipAutocomplete.init(field);
-			field.click();
-		}
-	}
-}, false);
-
 function _f(fieldId) {
 	var field = (fieldId) ? cIPJQ("input[data-cip-id='"+fieldId+"']:first") : [];
 	return (field.length > 0) ? field : null;
