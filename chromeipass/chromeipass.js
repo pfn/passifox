@@ -25,9 +25,11 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 			// selection may be requested.
 		}
 		else if (req.action == "fill_user_pass") {
+			cip.receiveCredentialsIfNecessary();
 			cip.fillInFromActiveElement(false);
 		}
 		else if (req.action == "fill_pass_only") {
+			cip.receiveCredentialsIfNecessary();
 			cip.fillInFromActiveElementPassOnly(false);
 		}
 		else if (req.action == "activate_password_generator") {
@@ -55,23 +57,6 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 		}
 	}
 });
-
-// Hotkeys for every page
-// ctrl + shift + p = fill only password
-// ctrl + shift + u = fill username + password
-window.addEventListener("keydown", function(e) {
-	if (e.ctrlKey && e.shiftKey) {
-		if (e.key == "KeyP" || e.keyIdentifier == "U+0050") { // P
-			e.preventDefault();
-			cip.fillInFromActiveElementPassOnly(false);
-		} else if (e.key == "KeyU" || e.keyIdentifier == "U+0055") { // U
-			e.preventDefault();
-			cip.fillInFromActiveElement(false);
-			var field =_f(cipFields.combinations[0].username);
-			field.click();
-		}
-	}
-}, false);
 
 function _f(fieldId) {
 	var field = (fieldId) ? cIPJQ("input[data-cip-id='"+fieldId+"']:first") : [];
@@ -1163,10 +1148,12 @@ cip.initCredentialFields = function(forceCall) {
 	cip.url = document.location.origin;
 	cip.submitUrl = cip.getFormActionUrl(cipFields.combinations[0]);
 
-	chrome.extension.sendMessage({
-		'action': 'retrieve_credentials',
-		'args': [ cip.url, cip.submitUrl ]
-	}, cip.retrieveCredentialsCallback);
+  if(cip.settings.autoRetrieveCredentials) {
+    chrome.extension.sendMessage({
+      'action': 'retrieve_credentials',
+      'args': [ cip.url, cip.submitUrl ]
+    }, cip.retrieveCredentialsCallback);
+  }
 } // end function init
 
 cip.initPasswordGenerator = function(inputs) {
@@ -1178,6 +1165,15 @@ cip.initPasswordGenerator = function(inputs) {
 				cipPassword.initField(inputs[i], inputs, i);
 			}
 		}
+	}
+}
+
+cip.receiveCredentialsIfNecessary = function () {
+	if(cip.credentials.length == 0) {
+		chrome.extension.sendMessage({
+			'action': 'retrieve_credentials',
+			'args': [ cip.url, cip.submitUrl ]
+		}, cip.retrieveCredentialsCallback);
 	}
 }
 
@@ -1417,6 +1413,17 @@ cip.fillInStringFields = function(fields, StringFields, filledInFields) {
 }
 
 cip.setValueWithChange = function(field, value) {
+
+	if (cip.settings.respectMaxLength === true) {
+		var attribute_maxlength = field.attr('maxlength');
+		if (typeof attribute_maxlength !== typeof undefined &&
+			$.isNumeric(attribute_maxlength) === true &&
+			attribute_maxlength > 0) {
+
+			value = value.substr(0, attribute_maxlength);
+		}
+	}
+
 	field.val(value);
 	field[0].dispatchEvent(new Event('input', {'bubbles': true}));
 	field[0].dispatchEvent(new Event('change', {'bubbles': true}));
@@ -1693,7 +1700,7 @@ cipEvents.triggerActivatedTab = function() {
 
 	// initCredentialFields calls also "retrieve_credentials", to prevent it
 	// check of init() was already called
-	if(_called.initCredentialFields && (cip.url || cip.submitUrl)) {
+	if(_called.initCredentialFields && (cip.url || cip.submitUrl) && cip.settings.autoRetrieveCredentials) {
 		chrome.extension.sendMessage({
 			'action': 'retrieve_credentials',
 			'args': [ cip.url, cip.submitUrl ]

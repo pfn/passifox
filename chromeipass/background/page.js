@@ -24,6 +24,9 @@ page.initSettings = function() {
 	if(!("autoFillSingleEntry" in page.settings)) {
 		page.settings.autoFillSingleEntry = 1;
 	}
+	if(!("autoRetrieveCredentials" in page.settings)) {
+		page.settings.autoRetrieveCredentials = 1;
+	}
 	if(!("hostname" in page.settings)) {
 		page.settings.hostname = "localhost";
 	}
