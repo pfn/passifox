@@ -1138,10 +1138,6 @@ cip.submitUrl = null;
 // received credentials from KeePassHTTP
 cip.credentials = [];
 
-cIPJQ(function() {
-	cip.init();
-});
-
 cip.init = function() {
 	browser.runtime.sendMessage({
 		"action": "get_settings",
@@ -1703,7 +1699,9 @@ cip.rememberCredentials = function(usernameValue, passwordValue) {
 	return false;
 };
 
-
+cIPJQ(function() {
+	cip.init();
+});
 
 var cipEvents = {};
 
