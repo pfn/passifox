@@ -50,7 +50,7 @@ browser.tabs.onRemoved.addListener(function(tabId, removeInfo) {
  */
 browser.tabs.onActivated.addListener(function(activeInfo) {
 	// remove possible credentials from old tab information
-    page.clearCredentials(page.currentTabId, true);
+	page.clearCredentials(page.currentTabId, true);
 	browserAction.removeRememberPopup(null, {"id": page.currentTabId}, true);
 
 	browser.tabs.get(activeInfo.tabId).then(function(info) {
@@ -84,8 +84,8 @@ browser.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
  */
 if (browser.webRequest.onAuthRequired) {
 	browser.webRequest.onAuthRequired.addListener(httpAuth.handleRequest,
-												  { urls: ["<all_urls>"] }, ["asyncBlocking"]
-												 );
+													{ urls: ["<all_urls>"] }, ["blocking"]
+													);
 }
 
 /**

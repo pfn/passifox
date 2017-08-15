@@ -2,26 +2,29 @@ var httpAuth = httpAuth || {};
 
 httpAuth.pendingCallbacks = [];
 httpAuth.requestId = "";
-httpAuth.callback = null;
 httpAuth.tabId = 0;
 httpAuth.url = null;
 httpAuth.isProxy = false;
 httpAuth.proxyUrl = null;
+httpAuth.resolve = null;
 
 
-httpAuth.handleRequest = function (details, callback) {
-	if(httpAuth.requestId == details.requestId || !page.tabs[details.tabId]) {
-		callback({});
-	}
-	else {
-		httpAuth.requestId = details.requestId;
-		httpAuth.pendingCallbacks.push(callback);
-		httpAuth.processPendingCallbacks(details);
-	}
+httpAuth.handleRequest = function (details) {
+	return new Promise((resolve, reject) => {
+		if(httpAuth.requestId == details.requestId || !page.tabs[details.tabId]) {
+			resolve({cancel: true});
+		}
+		else {
+			httpAuth.requestId = details.requestId;
+			httpAuth.pendingCallbacks.push(details);
+			httpAuth.resolve = resolve;
+			httpAuth.processPendingCallbacks(details);
+		}
+	});
 }
 
 httpAuth.processPendingCallbacks = function(details) {
-	httpAuth.callback = httpAuth.pendingCallbacks.pop();
+	//httpAuth.callback = httpAuth.pendingCallbacks.pop();
 	httpAuth.tabId = details.tabId;
 	httpAuth.url = details.url;
 	httpAuth.isProxy = details.isProxy;
@@ -47,7 +50,7 @@ httpAuth.loginOrShowCredentials = function(logins) {
 		//generate popup-list for HTTP Auth usernames + descriptions
 
 		if(page.settings.autoFillAndSend) {
-			httpAuth.callback({
+			httpAuth.resolve({
 				authCredentials: {
 					username: logins[0].Login,
 					password: logins[0].Password
@@ -55,11 +58,11 @@ httpAuth.loginOrShowCredentials = function(logins) {
 			});
 		}
 		else {
-			httpAuth.callback({});
+			httpAuth.resolve({cancel:true});
 		}
 	}
 	// no logins found
 	else {
-		httpAuth.callback({});
+		httpAuth.resolve({cancel:true});
 	}
 }
