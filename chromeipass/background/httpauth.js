@@ -1,30 +1,29 @@
 var httpAuth = httpAuth || {};
 
-httpAuth.pendingCallbacks = [];
 httpAuth.requestId = "";
 httpAuth.tabId = 0;
 httpAuth.url = null;
 httpAuth.isProxy = false;
 httpAuth.proxyUrl = null;
 httpAuth.resolve = null;
+httpAuth.reject = null;
 
 
 httpAuth.handleRequest = function (details) {
 	return new Promise((resolve, reject) => {
 		if(httpAuth.requestId == details.requestId || !page.tabs[details.tabId]) {
-			resolve({cancel: true});
+			reject({});
 		}
 		else {
 			httpAuth.requestId = details.requestId;
-			httpAuth.pendingCallbacks.push(details);
 			httpAuth.resolve = resolve;
+			httpAuth.reject = reject;
 			httpAuth.processPendingCallbacks(details);
 		}
 	});
 }
 
 httpAuth.processPendingCallbacks = function(details) {
-	//httpAuth.callback = httpAuth.pendingCallbacks.pop();
 	httpAuth.tabId = details.tabId;
 	httpAuth.url = details.url;
 	httpAuth.isProxy = details.isProxy;
@@ -58,11 +57,11 @@ httpAuth.loginOrShowCredentials = function(logins) {
 			});
 		}
 		else {
-			httpAuth.resolve({cancel:true});
+			httpAuth.reject({});
 		}
 	}
 	// no logins found
 	else {
-		httpAuth.resolve({cancel:true});
+		httpAuth.reject({});
 	}
 }
