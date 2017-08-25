@@ -80,7 +80,7 @@ event.invoke = function(handler, callback, senderTabId, args, secondTime) {
 
 event.onShowAlert = function(callback, tab, message) {
 	if( page.settings.supressAlerts ){ console.log(message); }
-	else { alert(message); }
+	else { browser.tabs.executeScript({code: 'alert(\''+message+'\')'}); }
 }
 
 event.onLoadSettings = function(callback, tab) {
