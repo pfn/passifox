@@ -146,6 +146,27 @@ browser.contextMenus.create({
 	}
 });
 
+/**
+ * Listen for keyboard shortcuts specified by user
+ */
+browser.commands.onCommand.addListener(function(command) {
+
+	if(command === "fill-username-password") {
+		browser.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+			if (tabs.length) {
+				browser.tabs.sendMessage(tabs[0].id, { action: "fill_user_pass" });
+			}
+		});
+	}
+
+	if(command === "fill-password") {
+		browser.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+			if (tabs.length) {
+				browser.tabs.sendMessage(tabs[0].id, { action: "fill_pass_only" });
+			}
+		});
+	}
+});
 
 /**
  * Interval which updates the browserAction (e.g. blinking icon)
