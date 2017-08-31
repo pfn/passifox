@@ -9,6 +9,12 @@
 		"128": "icons/keepass_128x128.png"
 	},
 
+	"applications": {
+		"gecko": {
+			"id": "chromeipass@addons.brandt.tech"
+		}
+	},
+
 	"browser_action": {
 		"default_icon": {
 			"19": "icons/19x19/icon_normal_blue_19x19.png",
