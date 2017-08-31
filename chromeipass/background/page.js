@@ -12,7 +12,7 @@ page.migrateSettings = () => {
 		if (old) {
 			var settings = JSON.parse(old);
 			browser.storage.local.set({'settings': settings}).then(() => {
-				localStorage.removeItem(item);
+				localStorage.removeItem('settings');
 				resolve(obj);
 			});
 		} else {
