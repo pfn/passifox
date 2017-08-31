@@ -85,6 +85,7 @@
 		"activeTab",
 		"contextMenus",
 		"clipboardWrite",
+		"storage",
 		"tabs",
 		"webRequest",
 		"webRequestBlocking",

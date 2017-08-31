@@ -4,36 +4,57 @@ var page = {};
 page.tabs = {};
 
 page.currentTabId = -1;
-page.settings = (typeof(localStorage.settings) == 'undefined') ? {} : JSON.parse(localStorage.settings);
 page.blockedTabs = {};
 
+page.migrateSettings = () => {
+	return new Promise((resolve, reject) => {
+		var old = localStorage.getItem('settings');
+		if (old) {
+			var settings = JSON.parse(old);
+			browser.storage.local.set({'settings': settings}).then(() => {
+				localStorage.removeItem(item);
+				resolve(obj);
+			});
+		} else {
+			event.onLoadSettings((settings) => {
+				resolve(settings);
+			});
+		}
+	});
+};
+
 page.initSettings = function() {
-	event.onLoadSettings();
-	if(!("checkUpdateKeePassHttp" in page.settings)) {
-		page.settings.checkUpdateKeePassHttp = 3;
-	}
-	if(!("autoCompleteUsernames" in page.settings)) {
-		page.settings.autoCompleteUsernames = 1;
-	}
-	if(!("autoFillAndSend" in page.settings)) {
-		page.settings.autoFillAndSend = 1;
-	}
-	if(!("usePasswordGenerator" in page.settings)) {
-		page.settings.usePasswordGenerator = 1;
-	}
-	if(!("autoFillSingleEntry" in page.settings)) {
-		page.settings.autoFillSingleEntry = 1;
-	}
-	if(!("autoRetrieveCredentials" in page.settings)) {
-		page.settings.autoRetrieveCredentials = 1;
-	}
-	if(!("hostname" in page.settings)) {
-		page.settings.hostname = "localhost";
-	}
-	if(!("port" in page.settings)) {
-		page.settings.port = "19455";
-	}
-	localStorage.settings = JSON.stringify(page.settings);
+	return new Promise((resolve, reject) => {
+		page.migrateSettings().then((settings) => {
+			page.settings = settings;
+			if(!("checkUpdateKeePassHttp" in page.settings)) {
+				page.settings.checkUpdateKeePassHttp = 3;
+			}
+			if(!("autoCompleteUsernames" in page.settings)) {
+				page.settings.autoCompleteUsernames = 1;
+			}
+			if(!("autoFillAndSend" in page.settings)) {
+				page.settings.autoFillAndSend = 1;
+			}
+			if(!("usePasswordGenerator" in page.settings)) {
+				page.settings.usePasswordGenerator = 1;
+			}
+			if(!("autoFillSingleEntry" in page.settings)) {
+				page.settings.autoFillSingleEntry = 1;
+			}
+			if(!("autoRetrieveCredentials" in page.settings)) {
+				page.settings.autoRetrieveCredentials = 1;
+			}
+			if(!("hostname" in page.settings)) {
+				page.settings.hostname = "localhost";
+			}
+			if(!("port" in page.settings)) {
+				page.settings.port = "19455";
+			}
+			browser.storage.local.set({'settings': page.settings});
+			resolve();
+		});
+	});
 }
 
 page.initOpenedTabs = function() {
@@ -64,13 +85,13 @@ page.clearCredentials = function(tabId, complete) {
 	page.tabs[tabId].credentials = {};
 	delete page.tabs[tabId].credentials;
 
-    if(complete) {
-        page.tabs[tabId].loginList = [];
+	if(complete) {
+		page.tabs[tabId].loginList = [];
 
-        browser.tabs.sendMessage(tabId, {
-            action: "clear_credentials"
-        });
-    }
+		browser.tabs.sendMessage(tabId, {
+			action: "clear_credentials"
+		});
+	}
 }
 
 page.createTabEntry = function(tabId) {
@@ -113,11 +134,10 @@ page.debugConsole = function() {
 
 page.sprintf = function(input, args) {
 	return input.replace(/{(\d+)}/g, function(match, number) {
-      return typeof args[number] != 'undefined'
-        ? (typeof args[number] == 'object' ? JSON.stringify(args[number]) : args[number])
-        : match
-      ;
-    });
+		return typeof args[number] != 'undefined'
+			? (typeof args[number] == 'object' ? JSON.stringify(args[number]) : args[number])
+			: match;
+	});
 }
 
 page.debugDummy = function() {};

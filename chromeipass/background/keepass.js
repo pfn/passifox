@@ -5,18 +5,23 @@ keepass.isDatabaseClosed = false;
 keepass.isKeePassHttpAvailable = false;
 keepass.isEncryptionKeyUnrecognized = false;
 keepass.currentKeePassHttp = {"version": 0, "versionParsed": 0};
-keepass.latestKeePassHttp = (typeof(localStorage.latestKeePassHttp) == 'undefined') ? {"version": 0, "versionParsed": 0, "lastChecked": null} : JSON.parse(localStorage.latestKeePassHttp);
 keepass.keySize = 8; // wtf? stupid cryptoHelpers
 keepass.pluginUrlDefault = "http://localhost:19455/";
 keepass.latestVersionUrl = "https://passifox.appspot.com/kph/latest-version.txt";
 keepass.cacheTimeout = 30 * 1000; // milliseconds
 keepass.databaseHash = "no-hash"; //no-hash = keepasshttp is too old and does not return a hash value
-keepass.keyRing = (typeof(localStorage.keyRing) == 'undefined') ? {} : JSON.parse(localStorage.keyRing);
 keepass.keyId = "chromeipass-cryptokey-name";
 keepass.keyBody = "chromeipass-key";
 keepass.to_s = cryptoHelpers.convertByteArrayToString;
 keepass.to_b = cryptoHelpers.convertStringToByteArray;
 
+browser.storage.local.get({
+	'latestKeePassHttp': {'version': 0, 'versionParsed': 0, 'lastChecked': null},
+	'keyRing': {}})
+	.then((item) => {
+	keepass.latestKeePassHttp = item.latestKeePassHttp;
+	keepass.keyRing = item.keyRing;
+});
 
 keepass.addCredentials = function(callback, tab, username, password, url) {
 	keepass.updateCredentials(callback, tab, null, username, password, url);
@@ -315,17 +320,29 @@ keepass.checkStatus = function (status, tab) {
 	return success;
 }
 
-keepass.convertKeyToKeyRing = function() {
-	if(keepass.keyId in localStorage && keepass.keyBody in localStorage && !("keyRing" in localStorage)) {
-		var hash = keepass.getDatabaseHash(null);
-		keepass.saveKey(hash, localStorage[keepass.keyId], localStorage[keepass.keyBody]);
-	}
-
-	if("keyRing" in localStorage) {
-		delete localStorage[keepass.keyId];
-		delete localStorage[keepass.keyBody];
-	}
-}
+keepass.migrateKeyRing = () => {
+	return new Promise((resolve, reject) => {
+		browser.storage.local.get('keyRing').then((item) => {
+			var keyring = item.keyRing;
+			if ('keyRing' in localStorage) {
+				if (!keyring) {
+					keyring = JSON.parse(localStorage['keyRing']);
+					browser.storage.local.set({'keyRing': keyring});
+				}
+				delete localStorage['keyRing'];
+			}
+			if (keepass.keyId in localStorage && keepass.keyBody in localStorage) {
+				if (!keyring) {
+					var hash = keepass.getDatabaseHash(null);
+					keepass.saveKey(hash, localStorage[keepass.keyId], localStorage[keepass.keyBody]);
+				}
+				delete localStorage[keepass.keyId];
+				delete localStorage[keepass.keyBody];
+			}
+			resolve();
+		});
+	});
+};
 
 keepass.saveKey = function(hash, id, key) {
 	if(!(hash in keepass.keyRing)) {
@@ -341,19 +358,19 @@ keepass.saveKey = function(hash, id, key) {
 		keepass.keyRing[hash].id = id;
 		keepass.keyRing[hash].key = key;
 	}
-	localStorage.keyRing = JSON.stringify(keepass.keyRing);
+	browser.storage.local.set({'keyRing': keepass.keyRing});
 }
 
 keepass.updateLastUsed = function(hash) {
 	if((hash in keepass.keyRing)) {
 		keepass.keyRing[hash].lastUsed = new Date();
-		localStorage.keyRing = JSON.stringify(keepass.keyRing);
+		browser.storage.local.set({'keyRing': keepass.keyRing});
 	}
 }
 
 keepass.deleteKey = function(hash) {
 	delete keepass.keyRing[hash];
-	localStorage.keyRing = JSON.stringify(keepass.keyRing);
+	browser.storage.local.set({'keyRing': keepass.keyRing});
 }
 
 keepass.getIconColor = function() {
@@ -410,7 +427,7 @@ keepass.checkForNewKeePassHttpVersion = function() {
 	}
 
 	if($version != -1) {
-		localStorage.latestKeePassHttp = JSON.stringify(keepass.latestKeePassHttp);
+		browser.storage.local.set({'latestKeePassHttp': keepass.latestKeePassHttp});
 	}
 	keepass.latestKeePassHttp.lastChecked = new Date();
 }

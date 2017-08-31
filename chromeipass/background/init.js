@@ -1,17 +1,23 @@
 // since version 2.0 the extension is using a keyRing instead of a single key-name-pair
-keepass.convertKeyToKeyRing();
-// load settings
-page.initSettings();
-// create tab information structure for every opened tab
-page.initOpenedTabs();
-// initial connection with KeePassHttp
-keepass.getDatabaseHash(null);
-// set initial tab-ID
-browser.tabs.query({"active": true, "currentWindow": true}).then(function(tabs) {
-	if (tabs.length === 0)
-		return; // For example: only the background devtools or a popup are opened
-	page.currentTabId = tabs[0].id;
+keepass.migrateKeyRing().then(() => {
+	// load settings
+	page.initSettings().then(() => {
+		// initial connection with KeePassHttp
+		keepass.getDatabaseHash(null);
+
+		// create tab information structure for every opened tab
+		page.initOpenedTabs();
+
+		// set initial tab-ID
+		browser.tabs.query({"active": true, "currentWindow": true}).then(function(tabs) {
+			if (tabs.length === 0)
+				return; // For example: only the background devtools or a popup are opened
+			page.currentTabId = tabs[0].id;
+			browserAction.show(null, tabs[0]);
+		});
+	});
 });
+
 // Milliseconds for intervall (e.g. to update browserAction)
 var _interval = 250;
 

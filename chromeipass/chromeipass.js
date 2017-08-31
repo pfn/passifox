@@ -16,10 +16,10 @@ browser.runtime.onMessage.addListener(function(req, sender, callback) {
 					combination = cipFields.getCombination("password", cip.p);
 				}
 
-                var list = {};
+				var list = {};
 				if(cip.fillInStringFields(combination.fields, cip.credentials[req.id].StringFields, list)) {
-                    cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
-                }
+					cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+				}
 			}
 			// wish I could clear out _logins and _u, but a subsequent
 			// selection may be requested.
@@ -49,9 +49,9 @@ browser.runtime.onMessage.addListener(function(req, sender, callback) {
 		}
 		else if (req.action == "redetect_fields") {
 			browser.runtime.sendMessage({
-				"action": "get_settings",
-			}).then(function(response) {
-				cip.settings = response.data;
+				"action": "load_settings",
+			}).then(function(settings) {
+				cip.settings = settings;
 				cip.initCredentialFields(true);
 			});
 		}
@@ -163,7 +163,7 @@ cipPassword.init = function() {
 	}, 400);
 
 	/* Append extension-local background-image URLs to
-	   'generate password' icon CSS classes */
+		'generate password' icon CSS classes */
 	var make_keyicon_css = function(nested_class, icon_size) {
 		return ".cip-genpw-icon." + nested_class + " {" +
 			"background-image: url(" +
@@ -488,16 +488,16 @@ cipForm.init = function(form, credentialFields) {
 }
 
 cipForm.destroy = function(form, credentialFields) {
-    if(form === false && credentialFields) {
-        var field = _f(credentialFields.password) || _f(credentialFields.username);
+	if(form === false && credentialFields) {
+		var field = _f(credentialFields.password) || _f(credentialFields.username);
 		if(field) {
 			form = field.closest("form");
 		}
-    }
+	}
 
-    if(form && cIPJQ(form).length > 0) {
-        cIPJQ(form).unbind('submit', cipForm.onSubmit);
-    }
+	if(form && cIPJQ(form).length > 0) {
+		cIPJQ(form).unbind('submit', cipForm.onSubmit);
+	}
 }
 
 cipForm.setInputFields = function(form, credentialFields) {
@@ -769,7 +769,7 @@ cipDefine.prepareStep3 = function() {
 		cIPJQ("button#b2c-btn-dismiss").click();
 		return;
 	}
-	 */
+	*/
 
 	if(!cipDefine.selection.username && !cipDefine.selection.password) {
 		cIPJQ("button#b2c-btn-confirm:first").removeClass("b2c-btn-primary").attr("disabled", true);
@@ -889,7 +889,7 @@ cipFields.getCombination = function(givenType, fieldId) {
 		"password": null
 	};
 
-    var newCombi = false;
+	var newCombi = false;
 	if(givenType == "username") {
 		var passwordField = cipFields.getPasswordField(fieldId, true);
 		var passwordId = null;
@@ -900,7 +900,7 @@ cipFields.getCombination = function(givenType, fieldId) {
 			"username": fieldId,
 			"password": passwordId
 		};
-        newCombi = true;
+		newCombi = true;
 	}
 	else if(givenType == "password") {
 		var usernameField = cipFields.getUsernameField(fieldId, true);
@@ -912,7 +912,7 @@ cipFields.getCombination = function(givenType, fieldId) {
 			"username": usernameId,
 			"password": fieldId
 		};
-        newCombi = true;
+		newCombi = true;
 	}
 
 	if(combination.username || combination.password) {
@@ -925,9 +925,9 @@ cipFields.getCombination = function(givenType, fieldId) {
 		}
 	}
 
-    if(newCombi) {
-        combination.isNew = true;
-    }
+	if(newCombi) {
+		combination.isNew = true;
+	}
 	return combination;
 }
 
@@ -1120,9 +1120,9 @@ cip.credentials = [];
 
 cip.init = function() {
 	browser.runtime.sendMessage({
-		"action": "get_settings",
-	}).then(function(response) {
-		cip.settings = response.data;
+		"action": "load_settings",
+	}).then(function(settings) {
+		cip.settings = settings;
 		cip.initCredentialFields();
 	});
 }
@@ -1153,12 +1153,12 @@ cip.initCredentialFields = function(forceCall) {
 	cip.url = document.location.origin;
 	cip.submitUrl = cip.getFormActionUrl(cipFields.combinations[0]);
 
-  if(cip.settings.autoRetrieveCredentials) {
-    browser.runtime.sendMessage({
-      'action': 'retrieve_credentials',
-      'args': [ cip.url, cip.submitUrl ]
-    }).then(cip.retrieveCredentialsCallback);
-  }
+	if(cip.settings.autoRetrieveCredentials) {
+		browser.runtime.sendMessage({
+			'action': 'retrieve_credentials',
+			'args': [ cip.url, cip.submitUrl ]
+		}).then(cip.retrieveCredentialsCallback);
+	}
 } // end function init
 
 cip.initPasswordGenerator = function(inputs) {
@@ -1266,9 +1266,9 @@ cip.preparePageForMultipleCredentials = function(credentials) {
 cip.getFormActionUrl = function(combination) {
 	var field = _f(combination.password) || _f(combination.username);
 
-    if(field == null) {
-        return null;
-    }
+	if(field == null) {
+		return null;
+	}
 
 	var form = field.closest("form");
 	var action = null;
@@ -1401,14 +1401,14 @@ cip.setValue = function(field, value) {
 cip.fillInStringFields = function(fields, StringFields, filledInFields) {
 	var $filledIn = false;
 
-    filledInFields.list = [];
+	filledInFields.list = [];
 	if(fields && StringFields && fields.length > 0 && StringFields.length > 0) {
-        for(var i = 0; i < fields.length; i++) {
+		for(var i = 0; i < fields.length; i++) {
 			var $sf = _fs(fields[i]);
 			if($sf && StringFields[i]) {
 				//$sf.val(StringFields[i].Value);
 				cip.setValue($sf, StringFields[i].Value);
-                filledInFields.list.push(fields[i]);
+				filledInFields.list.push(fields[i]);
 				$filledIn = true;
 			}
 		}
@@ -1462,11 +1462,11 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 			filledIn = true;
 		}
 
-        var list = {};
+		var list = {};
 		if(cip.fillInStringFields(combination.fields, cip.credentials[0].StringFields, list)) {
-            cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
-            filledIn = true;
-        }
+			cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+			filledIn = true;
+		}
 
 		if(!filledIn) {
 			if(!suppressWarnings) {
@@ -1492,11 +1492,11 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 			filledIn = true;
 		}
 
-        var list = {};
+		var list = {};
 		if(cip.fillInStringFields(combination.fields, cip.credentials[combination.loginId].StringFields, list)) {
-            cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
-            filledIn = true;
-        }
+			cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+			filledIn = true;
+		}
 
 		if(!filledIn) {
 			if(!suppressWarnings) {
@@ -1544,10 +1544,10 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 					pField.data("unchanged", true);
 				}
 
-                var list = {};
+				var list = {};
 				if(cip.fillInStringFields(combination.fields, valStringFields, list)) {
-                    cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
-                }
+					cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+				}
 			}
 
 			// user has to select correct credentials by himself

@@ -1,5 +1,4 @@
 var $ = cIPJQ.noConflict(true);
-var _settings = typeof(localStorage.settings)=='undefined' ? {} : JSON.parse(localStorage.settings);
 
 function updateAvailableResponse(available) {
 	if(available) {
