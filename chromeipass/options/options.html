@@ -6,6 +6,7 @@
 		<link href="bootstrap.min.css" rel="stylesheet" />
 		<link rel="stylesheet" href="../bootstrap-btn.css" />
 		<link href="bootstrap-responsive.min.css" rel="stylesheet" />
+		<script type="text/javascript" src="../browser-polyfill.min.js"></script>
 		<script type="text/javascript" src="../jquery-1.11.1.min.js"></script>
 		<script type="text/javascript" src="bootstrap.min.js"></script>
 		<script type="text/javascript" src="options.js"></script>
@@ -225,7 +226,7 @@
 					</div>
 				</div>
 				<hr />
-				<p>
+				<p id="http-auth-options">
 					<label class="checkbox">
 						<input type="checkbox" name="autoFillAndSend" value="1" /> Auto fill HTTP Auth dialogs and send them.
 					</label>
@@ -424,13 +425,14 @@
 				<h2>About</h2>
 				<hr />
 				<p>
-					Developed by <a target="_blank" href="https://github.com/pfn/">Perry Nguyen</a> and <a target="_blank" href="http://lukas-schulze.de">Lukas Schulze</a>.
+					Developed by <a target="_blank" href="https://github.com/pfn/">Perry Nguyen</a> and <a target="_blank" href="http://lukas-schulze.de">Lukas Schulze</a>.<br />
+					WebExtension (Firefox) compatibility by <a target="_blank" href="https://github.com/projectgus">Angus Gratton</a> and <a target="_blank" href="https://github.com/smorks">Andy Brandt</a>.
 				</p>
 				<p>
-					<a target="_blank" href="https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae">Visit extension's page in Chrome Web store</a>
+					<a target="_blank" href="https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae" id="chrome-web-store-link">Visit extension's page in Chrome Web store</a>
 				</p>
 				<p>
-					<a target="_blank" href="https://github.com/pfn/passifox">Visit project's page in GitHub</a>.
+					<a target="_blank" href="https://github.com/smorks/passifox">Visit project's page in GitHub</a>.
 				</p>
 				<hr />
 				<div class="row">
@@ -444,7 +446,7 @@
 			</div>
 			<hr>
 			<div class="footer">
-				<p>2010-2016 - Perry Nguyen, Lukas Schulze</p>
+				<p>2010-2017 - Perry Nguyen, Lukas Schulze</p>
 			</div>
 		</div> <!-- /container -->
 	</body>

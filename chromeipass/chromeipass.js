@@ -1,7 +1,7 @@
 // contains already called method names
 var _called = {};
 
-chrome.extension.onMessage.addListener(function(req, sender, callback) {
+browser.runtime.onMessage.addListener(function(req, sender, callback) {
 	if ('action' in req) {
 		if(req.action == "fill_user_pass_with_specific_login") {
 			if(cip.credentials[req.id]) {
@@ -16,10 +16,10 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 					combination = cipFields.getCombination("password", cip.p);
 				}
 
-                var list = {};
+				var list = {};
 				if(cip.fillInStringFields(combination.fields, cip.credentials[req.id].StringFields, list)) {
-                    cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
-                }
+					cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+				}
 			}
 			// wish I could clear out _logins and _u, but a subsequent
 			// selection may be requested.
@@ -48,10 +48,10 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 			cipEvents.triggerActivatedTab();
 		}
 		else if (req.action == "redetect_fields") {
-			chrome.extension.sendMessage({
-				"action": "get_settings",
-			}, function(response) {
-				cip.settings = response.data;
+			browser.runtime.sendMessage({
+				"action": "load_settings",
+			}).then(function(settings) {
+				cip.settings = settings;
 				cip.initCredentialFields(true);
 			});
 		}
@@ -161,6 +161,18 @@ cipPassword.init = function() {
 	window.setInterval(function() {
 		cipPassword.checkObservedElements();
 	}, 400);
+
+	/* Append extension-local background-image URLs to
+		'generate password' icon CSS classes */
+	var make_keyicon_css = function(nested_class, icon_size) {
+		return ".cip-genpw-icon." + nested_class + " {" +
+			"background-image: url(" +
+			browser.runtime.getURL("/icons/key_"+icon_size+".png") +
+			"); }\n";
+	}
+	var styleStr = make_keyicon_css("cip-icon-key-small", "16x16") +
+		make_keyicon_css("cip-icon-key-big", "24x24");
+	cIPJQ('<style>'+styleStr+'</style>').appendTo('head');
 }
 
 cipPassword.initField = function(field, inputs, pos) {
@@ -211,9 +223,9 @@ cipPassword.createDialog = function() {
 		.css("float", "left")
 		.click(function(e) {
 			e.preventDefault();
-			chrome.extension.sendMessage({
+			browser.runtime.sendMessage({
 				action: "generate_password"
-			}, cipPassword.callbackGeneratedPassword);
+			}).then(cipPassword.callbackGeneratedPassword);
 		});
 	$divFloat.append($btnGenerate);
 
@@ -223,14 +235,8 @@ cipPassword.createDialog = function() {
 		.addClass("b2c-btn")
 		.addClass("b2c-btn-small")
 		.css("float", "right")
-		.click(function(e) {
-			e.preventDefault();
+		.click(cipPassword.copyPasswordToClipboard);
 
-			chrome.extension.sendMessage({
-				action: "copy_password",
-				args: [cIPJQ("input#cip-genpw-textfield-password").val()]
-			}, cipPassword.callbackPasswordCopied);
-		});
 	$divFloat.append($btnClipboard);
 
 	$dialog.append($divFloat);
@@ -295,11 +301,7 @@ cipPassword.createDialog = function() {
 					}
 				}
 
-				// copy password to clipboard
-				chrome.extension.sendMessage({
-					action: "copy_password",
-					args: [$password]
-				}, cipPassword.callbackPasswordCopied);
+				cipPassword.copyPasswordToClipboard();
 			}
 		});
 	$dialog.append($btnFillIn);
@@ -395,10 +397,18 @@ cipPassword.setIconPosition = function($icon, $field) {
 		.css("left", $field.offset().left + $field.outerWidth() - $icon.data("size") - $icon.data("offset"))
 }
 
-cipPassword.callbackPasswordCopied = function(bool) {
-	if(bool) {
+cipPassword.copyPasswordToClipboard = function(e) {
+	if (e) {
+		e.preventDefault();
+	}
+
+	var input = cIPJQ("input#cip-genpw-textfield-password");
+	input.select()
+	var success = document.execCommand("copy");
+	if(success) {
 		cIPJQ("#cip-genpw-btn-clipboard").addClass("b2c-btn-success");
 	}
+	cIPJQ("#cip-genpw-dialog").select();
 }
 
 cipPassword.callbackGeneratedPassword = function(entries) {
@@ -426,9 +436,9 @@ cipPassword.callbackGeneratedPassword = function(entries) {
 }
 
 cipPassword.onRequestPassword = function() {
-	chrome.extension.sendMessage({
+	browser.runtime.sendMessage({
 		'action': 'generate_password'
-	}, cipPassword.callbackGeneratedPassword);
+	}).then(cipPassword.callbackGeneratedPassword);
 }
 
 cipPassword.checkObservedElements = function() {
@@ -478,16 +488,16 @@ cipForm.init = function(form, credentialFields) {
 }
 
 cipForm.destroy = function(form, credentialFields) {
-    if(form === false && credentialFields) {
-        var field = _f(credentialFields.password) || _f(credentialFields.username);
+	if(form === false && credentialFields) {
+		var field = _f(credentialFields.password) || _f(credentialFields.username);
 		if(field) {
 			form = field.closest("form");
 		}
-    }
+	}
 
-    if(form && cIPJQ(form).length > 0) {
-        cIPJQ(form).unbind('submit', cipForm.onSubmit);
-    }
+	if(form && cIPJQ(form).length > 0) {
+		cIPJQ(form).unbind('submit', cipForm.onSubmit);
+	}
 }
 
 cipForm.setInputFields = function(form, credentialFields) {
@@ -612,7 +622,7 @@ cipDefine.initDescription = function() {
 				"fields": fieldIds
 			};
 
-			chrome.extension.sendMessage({
+			browser.runtime.sendMessage({
 				action: 'save_settings',
 				args: [cip.settings]
 			});
@@ -638,12 +648,12 @@ cipDefine.initDescription = function() {
 			.click(function(e) {
 				delete cip.settings["defined-credential-fields"][document.location.origin];
 
-				chrome.extension.sendMessage({
+				browser.runtime.sendMessage({
 					action: 'save_settings',
 					args: [cip.settings]
 				});
 
-				chrome.extension.sendMessage({
+				browser.runtime.sendMessage({
 					action: 'load_settings'
 				});
 
@@ -759,7 +769,7 @@ cipDefine.prepareStep3 = function() {
 		cIPJQ("button#b2c-btn-dismiss").click();
 		return;
 	}
-	 */
+	*/
 
 	if(!cipDefine.selection.username && !cipDefine.selection.password) {
 		cIPJQ("button#b2c-btn-confirm:first").removeClass("b2c-btn-primary").attr("disabled", true);
@@ -773,8 +783,7 @@ cipDefine.prepareStep3 = function() {
 }
 
 
-
-cipFields = {}
+var cipFields = {}
 
 cipFields.inputQueryPattern = "input[type='text'], input[type='email'], input[type='username'], input[type='password'], input[type='tel'], input[type='number'], input:not([type])";
 // unique number as new IDs for input fields
@@ -880,7 +889,7 @@ cipFields.getCombination = function(givenType, fieldId) {
 		"password": null
 	};
 
-    var newCombi = false;
+	var newCombi = false;
 	if(givenType == "username") {
 		var passwordField = cipFields.getPasswordField(fieldId, true);
 		var passwordId = null;
@@ -891,7 +900,7 @@ cipFields.getCombination = function(givenType, fieldId) {
 			"username": fieldId,
 			"password": passwordId
 		};
-        newCombi = true;
+		newCombi = true;
 	}
 	else if(givenType == "password") {
 		var usernameField = cipFields.getUsernameField(fieldId, true);
@@ -903,7 +912,7 @@ cipFields.getCombination = function(givenType, fieldId) {
 			"username": usernameId,
 			"password": fieldId
 		};
-        newCombi = true;
+		newCombi = true;
 	}
 
 	if(combination.username || combination.password) {
@@ -916,9 +925,9 @@ cipFields.getCombination = function(givenType, fieldId) {
 		}
 	}
 
-    if(newCombi) {
-        combination.isNew = true;
-    }
+	if(newCombi) {
+		combination.isNew = true;
+	}
 	return combination;
 }
 
@@ -1109,15 +1118,11 @@ cip.submitUrl = null;
 // received credentials from KeePassHTTP
 cip.credentials = [];
 
-cIPJQ(function() {
-	cip.init();
-});
-
 cip.init = function() {
-	chrome.extension.sendMessage({
-		"action": "get_settings",
-	}, function(response) {
-		cip.settings = response.data;
+	browser.runtime.sendMessage({
+		"action": "load_settings",
+	}).then(function(settings) {
+		cip.settings = settings;
 		cip.initCredentialFields();
 	});
 }
@@ -1139,7 +1144,7 @@ cip.initCredentialFields = function(forceCall) {
 	cipFields.prepareCombinations(cipFields.combinations);
 
 	if(cipFields.combinations.length == 0) {
-		chrome.extension.sendMessage({
+		browser.runtime.sendMessage({
 			'action': 'show_default_browseraction'
 		});
 		return;
@@ -1148,12 +1153,12 @@ cip.initCredentialFields = function(forceCall) {
 	cip.url = document.location.origin;
 	cip.submitUrl = cip.getFormActionUrl(cipFields.combinations[0]);
 
-  if(cip.settings.autoRetrieveCredentials) {
-    chrome.extension.sendMessage({
-      'action': 'retrieve_credentials',
-      'args': [ cip.url, cip.submitUrl ]
-    }, cip.retrieveCredentialsCallback);
-  }
+	if(cip.settings.autoRetrieveCredentials) {
+		browser.runtime.sendMessage({
+			'action': 'retrieve_credentials',
+			'args': [ cip.url, cip.submitUrl ]
+		}).then(cip.retrieveCredentialsCallback);
+	}
 } // end function init
 
 cip.initPasswordGenerator = function(inputs) {
@@ -1170,10 +1175,10 @@ cip.initPasswordGenerator = function(inputs) {
 
 cip.receiveCredentialsIfNecessary = function () {
 	if(cip.credentials.length == 0) {
-		chrome.extension.sendMessage({
+		browser.runtime.sendMessage({
 			'action': 'retrieve_credentials',
 			'args': [ cip.url, cip.submitUrl ]
-		}, cip.retrieveCredentialsCallback);
+		}).then(cip.retrieveCredentialsCallback);
 	}
 }
 
@@ -1215,7 +1220,7 @@ cip.prepareFieldsForCredentials = function(autoFillInForSingle) {
 		}
 
 		// generate popup-list of usernames + descriptions
-		chrome.extension.sendMessage({
+		browser.runtime.sendMessage({
 			'action': 'popup_login',
 			'args': [[cip.credentials[0].Login + " (" + cip.credentials[0].Name + ")"]]
 		});
@@ -1243,7 +1248,7 @@ cip.preparePageForMultipleCredentials = function(credentials) {
 	}
 
 	// generate popup-list of usernames + descriptions
-	chrome.extension.sendMessage({
+	browser.runtime.sendMessage({
 		'action': 'popup_login',
 		'args': [usernames]
 	});
@@ -1261,9 +1266,9 @@ cip.preparePageForMultipleCredentials = function(credentials) {
 cip.getFormActionUrl = function(combination) {
 	var field = _f(combination.password) || _f(combination.username);
 
-    if(field == null) {
-        return null;
-    }
+	if(field == null) {
+		return null;
+	}
 
 	var form = field.closest("form");
 	var action = null;
@@ -1311,10 +1316,10 @@ cip.fillInCredentials = function(combination, onlyPassword, suppressWarnings) {
 		cip.url = document.location.origin;
 		cip.submitUrl = action;
 
-		chrome.extension.sendMessage({
+		browser.runtime.sendMessage({
 			'action': 'retrieve_credentials',
 			'args': [ cip.url, cip.submitUrl, false, true ]
-		}, function(credentials) {
+		}).then(function(credentials) {
 			cip.retrieveCredentialsCallback(credentials, true);
 			cip.fillIn(combination, onlyPassword, suppressWarnings);
 		});
@@ -1365,7 +1370,7 @@ cip.fillInFromActiveElementPassOnly = function(suppressWarnings) {
 
 	if(!_f(combination.password)) {
 		var message = "Unable to find a password field";
-		chrome.extension.sendMessage({
+		browser.runtime.sendMessage({
 			action: 'alert',
 			args: [message]
 		});
@@ -1396,14 +1401,14 @@ cip.setValue = function(field, value) {
 cip.fillInStringFields = function(fields, StringFields, filledInFields) {
 	var $filledIn = false;
 
-    filledInFields.list = [];
+	filledInFields.list = [];
 	if(fields && StringFields && fields.length > 0 && StringFields.length > 0) {
-        for(var i = 0; i < fields.length; i++) {
+		for(var i = 0; i < fields.length; i++) {
 			var $sf = _fs(fields[i]);
 			if($sf && StringFields[i]) {
 				//$sf.val(StringFields[i].Value);
 				cip.setValue($sf, StringFields[i].Value);
-                filledInFields.list.push(fields[i]);
+				filledInFields.list.push(fields[i]);
 				$filledIn = true;
 			}
 		}
@@ -1433,7 +1438,7 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 	// no credentials available
 	if (cip.credentials.length == 0 && !suppressWarnings) {
 		var message = "No logins found.";
-		chrome.extension.sendMessage({
+		browser.runtime.sendMessage({
 			action: 'alert',
 			args: [message]
 		});
@@ -1457,16 +1462,16 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 			filledIn = true;
 		}
 
-        var list = {};
+		var list = {};
 		if(cip.fillInStringFields(combination.fields, cip.credentials[0].StringFields, list)) {
-            cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
-            filledIn = true;
-        }
+			cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+			filledIn = true;
+		}
 
 		if(!filledIn) {
 			if(!suppressWarnings) {
 				var message = "Error #101\nCannot find fields to fill in.";
-				chrome.extension.sendMessage({
+				browser.runtime.sendMessage({
 					action: 'alert',
 					args: [message]
 				});
@@ -1487,16 +1492,16 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 			filledIn = true;
 		}
 
-        var list = {};
+		var list = {};
 		if(cip.fillInStringFields(combination.fields, cip.credentials[combination.loginId].StringFields, list)) {
-            cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
-            filledIn = true;
-        }
+			cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+			filledIn = true;
+		}
 
 		if(!filledIn) {
 			if(!suppressWarnings) {
 				var message = "Error #102\nCannot find fields to fill in.";
-				chrome.extension.sendMessage({
+				browser.runtime.sendMessage({
 					action: 'alert',
 					args: [message]
 				});
@@ -1539,10 +1544,10 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 					pField.data("unchanged", true);
 				}
 
-                var list = {};
+				var list = {};
 				if(cip.fillInStringFields(combination.fields, valStringFields, list)) {
-                    cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
-                }
+					cipForm.destroy(false, {"password": list.list[0], "username": list.list[1]});
+				}
 			}
 
 			// user has to select correct credentials by himself
@@ -1550,7 +1555,7 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 				if(!suppressWarnings) {
 					var message = "Error #105\nMore than one login was found in KeePass!\n" +
 					"Press the chromeIPass icon for more options.";
-					chrome.extension.sendMessage({
+					browser.runtime.sendMessage({
 						action: 'alert',
 						args: [message]
 					});
@@ -1559,7 +1564,7 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 			else if(countPasswords < 1) {
 				if(!suppressWarnings) {
 					var message = "Error #103\nNo credentials for given username found.";
-					chrome.extension.sendMessage({
+					browser.runtime.sendMessage({
 						action: 'alert',
 						args: [message]
 					});
@@ -1570,7 +1575,7 @@ cip.fillIn = function(combination, onlyPassword, suppressWarnings) {
 			if(!suppressWarnings) {
 					var message = "Error #104\nMore than one login was found in KeePass!\n" +
 					"Press the chromeIPass icon for more options.";
-				chrome.extension.sendMessage({
+				browser.runtime.sendMessage({
 					action: 'alert',
 					args: [message]
 				});
@@ -1663,7 +1668,7 @@ cip.rememberCredentials = function(usernameValue, passwordValue) {
 			}
 		}
 
-		chrome.extension.sendMessage({
+		browser.runtime.sendMessage({
 			'action': 'set_remember_credentials',
 			'args': [usernameValue, passwordValue, url, usernameExists, credentialsList]
 		});
@@ -1674,9 +1679,11 @@ cip.rememberCredentials = function(usernameValue, passwordValue) {
 	return false;
 };
 
+cIPJQ(function() {
+	cip.init();
+});
 
-
-cipEvents = {};
+var cipEvents = {};
 
 cipEvents.clearCredentials = function() {
 	cip.credentials = [];
@@ -1701,9 +1708,9 @@ cipEvents.triggerActivatedTab = function() {
 	// initCredentialFields calls also "retrieve_credentials", to prevent it
 	// check of init() was already called
 	if(_called.initCredentialFields && (cip.url || cip.submitUrl) && cip.settings.autoRetrieveCredentials) {
-		chrome.extension.sendMessage({
+		browser.runtime.sendMessage({
 			'action': 'retrieve_credentials',
 			'args': [ cip.url, cip.submitUrl ]
-		}, cip.retrieveCredentialsCallback);
+		}).then(cip.retrieveCredentialsCallback);
 	}
 }

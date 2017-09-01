@@ -3,17 +3,34 @@ if(cIPJQ) {
 }
 
 $(function() {
-	options.initMenu();
-	options.initGeneralSettings();
-	options.initConnectedDatabases();
-	options.initSpecifiedCredentialFields();
-	options.initAbout();
+	browser.runtime.sendMessage({ action: 'load_settings' }).then((settings) => {
+		options.settings = settings;
+		browser.runtime.sendMessage({ action: 'load_keyring' }).then((keyRing) => {
+			options.keyRing = keyRing;
+			options.initMenu();
+			options.initGeneralSettings();
+			options.initConnectedDatabases();
+			options.initSpecifiedCredentialFields();
+			options.initAbout();
+		});
+	});
 });
 
 var options = options || {};
 
-options.settings = typeof(localStorage.settings)=='undefined' ? {} : JSON.parse(localStorage.settings);
-options.keyRing = typeof(localStorage.keyRing)=='undefined' ? {} : JSON.parse(localStorage.keyRing);
+options.saveSettings = function() {
+	browser.storage.local.set({'settings': options.settings});
+	browser.runtime.sendMessage({
+		action: 'load_settings'
+	});
+};
+
+options.saveKeyRing = function() {
+	browser.storage.local.set({'keyRing': options.keyRing});
+	browser.runtime.sendMessage({
+		action: 'load_keyring'
+	});
+};
 
 options.initMenu = function() {
 	$(".navbar:first ul.nav:first li a").click(function(e) {
@@ -34,11 +51,7 @@ options.initGeneralSettings = function() {
 
 	$("#tab-general-settings input[type=checkbox]").change(function() {
 		options.settings[$(this).attr("name")] = $(this).is(':checked');
-		localStorage.settings = JSON.stringify(options.settings);
-
-        chrome.extension.sendMessage({
-            action: 'load_settings'
-        });
+		options.saveSettings();
 	});
 
 	$("#tab-general-settings input[type=radio]").each(function() {
@@ -49,28 +62,24 @@ options.initGeneralSettings = function() {
 
 	$("#tab-general-settings input[type=radio]").change(function() {
 		options.settings[$(this).attr("name")] = $(this).val();
-		localStorage.settings = JSON.stringify(options.settings);
-
-        chrome.extension.sendMessage({
-            action: 'load_settings'
-        });
+		options.saveSettings();
 	});
 
-	chrome.extension.sendMessage({
+	browser.runtime.sendMessage({
 		action: "get_keepasshttp_versions"
-	}, options.showKeePassHttpVersions);
+	}).then(options.showKeePassHttpVersions);
 
 	$("#tab-general-settings button.checkUpdateKeePassHttp:first").click(function(e) {
 		e.preventDefault();
 		$(this).attr("disabled", true);
-		chrome.extension.sendMessage({
+		browser.runtime.sendMessage({
 			action: "check_update_keepasshttp"
-		}, options.showKeePassHttpVersions);
+		}).then(options.showKeePassHttpVersions);
 	});
 
 	$("#showDangerousSettings").click(function() {
-        $('#dangerousSettings').is(":visible") ? $(this).text("Show these settings anyway") : $(this).text("Hide");
-        $("#dangerousSettings").toggle();
+		$('#dangerousSettings').is(":visible") ? $(this).text("Show these settings anyway") : $(this).text("Hide");
+		$("#dangerousSettings").toggle();
 	});
 
 	$("#hostname").val(options.settings["hostname"]);
@@ -92,11 +101,7 @@ options.initGeneralSettings = function() {
 		$("#port").closest(".control-group").removeClass("error").addClass("success");
 		setTimeout(function() {$("#port").closest(".control-group").removeClass("success")}, 2500);
 
-		localStorage.settings = JSON.stringify(options.settings);
-
-		chrome.extension.sendMessage({
-			action: 'load_settings'
-		});
+		options.saveSettings();
 	});
 
 	$("#hostnameButton").click(function() {
@@ -111,57 +116,47 @@ options.initGeneralSettings = function() {
 		$("#hostname").closest(".control-group").removeClass("error").addClass("success");
 		setTimeout(function() {$("#hostname").closest(".control-group").removeClass("success")}, 2500);
 
-		localStorage.settings = JSON.stringify(options.settings);
-
-		chrome.extension.sendMessage({
-			action: 'load_settings'
-		});
+		options.saveSettings();
 	});
 
-		$("#blinkTimeoutButton").click(function(){
+	$("#blinkTimeoutButton").click(function(){
 		var blinkTimeout = $.trim($("#blinkTimeout").val());
 		var blinkTimeoutval = parseInt(blinkTimeout);
-		
-                options.settings["blinkTimeout"] = blinkTimeoutval.toString();
+
+		options.settings["blinkTimeout"] = blinkTimeoutval.toString();
+
 		$("#blinkTimeout").closest(".control-group").removeClass("error").addClass("success");
 		setTimeout(function() {$("#blinkTimeout").closest(".control-group").removeClass("success")}, 2500);
 
-		localStorage.settings = JSON.stringify(options.settings);
-
-		chrome.extension.sendMessage({
-			action: 'load_settings'
-		});
+		options.saveSettings();
 	});
 
 	$("#blinkMinTimeoutButton").click(function(){
 		var blinkMinTimeout = $.trim($("#blinkMinTimeout").val());
 		var blinkMinTimeoutval = parseInt(blinkMinTimeout);
-		
-        options.settings["blinkMinTimeout"] = blinkMinTimeoutval.toString();
+
+		options.settings["blinkMinTimeout"] = blinkMinTimeoutval.toString();
 		$("#blinkMinTimeout").closest(".control-group").removeClass("error").addClass("success");
 		setTimeout(function() {$("#blinkMinTimeout").closest(".control-group").removeClass("success")}, 2500);
 
-		localStorage.settings = JSON.stringify(options.settings);
-
-		chrome.extension.sendMessage({
-			action: 'load_settings'
-		});
+		options.saveSettings();
 	});
 
 	$("#allowedRedirectButton").click(function(){
 		var allowedRedirect = $.trim($("#allowedRedirect").val());
 		var allowedRedirectval = parseInt(allowedRedirect);
-		
-        options.settings["allowedRedirect"] = allowedRedirectval.toString();
+
+		options.settings["allowedRedirect"] = allowedRedirectval.toString();
 		$("#allowedRedirect").closest(".control-group").removeClass("error").addClass("success");
 		setTimeout(function() {$("#allowedRedirect").closest(".control-group").removeClass("success")}, 2500);
 
-		localStorage.settings = JSON.stringify(options.settings);
-
-		chrome.extension.sendMessage({
-			action: 'load_settings'
-		});
+		options.saveSettings();
 	});
+
+	if (!browser.webRequest.onAuthRequired) {
+		/* onAuthRequired isn't supported on current Firefox, so hide this feature. */
+		$("#http-auth-options").hide();
+	}
 };
 
 options.showKeePassHttpVersions = function(response) {
@@ -195,11 +190,7 @@ options.initConnectedDatabases = function() {
 		$("#tab-connected-databases #tr-cd-" + $hash).remove();
 
 		delete options.keyRing[$hash];
-		localStorage.keyRing = JSON.stringify(options.keyRing);
-
-        chrome.extension.sendMessage({
-            action: 'load_keyring'
-        });
+		options.saveKeyRing();
 
 		if($("#tab-connected-databases table tbody:first tr").length > 2) {
 			$("#tab-connected-databases table tbody:first tr.empty:first").hide();
@@ -219,10 +210,7 @@ options.initConnectedDatabases = function() {
 		$(this).parent().parent().find("a.dropdown-toggle:first").find("img:first").attr("src", "/icons/19x19/icon_normal_" + $icon + "_19x19.png");
 
 		options.keyRing[$hash].icon = $icon;
-		localStorage.keyRing = JSON.stringify(options.keyRing);
-        chrome.extension.sendMessage({
-            action: 'load_keyring'
-        });
+		options.saveKeyRing();
 	});
 
 	var $trClone = $("#tab-connected-databases table tr.clone:first").clone(true);
@@ -250,7 +238,7 @@ options.initConnectedDatabases = function() {
 		$("#tab-connected-databases table tbody:first tr.empty:first").show();
 	}
 	$("#connect-button").click(function() {
-		chrome.extension.sendMessage({
+		browser.runtime.sendMessage({
 			action: "associate"
 		});
 	});
@@ -274,11 +262,7 @@ options.initSpecifiedCredentialFields = function() {
 		$("#tab-specified-fields #" + $trId).remove();
 
 		delete options.settings["defined-credential-fields"][$url];
-		localStorage.settings = JSON.stringify(options.settings);
-
-        chrome.extension.sendMessage({
-            action: 'load_settings'
-        });
+		options.saveSettings();
 
 		if($("#tab-specified-fields table tbody:first tr").length > 2) {
 			$("#tab-specified-fields table tbody:first tr.empty:first").hide();
@@ -310,5 +294,10 @@ options.initSpecifiedCredentialFields = function() {
 }
 
 options.initAbout = function() {
-	$("#tab-about em.versionCIP").text(chrome.app.getDetails().version);
+	var manifest = browser.runtime.getManifest();
+	$("#tab-about em.versionCIP").text(manifest.version);
+	if (!(/Chrome/.test(navigator.userAgent) && /Google/.test(navigator.vendor))) {
+		/* Not Chrome or Chromium  */
+		$("#chrome-web-store-link").remove();
+	}
 }

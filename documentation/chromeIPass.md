@@ -1,7 +1,9 @@
 # chromeIPass
 
-is an extension for the browser Google Chrome to send and receive credentials from KeePass(XC).
-<br />It can be downloaded from [Chrome Web Store](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae).
+Is a WebExtension for browsers to send and receive credentials from KeePass(XC).
+
+* For Google Chrome, it can be downloaded from [Chrome Web Store](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae).
+* For Firefox, Work In Progress...
 
 Please read at least the section [Important information](#6-important-information).
 
@@ -73,7 +75,8 @@ It is recommended to disable the built-in Chrome password management when using 
 
 ### 2.2 Installation
 1. Your database in KeePass has to be unlocked.
-2. Go to the [Chrome Web Store](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae) and install the extension chromeIPass.
+2. Install the extension.
+  - For Chrome, the ChromeIPass extension is available in the [Chrome Web Store](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae).
 3. Now there is a new browser icon available:<br />
 ![browser-icon](https://raw.github.com/pfn/passifox/master/documentation/images/cip-browser-icon.png)
 

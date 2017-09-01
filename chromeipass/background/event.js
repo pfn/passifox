@@ -43,12 +43,7 @@ event.invoke = function(handler, callback, senderTabId, args, secondTime) {
 	// remove information from no longer existing tabs
 	page.removePageInformationFromNotExistingTabs();
 
-	chrome.tabs.get(senderTabId, function(tab) {
-	//chrome.tabs.query({"active": true, "windowId": chrome.windows.WINDOW_ID_CURRENT}, function(tabs) {
-		//if (tabs.length === 0)
-		//	return; // For example: only the background devtools or a popup are opened
-		//var tab = tabs[0];
-
+	browser.tabs.get(senderTabId).then(function(tab) {
 		if(!tab) {
 			return;
 		}
@@ -82,34 +77,38 @@ event.invoke = function(handler, callback, senderTabId, args, secondTime) {
 	});
 }
 
-
 event.onShowAlert = function(callback, tab, message) {
 	if( page.settings.supressAlerts ){ console.log(message); }
-	else { alert(message); }
+	else { browser.tabs.executeScript({code: 'alert(\''+message+'\')'}); }
 }
 
 event.onLoadSettings = function(callback, tab) {
-	page.settings = (typeof(localStorage.settings) == 'undefined') ? {} : JSON.parse(localStorage.settings);
+	browser.storage.local.get({'settings': {}}).then((item) => {
+		callback(item.settings);
+	}, (err) => {
+		console.log('error loading settings: ' + err);
+	});
 }
 
 event.onLoadKeyRing = function(callback, tab) {
-	keepass.keyRing = (typeof(localStorage.keyRing) == 'undefined') ? {} : JSON.parse(localStorage.keyRing);
-	if(keepass.isAssociated() && !keepass.keyRing[keepass.associated.hash]) {
-		keepass.associated = {
-			"value": false,
-			"hash": null
-		};
-	}
-}
-
-event.onGetSettings = function(callback, tab) {
-	event.onLoadSettings();
-	callback({ data: page.settings });
+	browser.storage.local.get({'keyRing': {}}).then(function(item) {
+		keepass.keyRing = item.keyRing;
+		if(keepass.isAssociated() && !keepass.keyRing[keepass.associated.hash]) {
+			keepass.associated = {
+				"value": false,
+				"hash": null
+			};
+		}
+		callback(item.keyRing);
+	}, (err) => {
+		console.log('error loading keyRing: ' + err);
+	});
 }
 
 event.onSaveSettings = function(callback, tab, settings) {
-	localStorage.settings = JSON.stringify(settings);
-	event.onLoadSettings();
+	browser.storage.local.set({'settings': settings}).then(function() {
+		event.onLoadSettings();
+	});
 }
 
 event.onGetStatus = function(callback, tab) {
@@ -224,7 +223,6 @@ event.messageHandlers = {
 	'check_update_keepasshttp': event.onCheckUpdateKeePassHttp,
 	'get_connected_database': event.onGetConnectedDatabase,
 	'get_keepasshttp_versions': event.onGetKeePassHttpVersions,
-	'get_settings': event.onGetSettings,
 	'get_status': event.onGetStatus,
 	'get_tab_information': event.onGetTabInformation,
 	'load_keyring': event.onLoadKeyRing,
@@ -241,5 +239,4 @@ event.messageHandlers = {
 	'stack_add': browserAction.stackAdd,
 	'update_available_keepasshttp': event.onUpdateAvailableKeePassHttp,
 	'generate_password': keepass.generatePassword,
-	'copy_password': keepass.copyPassword
 };
