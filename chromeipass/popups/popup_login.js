@@ -24,5 +24,19 @@ $(function() {
 			});
 			ul.appendChild(li);
 		}
+
+		var filter = document.getElementById("login-filter");
+		filter.addEventListener('keyup', function() {
+			var val = this.value;
+			var re = new RegExp(val, "i");
+			var links = ul.getElementsByTagName("a");
+			for (var i in links) {
+				if (links.hasOwnProperty(i)) {
+					var found = String(links[i].textContent).match(re) !== null;
+					links[i].parentElement.style = found ? "" : "display: none;";
+				}
+			}
+		});
+		filter.focus();
 	});
 });

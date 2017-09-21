@@ -72,3 +72,13 @@ body {
 #update-available a:active {
 	text-decoration: none;
 }
+#login-filter {
+	height: 22px;
+	padding: 4px 6px;
+	margin-bottom: 10px;
+	font-size: 14px;
+	line-height: 22px;
+	color: #555;
+	border-radius: 4px 0 0 4px;
+	border: 1px solid #ccc;
+}
