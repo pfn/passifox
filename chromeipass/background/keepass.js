@@ -76,6 +76,18 @@ keepass.updateCredentials = function(callback, tab, entryId, username, password,
 }
 
 keepass.retrieveCredentials = function (callback, tab, url, submiturl, forceCallback, triggerUnlock) {
+
+	// if setting is active ask if password should be filled
+	if(page.settings.popupAutoFill){
+		var r = confirm("Should credentials for \n \n" + url + "\n \nbe retrived ?");
+		if (r == false) {
+			if(forceCallback) {
+				callback([]);
+			}
+		    return;
+		};
+	}
+
 	page.debug("keepass.retrieveCredentials(callback, {1}, {2}, {3}, {4})", tab.id, url, submiturl, forceCallback);
 
 	// unset error message
