@@ -3,3 +3,7 @@
 chromeipass.pem
 /chromeipass-data/
 .idea/
+
+*.sublime-workspace
+
+*.sublime-project
