@@ -802,7 +802,7 @@ cipFields.setUniqueId = function(field) {
 }
 
 cipFields.prepareId = function(id) {
-	return id.replace(/[:#.,\[\]\(\)' "]/g, function(m) {
+	return id.replace(/[:#.,;\[\]\(\)' "]/g, function(m) {
 												return "\\"+m
 											});
 }
