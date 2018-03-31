@@ -1,8 +1,56 @@
 // contains already called method names
 var _called = {};
+var cIPJQ_full = typeof cIPJQ !== 'undefined' ? cIPJQ : null;
+var cIPJQ_lite = Zepto;
+(function (zepto) {  // add missing functionality
+	zepto.outerWidth = function() {
+		var el = this[0];
+		var v = el.offsetWidth;
+		var style = getComputedStyle(el, '');
+		v += parseInt(style.marginLeft) + parseInt(style.marginRight);
+		return v;
+	};
+	zepto.outerHeight = function() {
+		var el = this[0];
+		var v = el.offsetHeight;
+		var style = getComputedStyle(el, '');
+		v += parseInt(style.marginTop) + parseInt(style.marginBottom);
+		return v;
+	};
+})(Object.getPrototypeOf(cIPJQ_lite()));
+cIPJQ = cIPJQ_lite;
+
+var with_cIPJQ_full = (function () {
+	var queue = null;
+	return function (func/*, args...*/) {
+		var args = [];
+		for (var i = 0; i !== arguments.length; ++i) {
+			args.push(arguments[i]);
+		}
+		if (cIPJQ_full === null) {
+			if (queue === null) {
+				queue = [];
+				chrome.runtime.sendMessage({
+					"action": "execute_script",
+					"args": [["jquery-1.11.1.min.js", "jquery-ui-1.10.2.custom.min.js"]]
+				}, function () {
+					cIPJQ_full = cIPJQ;
+					cIPJQ = cIPJQ_lite;
+					for (var i = 0; i !== queue.length; ++i) {
+						var callback = queue[i];
+						callback.func.apply(callback.this_, callback.args);
+					}
+				});
+			}
+			queue.push({this_: this, func: func, args: args});
+		} else {
+			func.apply(this, args);
+		}
+	};
+})();
 
 chrome.extension.onMessage.addListener(function(req, sender, callback) {
-	if ('action' in req) {
+	if ('action' in req) with_cIPJQ_full(function () {
 		if(req.action == "fill_user_pass_with_specific_login") {
 			if(cip.credentials[req.id]) {
 				var combination = null;
@@ -48,18 +96,16 @@ chrome.extension.onMessage.addListener(function(req, sender, callback) {
 			cipEvents.triggerActivatedTab();
 		}
 		else if (req.action == "redetect_fields") {
-			chrome.extension.sendMessage({
-				"action": "get_settings",
-			}, function(response) {
-				cip.settings = response.data;
-				cip.initCredentialFields(true);
-			});
+			cip.init(true);
 		}
-	}
+	});
 });
 
-function _f(fieldId) {
-	var field = (fieldId) ? cIPJQ("input[data-cip-id='"+fieldId+"']:first") : [];
+function _f(fieldId, $) {
+	if (typeof $ === 'undefined') {
+		$ = cIPJQ;
+	}
+	var field = (fieldId) ? $("input[data-cip-id='"+fieldId+"']:first") : [];
 	return (field.length > 0) ? field : null;
 }
 
@@ -77,7 +123,7 @@ cipAutocomplete.elements = [];
 
 cipAutocomplete.init = function(field) {
 	if(field.hasClass("cip-ui-autocomplete-input")) {
-		//_f(credentialInputs[i].username).autocomplete("source", autocompleteSource);
+		//_f(credentialInputs[i].username, cIPJQ_full).autocomplete("source", autocompleteSource);
 		field.autocomplete("destroy");
 	}
 
@@ -95,7 +141,7 @@ cipAutocomplete.init = function(field) {
 }
 
 cipAutocomplete.onClick = function() {
-	cIPJQ(this).autocomplete("search", cIPJQ(this).val());
+	cIPJQ_full(this).autocomplete("search", cIPJQ(this).val());
 }
 
 cipAutocomplete.onOpen = function(event, ui) {
@@ -140,7 +186,7 @@ cipAutocomplete.onFocus = function() {
 	cip.u = cIPJQ(this);
 
 	if(cIPJQ(this).val() == "") {
-		cIPJQ(this).autocomplete("search", "");
+		cIPJQ_full(this).autocomplete("search", "");
 	}
 }
 
@@ -149,7 +195,6 @@ cipAutocomplete.onFocus = function() {
 var cipPassword = {};
 
 cipPassword.observedIcons = [];
-cipPassword.observingLock = false;
 
 cipPassword.init = function() {
 	if("initPasswordGenerator" in _called) {
@@ -157,10 +202,34 @@ cipPassword.init = function() {
 	}
 
 	_called.initPasswordGenerator = true;
-
-	window.setInterval(function() {
+	var loader = function () {
 		cipPassword.checkObservedElements();
-	}, 400);
+	};
+	(function (this_) {
+		var observer;
+		var observer_target = document.body;
+		var observer_callback = function (mutations) {
+			observer.disconnect();
+			try {
+				if (mutations) {
+					for (var i = 0; i !== mutations.length; ++i) {
+						var addedNodes = mutations[i].addedNodes;
+						for (var j = 0; j !== addedNodes.length; ++j) {
+							var node = addedNodes[j];
+							if (node.nodeType === Node.ELEMENT_NODE) {
+								loader.apply(this_);
+							}
+						}
+					}
+				}
+			} finally {
+				observer.observe(observer_target, {childList: true, subtree: true, attributes: false, characterData: false});
+			}
+		};
+		loader(observer_target);
+		observer = new MutationObserver(observer_callback);
+		observer_callback();
+	})(this);
 }
 
 cipPassword.initField = function(field, inputs, pos) {
@@ -198,7 +267,7 @@ cipPassword.createDialog = function() {
 
 	_called.passwordCreateDialog = true;
 
-	var $dialog = cIPJQ("<div>")
+	var $dialog = cIPJQ_full("<div>")
 		.attr("id", "cip-genpw-dialog");
 
 	var $divFloat = cIPJQ("<div>").addClass("cip-genpw-clearfix");
@@ -305,7 +374,7 @@ cipPassword.createDialog = function() {
 	$dialog.append($btnFillIn);
 
 	$dialog.hide();
-	cIPJQ("body").append($dialog);
+	cIPJQ_full("body").append($dialog);
 	$dialog.dialog({
 		closeText: "×",
 		autoOpen: false,
@@ -315,7 +384,7 @@ cipPassword.createDialog = function() {
 		title: "Password Generator",
 		open: function(event, ui) {
 			cIPJQ(".cip-ui-widget-overlay").click(function() {
-				cIPJQ("#cip-genpw-dialog:first").dialog("close");
+				cIPJQ_full("#cip-genpw-dialog:first").dialog("close");
 			});
 
 			if(cIPJQ("input#cip-genpw-textfield-password:first").val() == "") {
@@ -368,7 +437,7 @@ cipPassword.createIcon = function(field) {
 			return;
 		}
 
-		var $dialog = cIPJQ("#cip-genpw-dialog");
+		var $dialog = cIPJQ_full("#cip-genpw-dialog");
 		if($dialog.dialog("isOpen")) {
 			$dialog.dialog("close");
 		}
@@ -432,11 +501,6 @@ cipPassword.onRequestPassword = function() {
 }
 
 cipPassword.checkObservedElements = function() {
-	if(cipPassword.observingLock) {
-		return;
-	}
-
-	cipPassword.observingLock = true;
 	cIPJQ.each(cipPassword.observedIcons, function(index, iconField) {
 		if(iconField && iconField.length == 1) {
 			var fieldId = iconField.data("cip-genpw-field-id");
@@ -459,7 +523,6 @@ cipPassword.checkObservedElements = function() {
 			cipPassword.observedIcons.splice(index, 1);
 		}
 	});
-	cipPassword.observingLock = false;
 }
 
 
@@ -1109,16 +1172,12 @@ cip.submitUrl = null;
 // received credentials from KeePassHTTP
 cip.credentials = [];
 
-cIPJQ(function() {
-	cip.init();
-});
-
-cip.init = function() {
+cip.init = function(force) {
 	chrome.extension.sendMessage({
 		"action": "get_settings",
 	}, function(response) {
 		cip.settings = response.data;
-		cip.initCredentialFields();
+		cip.initCredentialFields(force);
 	});
 }
 
@@ -1129,6 +1188,10 @@ cip.initCredentialFields = function(forceCall) {
 	_called.initCredentialFields = true;
 
 	var inputs = cipFields.getAllFields();
+	if (!inputs || inputs.length === 0) {
+		return;
+	}
+	with_cIPJQ_full(function () {
 	cipFields.prepareVisibleFieldsWithID("select");
 	cip.initPasswordGenerator(inputs);
 
@@ -1154,6 +1217,7 @@ cip.initCredentialFields = function(forceCall) {
       'args': [ cip.url, cip.submitUrl ]
     }, cip.retrieveCredentialsCallback);
   }
+});
 } // end function init
 
 cip.initPasswordGenerator = function(inputs) {
@@ -1252,7 +1316,7 @@ cip.preparePageForMultipleCredentials = function(credentials) {
 	if(cip.settings.autoCompleteUsernames) {
 		for(var i = 0; i < cipFields.combinations.length; i++) {
 			if(_f(cipFields.combinations[i].username)) {
-				cipAutocomplete.init(_f(cipFields.combinations[i].username));
+				cipAutocomplete.init(_f(cipFields.combinations[i].username, cIPJQ_full));
 			}
 		}
 	}
@@ -1684,7 +1748,7 @@ cipEvents.clearCredentials = function() {
 
 	if(cip.settings.autoCompleteUsernames) {
 		for(var i = 0; i < cipFields.combinations.length; i++) {
-			var uField = _f(cipFields.combinations[i].username);
+			var uField = _f(cipFields.combinations[i].username, cIPJQ_full);
 			if(uField) {
 				if(uField.hasClass("cip-ui-autocomplete-input")) {
 					uField.autocomplete("destroy");
@@ -1707,3 +1771,7 @@ cipEvents.triggerActivatedTab = function() {
 		}, cip.retrieveCredentialsCallback);
 	}
 }
+
+cIPJQ(function() {
+	cip.init();
+});

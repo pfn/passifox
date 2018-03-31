@@ -10,7 +10,7 @@ event.onMessage = function(request, sender, callback) {
 			sender.tab.id = page.currentTabId;
 		}
 
-		event.invoke(event.messageHandlers[request.action], callback, sender.tab.id, request.args);
+		event.invoke(event.messageHandlers[request.action], callback, sender.tab.id, sender.frameId, request.args);
 
 		// onMessage closes channel for callback automatically
 		// if this method does not return true
@@ -31,7 +31,7 @@ event.onMessage = function(request, sender, callback) {
  * @param {bool} secondTime
  * @returns null (asynchronous)
  */
-event.invoke = function(handler, callback, senderTabId, args, secondTime) {
+event.invoke = function(handler, callback, senderTabId, senderFrameId, args, secondTime) {
 	if(senderTabId < 1) {
 		return;
 	}
@@ -58,7 +58,7 @@ event.invoke = function(handler, callback, senderTabId, args, secondTime) {
 			// using window.open()
 			if (!secondTime) {
 				window.setTimeout(function() {
-					event.invoke(handler, callback, senderTabId, args, true);
+					event.invoke(handler, callback, senderTabId, senderFrameId, args, true);
 				}, 250);
 			}
 			return;
@@ -72,6 +72,7 @@ event.invoke = function(handler, callback, senderTabId, args, secondTime) {
 
 		args.unshift(tab);
 		args.unshift(callback);
+		args.push(senderFrameId);
 
 		if(handler) {
 			handler.apply(this, args);
@@ -215,6 +216,17 @@ event.onMultipleFieldsPopup = function(callback, tab) {
 	browserAction.show(null, tab);
 }
 
+event.onExecuteScript = function (callback, tab, filenames, frameId) {
+	var n = 0;
+	for (var i = 0; i !== filenames.length; ++i) {
+		chrome.tabs.executeScript(tab.id, {file: filenames[i], frameId: frameId}, function () {
+			++n;
+			if (n === filenames.length) {
+				callback(filenames);
+			}
+		});
+	}
+}
 
 // all methods named in this object have to be declared BEFORE this!
 event.messageHandlers = {
@@ -222,6 +234,7 @@ event.messageHandlers = {
 	'alert': event.onShowAlert,
 	'associate': keepass.associate,
 	'check_update_keepasshttp': event.onCheckUpdateKeePassHttp,
+	'execute_script': event.onExecuteScript,
 	'get_connected_database': event.onGetConnectedDatabase,
 	'get_keepasshttp_versions': event.onGetKeePassHttpVersions,
 	'get_settings': event.onGetSettings,
