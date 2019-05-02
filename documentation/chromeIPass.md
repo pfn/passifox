@@ -1,7 +1,7 @@
 # chromeIPass
 
 is an extension for the browser Google Chrome to send and receive credentials from KeePass(XC).
-<br />It can be downloaded from [Chrome Web Store](https://chrome.google.com/webstore/detail/chromeipass/ompiailgknfdndiefoaoiligalphfdae).
+<br />It can be downloaded from [Chrome Web Store](https://chrome.google.com/webstore/detail/keepasshttp-connector/dafgdjggglmmknipkhngniifhplpcldb).
 
 Please read at least the section [Important information](#6-important-information).
 
